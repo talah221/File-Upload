@@ -1,0 +1,40 @@
+{
+  "name": "app-template",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "rtlcss-layout": "rtlcss ./public/assets/layout/css/layout-blue.css ./public/assets/layout/css/layout-blue-rtl.css",
+    "rtlcss-theme": "rtlcss ./public/assets/theme/theme-blue.css ./public/assets/theme/theme-blue-rtl.css"
+  },
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "mitt": "^2.1.0",
+    "primeflex": "^2.0.0",
+    "primeicons": "^4.1.0",
+    "primevue": "^3.2.0-rc.1",
+    "query-string": "^6.13.8",
+    "rtlcss": "^3.0.0",
+    "simple-encryptor": "^4.0.0",
+    "vue": "^3.0.5",
+    "vue-cookie-next": "^1.0.3",
+    "vue-router": "^4.0.0-0",
+    "vuex": "^4.0.0-0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.5.11",
+    "@vue/cli-plugin-eslint": "^4.5.11",
+    "@vue/cli-plugin-router": "^4.5.11",
+    "@vue/cli-plugin-vuex": "^4.5.11",
+    "@vue/cli-service": "^4.5.11",
+    "@vue/compiler-sfc": "^3.0.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-vue": "^7.0.0-0",
+    "prettier": "^1.19.1"
+  }
+}
