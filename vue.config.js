@@ -7,7 +7,15 @@ module.exports = {
       return args;
     });
   },
-
+  css: {
+    loaderOptions: {
+      scss: {
+        prependData: `
+          @import "@/assets/scss/variables.scss";
+        `
+      }
+    }
+  },
   configureWebpack: {
     devtool: "source-map"
   },

@@ -1,18 +1,21 @@
 <template>
-  <div class="home">
-    <login></login>
-  </div>
+  <section id="home" class="section section--auth">
+    <c-header />
+    <c-all-items />
+    <c-footer screen="social" />
+  </section>
 </template>
 
 <script>
-// @ is an alias to /src
-
-import Login from "@/components/Login.vue";
+import CHeader from "../components/c-header";
+import CFooter from "../components/c-footer";
+import CAllItems from "../components/c-all-items";
 
 export default {
-  name: "Home",
   components: {
-    Login
+    CHeader,
+    CFooter,
+    CAllItems
   }
 };
 </script>

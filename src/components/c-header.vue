@@ -1,0 +1,209 @@
+<template>
+  <header id="header" class="header">
+    <div class="header-top">
+      <div class="p-p-relative">
+        <div class="header-logo">
+          <router-link to="/home">
+            <img src="../assets/img/logo-small.png" alt="Logo" />
+          </router-link>
+        </div>
+        <div class="p-text-center">
+          <h1 class="p-m-0">שלום {{ username }}</h1>
+          <p class="p-mx-0 p-my-1">ברוך הבא לקבוצת רם אדרת – מבטיחים ומקימים</p>
+        </div>
+        <div v-if="$props.icon" class="header-icon">
+          <router-link to="/home">
+            <c-icon name="home" />
+          </router-link>
+        </div>
+        <a
+          href="#toggle-menu"
+          class="toggle-menu"
+          @click.prevent="$store.dispatch('main/toggleMenuShow', true)"
+        >
+          <c-icon name="menu" />
+        </a>
+      </div>
+    </div>
+    <div class="header-bottom p-d-flex p-jc-center p-mt-4">
+      <ul class="p-d-flex p-ai-center p-jc-center p-mx-0">
+        <li>ליה פארק - מגרש 106 הרצליה</li>
+        <li>בניין:1</li>
+        <li>דירה:4</li>
+      </ul>
+    </div>
+  </header>
+</template>
+
+<script>
+import CIcon from "./c-icon";
+
+export default {
+  props: {
+    icon: {
+      type: Boolean,
+      default: false
+    }
+  },
+  components: {
+    CIcon
+  },
+  setup() {
+    const username = "אברהם לשבסקי";
+
+    return {
+      username
+    };
+  }
+};
+</script>
+
+<style scoped lang="scss">
+@import "../assets/scss/mixins";
+
+.header {
+  .toggle-menu {
+    top: 0;
+    right: 0;
+    position: absolute;
+
+    display: block;
+
+    svg {
+      width: 16px;
+      height: 14px;
+
+      color: $color--secondary;
+    }
+
+    @include screen("sm") {
+      svg {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    @include screen("lg") {
+      display: none;
+    }
+  }
+
+  &-top {
+    position: relative;
+
+    padding: 20px 15px 5px;
+
+    @include screen("md") {
+      padding: 40px 35px 10px;
+    }
+
+    h1 {
+      font-size: 16px;
+
+      @include screen("md") {
+        font-size: 25px;
+      }
+    }
+
+    p {
+      font-size: 12px;
+
+      @include screen("md") {
+        font-size: 19px;
+      }
+    }
+  }
+
+  &-logo {
+    top: 0;
+    left: 0;
+    position: absolute;
+
+    width: 40px;
+    height: 40px;
+
+    @include screen("md") {
+      width: 85px;
+      height: 85px;
+    }
+  }
+
+  &-icon {
+    top: 0;
+    right: 0;
+    position: absolute;
+
+    display: none;
+
+    @include screen("lg") {
+      display: block;
+    }
+
+    svg {
+      width: 51px;
+      height: 51px;
+
+      color: $color--secondary;
+    }
+  }
+
+  &-bottom {
+    position: relative;
+
+    background-color: $color--dark;
+
+    @include screen("lg") {
+      border-bottom: 1px solid $color--default;
+    }
+
+    ul {
+      list-style: none;
+
+      height: 42px;
+      min-width: 320px;
+
+      padding: 10px 30px;
+      margin: -22px 0 -4px;
+
+      background-size: 100%;
+      background-repeat: no-repeat;
+      background-image: url("../assets/img/effects/bg-cliped.png");
+
+      @include screen("md") {
+        height: 56px;
+        min-width: 453px;
+
+        margin: -22px 0 -2px;
+      }
+
+      li {
+        position: relative;
+
+        font-size: 14px;
+
+        @include screen("md") {
+          font-size: 19px;
+        }
+
+        &:not(:last-child)::after {
+          content: "";
+
+          display: inline-block;
+
+          height: 11px;
+
+          margin: 0 5px;
+
+          border-left: 1px dotted $color--secondary;
+
+          vertical-align: middle;
+
+          @include screen("md") {
+            margin: 0 10px;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

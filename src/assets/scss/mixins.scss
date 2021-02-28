@@ -1,0 +1,13 @@
+@mixin smartColor($color, $factory: 75) {
+  @if (lightness($color) > $factory) {
+    color: black
+  } @else {
+    color: white;
+  }
+}
+
+@mixin screen($screen) {
+  @media screen and (min-width: map-get($SCREENS, $screen)) {
+    @content
+  }
+}

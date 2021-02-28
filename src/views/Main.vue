@@ -1,5 +1,5 @@
 <template>
-  <div class="container p-p-3" dir="rtl">
+  <!-- <div class="container p-p-3" dir="rtl">
     <div class="menuBtn">
       <Button
         type="button"
@@ -25,63 +25,66 @@
     <div class="content">
       <router-view />
     </div>
-  </div>
+  </div> -->
+  <c-mobile-menu />
+  <router-view />
 </template>
 
 <script>
-import AppFooter from "../components/AppFooter";
-
-import { mapState } from "vuex";
-import Button from "primevue/button";
-import Menu from "primevue/menu";
-import menuItemsArray from "../components/menuItems";
-import IFrameOA from "../components/iFrameOA.vue";
-
+// import AppFooter from "../components/AppFooter";
+// import { mapState } from "vuex";
+// import Button from "primevue/button";
+// import Menu from "primevue/menu";
+// import menuItemsArray from "../components/menuItems";
+// import IFrameOA from "../components/iFrameOA.vue";
+import CMobileMenu from "./components/c-mobile-menu";
 export default {
   name: "Main",
   components: {
-    AppFooter,
-    Menu,
-    Button,
-    IFrameOA
+    // AppFooter,
+    // Menu,
+    // Button,
+    // IFrameOA
+    CMobileMenu
   },
-  props: {
-    compName: {
-      type: String,
-      default: "A Point Systems"
-    },
-    logoImgSrc: {
-      type: String,
-      default: "/assets/logo-apoint.png/?v=2"
-    }
-  },
+  // props: {
+  //   compName: {
+  //     type: String,
+  //     default: "A Point Systems"
+  //   },
+  //   logoImgSrc: {
+  //     type: String,
+  //     default: "/assets/logo-apoint.png/?v=2"
+  //   }
+  // },
   data() {
     return {
-      //PrimeVue Roma settings
-      layoutMode: "overlay", //slim || static || overlay || horizontal
-      //menu settings
-      menuItems: menuItemsArray
+      // //PrimeVue Roma settings
+      // layoutMode: "overlay", //slim || static || overlay || horizontal
+      // //menu settings
+      // menuItems: menuItemsArray
     };
   },
   methods: {
-    showMenu(event) {
-      this.$refs.menu.toggle(event);
-    }
-  },
-  computed: {
-    ...mapState({
-      clientName: state => state.main.clientName,
-      clientID: state => state.main.clientID
-    }),
-    showMenuBtn() {
-      return this.clientID !== 0;
-    }
+    // showMenu(event) {
+    //   this.$refs.menu.toggle(event);
+    // }
   }
+  //,
+  // computed: {
+  //   ...mapState({
+  //     clientName: state => state.main.clientName,
+  //     clientID: state => state.main.clientID
+  //   }),
+  //   showMenuBtn() {
+  //     return this.clientID !== 0;
+  //   }
+  // }
 };
 </script>
 
 <style scoped>
-.container {
+/* .container {
   display: grid;
   grid-template-columns: 1fr 1fr 3fr 1fr;
   grid-template-rows: 120px 30px 1fr 22px;
@@ -142,5 +145,5 @@ export default {
 .p-datatable .p-datatable-tbody > tr > td,
 .p-datatable .p-datatable-tbody > tr {
   background-color: transparent !important;
-}
+} */
 </style>

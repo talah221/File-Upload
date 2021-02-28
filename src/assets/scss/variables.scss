@@ -1,0 +1,18 @@
+$font--rimary: "OpenSansHebrew";
+
+$screen--sm: 576px;
+$screen--md: 768px;
+$screen--lg: 992px;
+$screen--xl: 1140px;
+
+$color--dark: #000000;
+$color--light: #efefef;
+$color--default: #f2f2f2;
+$color--primary: #6d8dbe;
+$color--secondary: #929292;
+
+$effect--overlay: linear-gradient(to bottom, rgba(0, 0, 0, 0), #000000);
+$effect--overlay-light: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), #ffffff);
+
+$SCREENS: (sm: $screen--sm, md: $screen--md, lg: $screen--lg, xl: $screen--xl);
+$COLORS: (primary: $color--primary, secondary: $color--secondary, light: $color--light, dark: $color--dark);
