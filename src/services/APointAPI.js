@@ -119,7 +119,7 @@ export async function apiGetSessionToken(compGUID, userName, userPswd) {
     apiParam("UserName", userName),
     apiParam("UserPswd", userPswd)
   ];
-  console.log("apiGetSessionToken", raw);
+  // console.log("apiGetSessionToken", raw);
   const controller = new AbortController();
   const options = {
     method: "POST",
@@ -129,7 +129,7 @@ export async function apiGetSessionToken(compGUID, userName, userPswd) {
     redirect: "follow"
   };
 
-  console.log(options);
+  // console.log(options);
   let timeoutID = setTimeout(() => {
     controller.abort;
     //TODO: לטפל במקרים של ניתוק תקשורת
@@ -147,7 +147,7 @@ export async function apiGetSessionToken(compGUID, userName, userPswd) {
     const result = await response.text();
     const response_1 = JSON.parse(result);
     clearTimeout(timeoutID);
-    console.log(response_1);
+    // console.log(response_1);
     if (response_1.APIResponseCode === 0) {
       let userObject = JSON.parse(response_1.APIResponseText);
       // console.log("Login/Auth response: ", response_1);

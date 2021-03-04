@@ -3,8 +3,8 @@
     <div class="header-top">
       <div class="p-p-relative">
         <div class="header-logo">
-          <router-link to="/home">
-            <img src="../assets/img/logo-small.png" alt="Logo" />
+          <router-link to="/">
+            <img src="@/assets/img/logo-small.png" alt="Logo" />
           </router-link>
         </div>
         <div class="p-text-center">
@@ -12,15 +12,11 @@
           <p class="p-mx-0 p-my-1">ברוך הבא לקבוצת רם אדרת – מבטיחים ומקימים</p>
         </div>
         <div v-if="$props.icon" class="header-icon">
-          <router-link to="/home">
+          <router-link to="/">
             <c-icon name="home" />
           </router-link>
         </div>
-        <a
-          href="#toggle-menu"
-          class="toggle-menu"
-          @click.prevent="$store.dispatch('main/toggleMenuShow', true)"
-        >
+        <a href="#toggle-menu" class="toggle-menu" @click.prevent="toggleMenu">
           <c-icon name="menu" />
         </a>
       </div>
@@ -48,12 +44,15 @@ export default {
   components: {
     CIcon
   },
-  setup() {
-    const username = "אברהם לשבסקי";
-
+  data() {
     return {
-      username
+      username: "אברהם לשבסקי"
     };
+  },
+  methods: {
+    toggleMenu() {
+      this.$store.dispatch("main/toggleMenuShow", true);
+    }
   }
 };
 </script>

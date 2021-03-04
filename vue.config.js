@@ -20,6 +20,6 @@ module.exports = {
     devtool: "source-map"
   },
 
-  publicPath: "",
+  publicPath: "/",
   assetsDir: "assets"
 };

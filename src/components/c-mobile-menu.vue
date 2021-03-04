@@ -17,7 +17,7 @@
       <nav role="navigation">
         <ul>
           <li>
-            <router-link to="/home" class="p-d-flex p-ai-center">
+            <router-link to="/" class="p-d-flex p-ai-center">
               <c-icon name="arrow" />
               <span class="p-mr-2">עמוד הבית</span>
             </router-link>
@@ -28,6 +28,14 @@
               <span class="p-mr-2">{{ $item }}</span>
             </router-link>
           </li>
+          <li @click="logout">
+            <router-link to="/" class="p-d-flex p-ai-center">
+              <div class="p-d-flex p-ai-center">
+                <c-icon name="arrow" />
+                <span class="p-mr-2">יציאה</span>
+              </div>
+            </router-link>
+          </li>
         </ul>
       </nav>
     </div>
@@ -35,9 +43,9 @@
 </template>
 
 <script>
-import { useStore } from "vuex";
-import { computed, watch } from "vue";
-import { useRouter } from "vue-router";
+// import { useStore } from "vuex";
+// import { computed, watch } from "vue";
+// import { useRouter } from "vue-router";
 
 import CSidebar from "primevue/sidebar";
 
@@ -48,17 +56,18 @@ export default {
     CIcon,
     CSidebar
   },
-  setup() {
-    const $store = useStore();
-    const $router = useRouter();
+  computed: {
+    items() {
+      // console.log("store-items", $store.getters["main/getMenu"]);
+      return this.$store.getters["main/getMenu"];
+    },
+    sidebar() {
+      return this.$store.getters["main/getShowMenu"];
+    }
+  },
 
-    const items = computed(() => {
-      console.log("store-items", $store.getters["main/getMenu"]);
-      return $store.getters["main/getMenu"];
-    });
-    const sidebar = computed(() => $store.getters["main/getShowMenu"]);
-
-    watch(sidebar, value => {
+  watch: {
+    sidebar(newValue, value) {
       if (!value) {
         document.body.classList.remove("p-overflow-hidden");
       } else {
@@ -67,18 +76,67 @@ export default {
         document.body.classList.add("p-overflow-hidden");
         if (mask) mask.classList.remove("p-sidebar-mask-leave");
       }
-    });
+    }
+  },
+  methods: {
+    logout() {
+      // remove cookies
+      this.$cookie.removeCookie("main-user-object", {
+        path: "/",
+        domain: ""
+      }); // return this | false if key not found
+      this.$cookie.removeCookie("main-user-remember", {
+        path: "/",
+        domain: ""
+      }); // return this | false if key not found
 
-    $router.afterEach(() => {
-      if ($store.getters["main/getShowMenu"])
-        setTimeout(() => $store.dispatch("main/toggleMenuShow", false), 150);
-    });
-
-    return {
-      items,
-      sidebar
-    };
+      // אתחול הטוקן על מנת שיגיע למסך לוגין
+      this.$store.commit("api/resetToken");
+      // this.$router.push({
+      //   name: "Home"
+      // });
+    }
   }
+  //   setup() {
+  //     const $store = useStore();
+  //     const $router = useRouter();
+
+  //     const items = computed(() => {
+  //       console.log("store-items", $store.getters["main/getMenu"]);
+  //       return $store.getters["main/getMenu"];
+  //     });
+  //     const sidebar = computed(() => $store.getters["main/getShowMenu"]);
+
+  //     watch(sidebar, value => {
+  //       if (!value) {
+  //         document.body.classList.remove("p-overflow-hidden");
+  //       } else {
+  //         const mask = document.querySelector(".p-sidebar-mask-leave");
+
+  //         document.body.classList.add("p-overflow-hidden");
+  //         if (mask) mask.classList.remove("p-sidebar-mask-leave");
+  //       }
+  //     });
+
+  //     $router.afterEach(() => {
+  //       console.log("router-afterEach-getShowMenu");
+  //       if ($store.getters["main/getShowMenu"])
+  //         setTimeout(() => {
+  //           $store.dispatch("main/toggleMenuShow", false);
+  //           console.log("router.afterEach-in com");
+  //         }, 150);
+  //     });
+  //     const logout = () => {
+  //       console.log("logout");
+  //       // $store.commit("api/resetToken");
+  //       console.log(this.$cookie.getCookie("main-user-remember"));
+  //     };
+  //     return {
+  //       items,
+  //       sidebar,
+  //       logout
+  //     };
+  //   }
 };
 </script>
 

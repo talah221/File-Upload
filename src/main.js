@@ -33,7 +33,12 @@ router.beforeEach(function(to, from, next) {
   console.log("router.beforeEach");
   next();
 });
-
+router.afterEach(() => {
+  if (store.getters["main/getShowMenu"])
+    setTimeout(() => {
+      store.dispatch("main/toggleMenuShow", false);
+    }, 150);
+});
 app.use(ToastService).use(PrimeVue, {
   locale: primeVueLocale,
   ripple: true

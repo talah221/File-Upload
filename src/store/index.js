@@ -27,8 +27,9 @@ const mainStore = {
     setShowMenu: (state, payload) => (state.showMenu = payload)
   },
   actions: {
-    toggleMenuShow: ({ commit, getters }, show) =>
-      commit("setShowMenu", show ? show : !getters.getShowMenu)
+    toggleMenuShow: function({ commit, getters }, show) {
+      commit("setShowMenu", show ? show : !getters.getShowMenu);
+    }
   },
   modules: {},
   getters: {

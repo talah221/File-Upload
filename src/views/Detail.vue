@@ -8,19 +8,17 @@
 </template>
 
 <script>
-
-import CHeader from '../components/c-header'
-import CFooter from '../components/c-footer'
-import CAllItems from '../components/c-all-items'
-import CDetailItem from '../components/c-detail-item'
+import CHeader from "../components/c-header";
+import CFooter from "../components/c-footer";
+import CAllItems from "../components/c-all-items";
+import CDetailItem from "../components/c-detail-item";
 
 export default {
   components: {
     CHeader,
     CFooter,
     CAllItems,
-    CDetailItem,
-  }, 
-}
-
+    CDetailItem
+  }
+};
 </script>

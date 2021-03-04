@@ -1,8 +1,11 @@
 <template>
-  <div class="p-d-flex p-as-center p-jc-center" dir="rtl">
+  <div class="p-d-flex p-ai-center p-jc-center" dir="rtl">
     <transition name="fade">
       <div>
-        <img :src="logoImgSrc" :alt="compName" class="logo-style" />
+        <!-- <img :src="logoImgSrc" :alt="compName" class="logo-style" /> -->
+        <div class="p-d-flex p-flex-column p-ai-center p-jc-center">
+          <img src="@/assets/img/logo.png" :alt="compName" class="logo-style" />
+        </div>
         <h1>{{ loginHeader }}</h1>
         <div class="p-field p-grid">
           <label class="p-col-fixed lbl-style" for="userName">משתמש</label>
@@ -65,7 +68,7 @@ export default {
     },
     logoImgSrc: {
       type: String,
-      default: "/assets/Logo.jpg"
+      default: "/assets/img/Logo.jpg"
     },
     compGUID: {
       type: String,
@@ -88,16 +91,16 @@ export default {
   },
   methods: {
     autoLogin() {
-      this.rememberMe = this.$cookie.getCookie("main-user-remember");
-      console.log("main-user-remember", this.rememberMe, this.compGUID);
-      console.log("compGUID", this.compGUID);
+      this.rememberMe = this.$cookie.getCookie("main-user-remember") === "true";
+      // console.log("main-user-remember", this.rememberMe, this.compGUID);
+      // console.log("compGUID", this.compGUID);
       if (this.rememberMe && this.compGUID) {
         let userObject = decrypt(
           this.$cookie.getCookie("main-user-object"),
           this.compGUID
         );
         this.userName = userObject.userName;
-        console.log("userObject", userObject);
+        // console.log("userObject", userObject);
         //TODO: test auto login feature
         if (this.allowAutoLogin) {
           this.password = userObject.pswd;
@@ -110,7 +113,7 @@ export default {
     },
     async validateLogin() {
       let userID = await apiGetSessionToken(
-        "79D4854D-F78C-4940-87BC-834CCB96ED8C",
+        this.compGUID,
         this.userName,
         this.password
       );
@@ -163,6 +166,7 @@ export default {
   //   ...mapState({
   //     compGUID: state => state.api.compGUID
   //   })
+
   // },
   mounted() {
     this.autoLogin();
