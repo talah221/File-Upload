@@ -1,18 +1,4 @@
-<template>
-  <c-sidebar
-    position="right"
-    :visible="sidebar"
-    :showCloseIcon="false"
-    class="sidebar"
-  >
-    <a
-      href="#toggle-menu"
-      class="sidebar-close"
-      @click.prevent="$store.dispatch('main/toggleMenuShow', false)"
-    >
-      <c-icon name="cancel" />
-    </a>
-    <div class="sidebar-body">
+<!-- <div class="sidebar-body">
       <h3>תפריט</h3>
       <nav role="navigation">
         <ul>
@@ -38,36 +24,63 @@
           </li>
         </ul>
       </nav>
+    </div> -->
+<template>
+  <c-sidebar
+    position="right"
+    :visible="showMenu"
+    :showCloseIcon="false"
+    :modal="false"
+    class="sidebar p-sidebar-right "
+  >
+    <a
+      v-if="showCancle"
+      href="#toggle-menu"
+      class="sidebar-close"
+      @click.prevent="$store.dispatch('main/toggleMenuShow', false)"
+    >
+      <c-icon name="cancel" />
+    </a>
+    <div class="sidebar-body">
+      <h3>תפריט</h3>
+      <nav role="navigation">
+        <PanelMenu :model="items" :alwaysOpen="true" />
+      </nav>
     </div>
   </c-sidebar>
 </template>
 
 <script>
-// import { useStore } from "vuex";
-// import { computed, watch } from "vue";
-// import { useRouter } from "vue-router";
-
+import menuItems from "@/scripts/menuItems.js";
+import PanelMenu from "primevue/panelmenu";
 import CSidebar from "primevue/sidebar";
-
 import CIcon from "./c-icon";
-
+import screen from "@/scripts/screen.js";
 export default {
   components: {
-    CIcon,
-    CSidebar
+    PanelMenu,
+    CSidebar,
+    CIcon
+  },
+  data() {
+    return {
+      items: menuItems
+    };
   },
   computed: {
-    items() {
-      // console.log("store-items", $store.getters["main/getMenu"]);
-      return this.$store.getters["main/getMenu"];
-    },
-    sidebar() {
+    showMenu() {
+      // return true;
+      if (screen.isDesktop()) return true;
       return this.$store.getters["main/getShowMenu"];
+    },
+    showCancle() {
+      // return true;
+      if (screen.isDesktop()) return false;
+      return true;
     }
   },
-
   watch: {
-    sidebar(newValue, value) {
+    showMenu(sidebar, value) {
       if (!value) {
         document.body.classList.remove("p-overflow-hidden");
       } else {
@@ -77,66 +90,7 @@ export default {
         if (mask) mask.classList.remove("p-sidebar-mask-leave");
       }
     }
-  },
-  methods: {
-    logout() {
-      // remove cookies
-      this.$cookie.removeCookie("main-user-object", {
-        path: "/",
-        domain: ""
-      }); // return this | false if key not found
-      this.$cookie.removeCookie("main-user-remember", {
-        path: "/",
-        domain: ""
-      }); // return this | false if key not found
-
-      // אתחול הטוקן על מנת שיגיע למסך לוגין
-      this.$store.commit("api/resetToken");
-      // this.$router.push({
-      //   name: "Home"
-      // });
-    }
   }
-  //   setup() {
-  //     const $store = useStore();
-  //     const $router = useRouter();
-
-  //     const items = computed(() => {
-  //       console.log("store-items", $store.getters["main/getMenu"]);
-  //       return $store.getters["main/getMenu"];
-  //     });
-  //     const sidebar = computed(() => $store.getters["main/getShowMenu"]);
-
-  //     watch(sidebar, value => {
-  //       if (!value) {
-  //         document.body.classList.remove("p-overflow-hidden");
-  //       } else {
-  //         const mask = document.querySelector(".p-sidebar-mask-leave");
-
-  //         document.body.classList.add("p-overflow-hidden");
-  //         if (mask) mask.classList.remove("p-sidebar-mask-leave");
-  //       }
-  //     });
-
-  //     $router.afterEach(() => {
-  //       console.log("router-afterEach-getShowMenu");
-  //       if ($store.getters["main/getShowMenu"])
-  //         setTimeout(() => {
-  //           $store.dispatch("main/toggleMenuShow", false);
-  //           console.log("router.afterEach-in com");
-  //         }, 150);
-  //     });
-  //     const logout = () => {
-  //       console.log("logout");
-  //       // $store.commit("api/resetToken");
-  //       console.log(this.$cookie.getCookie("main-user-remember"));
-  //     };
-  //     return {
-  //       items,
-  //       sidebar,
-  //       logout
-  //     };
-  //   }
 };
 </script>
 
@@ -165,7 +119,7 @@ export default {
     background-size: auto 50%;
     background-repeat: no-repeat;
     background-position: bottom left;
-    background-image: url("../assets/img/effects/bg-bottom.png");
+    // background-image: url("../assets/img/effects/bg-bottom.png");
 
     h3 {
       margin: 20px 30px 30px;

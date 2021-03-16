@@ -7,7 +7,6 @@
     role="navigation"
   >
     <ul class="p-grid p-jc-center p-m-0">
-      <!-- <li @click="navigate">בדיקה</li> -->
       <li
         v-for="($item, $index) of items"
         :key="$index"

@@ -1,6 +1,27 @@
 //https://primefaces.org/primevue/showcase/#/locale
 
 export const primeVueLocale = {
+  startsWith: "מתחיל ב",
+  contains: "מכיל",
+  notContains: "לא מכיל",
+  endsWith: "מסתיים ב",
+  equals: "שווה",
+  notEquals: "שונה",
+  noFilter: "אין מסנן",
+  lt: "קטן מ",
+  lte: "קטן או שווה ל",
+  gt: "גדול מ",
+  gte: "גדול שווה ל",
+  dateIs: "תאריך שווה ל",
+  dateIsNot: "תאריך שונה מ",
+  dateBefore: "תאריך קטן מ",
+  dateAfter: "תאריך גדול מ",
+  clear: "נקה",
+  apply: "החל",
+  matchAll: "אתר הכל",
+  matchAny: "אתר אחד מ",
+  addRule: "הוסף כלל",
+  removeRule: "הסר כלל",
   accept: "לְקַבֵּל",
   reject: "לִדחוֹת",
   choose: "בחר",
@@ -16,23 +37,15 @@ export const primeVueLocale = {
     "יום שבת"
   ],
   dayNamesShort: [
-    "יוֹם רִאשׁוֹן",
-    "יוֹם שֵׁנִי",
-    "יוֹם שְׁלִישִׁי",
-    "יום רביעי",
-    "יוֹם חֲמִישִׁי",
-    "יוֹם שִׁישִׁי",
-    "יום שבת"
+    "רִאשׁוֹן",
+    "שֵׁנִי",
+    "שְׁלִישִׁי",
+    "רביעי",
+    "חֲמִישִׁי",
+    "שִׁישִׁי",
+    "שבת"
   ],
-  dayNamesMin: [
-    "יוֹם רִאשׁוֹן",
-    "יוֹם שֵׁנִי",
-    "יוֹם שְׁלִישִׁי",
-    "יום רביעי",
-    "יוֹם חֲמִישִׁי",
-    "יוֹם שִׁישִׁי",
-    "יום שבת"
-  ],
+  dayNamesMin: ["א", "ב", "ג", "ד", "ה", "ו", "ש"],
   monthNames: [
     "יָנוּאָר",
     "פברואר",
@@ -64,10 +77,11 @@ export const primeVueLocale = {
   today: "היום",
   weekHeader: "שָׁבוּעַ",
   firstDayOfWeek: 0,
-  dateFormat: "dd/mm/yyyy",
+  dateFormat: "dd/mm/yy",
   weak: "חלש",
   medium: "בינוני",
-  strong: "חָזָק",
-  passwordPrompt: "הכנס סיסמא",
-  clear: "נקה"
+  strong: "חָזָק :)",
+  passwordPrompt: "הזן סיסמא",
+  emptyFilterMessage: "לא נמצאו תוצאות",
+  emptyMessage: "אין אפשרויות זמינות"
 };

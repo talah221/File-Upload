@@ -1,5 +1,8 @@
 <template>
-  <div class="layout-rtl main-app">
+  <div
+    class="layout-rtl "
+    :class="{ mainApp: isLoggedIn === true && isDesktop }"
+  >
     <Login
       v-if="isLoggedIn === false"
       :allowAutoLogin="true"
@@ -11,13 +14,13 @@
     <Main v-if="isLoggedIn" />
     <!-- <Main v-if="isLoggedIn" :logoImgSrc="logoImgSrc" :compName="compName" /> -->
   </div>
-  <button @click="logout">logout</button>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
 import Login from "./components/Login";
 import Main from "./views/Main";
+import screen from "@/scripts/screen.js";
 
 export default {
   components: {
@@ -31,25 +34,6 @@ export default {
       // logoImgSrc: "/assets/img/logo-small.png",
       compName: "ram aderet"
     };
-  },
-  methods: {
-    logout() {
-      // remove cookies
-      this.$cookie.removeCookie("main-user-object", {
-        path: "/",
-        domain: ""
-      }); // return this | false if key not found
-      this.$cookie.removeCookie("main-user-remember", {
-        path: "/",
-        domain: ""
-      }); // return this | false if key not found
-
-      // אתחול הטוקן על מנת שיגיע למסך לוגין
-      this.$store.commit("api/resetToken");
-      this.$router.push({
-        name: "Home"
-      });
-    }
   },
   mounted() {
     // console.log("locale", this.$primevue);
@@ -85,12 +69,13 @@ export default {
     ...mapState({
       compID: state => state.api.compID,
       compGUID: state => state.api.compGUID
-    })
+    }),
+    isDesktop: () => screen.isDesktop()
   }
 };
 </script>
 <style>
-/* .main-app {
-  font-size: 15px;
-} */
+.mainApp {
+  margin-right: 20rem;
+}
 </style>

@@ -12,9 +12,9 @@ export const apiStore = {
   },
   mutations: {
     setSessionData(state, payload) {
-      //  console.log('state: setSessionData')
+      // console.log("state: setSessionData");
       for (let key of Object.keys(payload)) {
-        // console.log(`key: ${key}: ${payload[key]}`)
+        // console.log(`key: ${key}: ${payload[key]}`);
         state[key] = payload[key];
       }
     },

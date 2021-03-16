@@ -3,6 +3,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
 // import Login from "@/components/Login.vue";
 import Detail from "../views/Detail.vue";
+import Options from "../views/Options.vue";
+import AttendanceReporting from "../views/AttendanceReporting.vue";
 
 const routes = [
   {
@@ -14,14 +16,24 @@ const routes = [
     path: "/",
     name: "Home",
     component: Home
+  },
+  {
+    path: "/options/:id",
+    name: "Options",
+    component: Options
+  },
+  {
+    path: "/AttendanceReporting",
+    name: "AttendanceReporting",
+    component: AttendanceReporting
   }
 ];
-/*,
-  {
-    path: "/",
-    name: "Login",
-    component: Login
-  }*/
+// ,
+// {
+//   path: "/",
+//   name: "Login",
+//   component: Login
+// }
 const router = createRouter({
   routes,
   history: createWebHistory(process.env.BASE_URL),

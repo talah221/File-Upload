@@ -1,32 +1,22 @@
 <template>
   <header id="header" class="header">
     <div class="header-top">
-      <div class="p-p-relative">
+      <div class="p-p-relative p-d-flex p-ai-center p-jc-between">
+        <div>
+          <a
+            href="#toggle-menu"
+            class="toggle-menu"
+            @click.prevent="toggleMenu"
+          >
+            <c-icon name="menu" />
+          </a>
+        </div>
         <div class="header-logo">
           <router-link to="/">
             <img src="@/assets/img/logo-small.png" alt="Logo" />
           </router-link>
         </div>
-        <div class="p-text-center">
-          <h1 class="p-m-0">שלום {{ username }}</h1>
-          <p class="p-mx-0 p-my-1">ברוך הבא לקבוצת רם אדרת – מבטיחים ומקימים</p>
-        </div>
-        <div v-if="$props.icon" class="header-icon">
-          <router-link to="/">
-            <c-icon name="home" />
-          </router-link>
-        </div>
-        <a href="#toggle-menu" class="toggle-menu" @click.prevent="toggleMenu">
-          <c-icon name="menu" />
-        </a>
       </div>
-    </div>
-    <div class="header-bottom p-d-flex p-jc-center p-mt-4">
-      <ul class="p-d-flex p-ai-center p-jc-center p-mx-0">
-        <li>ליה פארק - מגרש 106 הרצליה</li>
-        <li>בניין:1</li>
-        <li>דירה:4</li>
-      </ul>
     </div>
   </header>
 </template>
@@ -90,7 +80,7 @@ export default {
   &-top {
     position: relative;
 
-    padding: 20px 15px 5px;
+    padding: 10px 15px 5px;
 
     @include screen("md") {
       padding: 40px 35px 10px;
@@ -204,5 +194,9 @@ export default {
       }
     }
   }
+}
+.header-logo,
+.toggle-menu {
+  position: static !important;
 }
 </style>

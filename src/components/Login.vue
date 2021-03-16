@@ -17,14 +17,9 @@
           <label class="p-col-fixed lbl-style" for="userName">סיסמה</label>
           <div class="p-col">
             <Password
-              name="pswd"
               v-model.lazy="password"
               @keypress.enter="login"
               :feedback="false"
-              promptLabel="הזן סיסמה"
-              weakLabel="חלש"
-              mediumLabel="בינוני"
-              strongLabel="חזק :)"
             />
           </div>
         </div>
@@ -157,8 +152,8 @@ export default {
     }
   },
   watch: {
-    compGUID(newValue, oldValue) {
-      console.log("watch compGUID", newValue, oldValue);
+    compGUID() {
+      // console.log("watch compGUID", newValue, oldValue);
       this.autoLogin();
     }
   },
