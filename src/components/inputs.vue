@@ -4,7 +4,7 @@
     v-for="($field, $i) of res.fields"
     :key="$i"
   >
-    <label :for="$field.Name">{{ $field.label }}</label>
+    <label :for="$field.Name">{{ $field.Caption }}</label>
     <div class="p-d-flex p-flex-column" ref="" :id="$field.Name">
       <a-point-textbox
         :field="$field"
@@ -58,50 +58,44 @@ export default {
           {
             num: 1,
             apointType: "text",
-            check: false,
             required: true,
-            label: "text",
+            Caption: "text",
             Format: "",
-            Control_source: "text value",
+            ControlSource: "text value",
             Enabled: true,
             Name: "text"
           },
           {
             num: 2,
             apointType: "text",
-            check: false,
             required: true,
-            label: "General Date and min, max date",
+            Caption: "General Date and min, max date",
             minDate: new Date(new Date().setDate(new Date().getDate() - 13)),
             maxDate: new Date(),
             manualInput: true,
             showButtonBar: true,
             Format: "General Date",
-            Control_source: "",
+            ControlSource: "",
             Enabled: true,
             Name: "General Date"
           },
           {
             num: 3,
             apointType: "text",
-            check: false,
             required: true,
-            label: "Long Date",
-            minDate: "",
-            maxDate: "",
+            Caption: "Long Date",
             manualInput: true,
             showButtonBar: true,
             Format: "Long Date",
-            Control_source: "",
+            ControlSource: "",
             Enabled: true,
             Name: "Long Date"
           },
           {
             num: 4,
             apointType: "text",
-            check: false,
             required: true,
-            label: "General Number",
+            Caption: "General Number",
             useGrouping: true,
             minFractionDigits: 2,
             maxFractionDigits: 3,
@@ -111,48 +105,44 @@ export default {
             locale: "en-US", // en-US, de-DE, en-IN, jp-JP
             currencyDisplay: "symbol", // symbol, code
             Format: "General Number",
-            Control_source: 55,
+            ControlSource: 55,
             Enabled: true,
             Name: "General Number"
           },
           {
             num: 5,
             apointType: "text",
-            check: false,
             required: true,
-            label: "Currency",
+            Caption: "Currency",
             useGrouping: false,
             minFractionDigits: 0,
             currency: "USD", // USD, EUR, INR, JPY
             locale: "en-US", // en-US, de-DE, en-IN, jp-JP
             currencyDisplay: "symbol", // symbol, code
             Format: "Currency",
-            Control_source: "",
+            ControlSource: "",
             Enabled: true,
             Name: "Currency"
           },
           {
             num: 6,
             apointType: "checkbox",
-            check: false,
             required: true,
-            label: "checkbox",
-            Control_source: true,
+            Caption: "checkbox",
+            ControlSource: true,
             Enabled: true,
             Name: "checkbox"
           },
           {
             num: 7,
             apointType: "dropdown",
-            check: false,
             required: true,
-            label: "dropdown",
+            Caption: "dropdown",
             optionLabel: "lbl",
             optionValue: "val",
             showClear: true,
-            Format: "",
-            Control_source: 2,
-            Row_source: [
+            ControlSource: 2,
+            RowRource: [
               { val: 1, lbl: "option 1" },
               { val: 2, lbl: "option 2" },
               { val: 3, lbl: "option 3" }
@@ -167,7 +157,7 @@ export default {
   methods: {
     checkData() {
       this.res.fields.forEach(f => {
-        if (f.required && (f.Control_source == null || f.Control_source == ""))
+        if (f.required && (f.ControlSource == null || f.ControlSource == ""))
           f.check = true;
         else f.check = false;
       });

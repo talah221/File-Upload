@@ -2,7 +2,7 @@
   <InputText
     type="text"
     v-if="field.Format == ''"
-    :disabled="!field.Enabled"
+    :disabled="!field.Enabled || field.Locked"
     @input="emitInputs($event.target.value)"
     :value="modelValue"
   />
@@ -12,7 +12,7 @@
     :minDate="field.minDate"
     :maxDate="field.maxDate"
     :manualInput="field.manualInput"
-    :disabled="!field.Enabled"
+    :disabled="!field.Enabled || field.Locked"
     :showButtonBar="field.showButtonBar"
     @date-select="emitInputs($event)"
     @change="emitInputs($event.target.value)"
@@ -24,7 +24,7 @@
     v-if="number"
     :mode="number.primeVue"
     :useGrouping="field.useGrouping"
-    :disabled="!field.Enabled"
+    :disabled="!field.Enabled || field.Locked"
     @input="emitInputs($event.value)"
     :value="modelValue"
     :minFractionDigits="field.minFractionDigits"

@@ -3,7 +3,7 @@
     :binary="true"
     v-model="value"
     :value="modelValue"
-    :disabled="!field.Enabled"
+    :disabled="!field.Enabled || field.Locked"
     @change="emitInputs()"
   />
 </template>

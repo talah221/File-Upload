@@ -2,11 +2,11 @@
   <Dropdown
     v-model="value"
     :value="modelValue"
-    :options="field.Row_source"
+    :options="field.RowSource"
     :optionLabel="field.optionLabel"
     :optionValue="field.optionValue"
     :showClear="field.showClear"
-    :disabled="!field.Enabled"
+    :disabled="!field.Enabled || field.Locked"
     @change="emitInputs($event.value)"
   />
 </template>
