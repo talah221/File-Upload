@@ -23,17 +23,14 @@ export default {
     modelValue: String
   },
   emits: ["update:modelValue"],
-  data() {
-    return {
-      value: null
-    };
-  },
-  mounted() {
-    this.value = this.modelValue;
+  computed: {
+    value() {
+      return this.modelValue;
+    }
   },
   methods: {
-    emitInputs() {
-      this.$emit("update:modelValue", this.value);
+    emitInputs(event) {
+      this.$emit("update:modelValue", event);
     }
   }
 };

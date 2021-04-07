@@ -56,20 +56,15 @@ export default {
     modelValue: String
   },
   emits: ["update:modelValue"],
-  data() {
-    return {
-      value: null
-    };
-  },
-  mounted() {
-    this.value = this.modelValue;
-  },
   computed: {
     date() {
       return formats.dateFormats.find(f => this.field.Format == f.access);
     },
     number() {
       return formats.numberFormats.find(f => this.field.Format == f.access);
+    },
+    value() {
+      return this.modelValue;
     }
   },
   methods: {
