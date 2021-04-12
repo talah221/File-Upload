@@ -19,6 +19,7 @@
     @clear-click="emitInputs($event.target.value)"
     :value="modelValue"
     v-model="value"
+    :showIcon="field.showIcon"
   />
   <InputNumber
     v-if="number"

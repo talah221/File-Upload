@@ -5,6 +5,8 @@ import Home from "../views/Home.vue";
 import Detail from "../views/Detail.vue";
 import Options from "../views/Options.vue";
 import AttendanceReporting from "../views/AttendanceReporting.vue";
+import qualityControlAdd from "../views/qualityControlAdd.vue";
+import Plan from "../views/Plan.vue";
 
 const routes = [
   {
@@ -26,6 +28,16 @@ const routes = [
     path: "/AttendanceReporting",
     name: "AttendanceReporting",
     component: AttendanceReporting
+  },
+  {
+    path: "/qualityControlAdd",
+    name: "qualityControlAdd",
+    component: qualityControlAdd
+  },
+  {
+    path: "/Plan/:id",
+    name: "Plan",
+    component: Plan
   }
 ];
 // ,

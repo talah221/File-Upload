@@ -13,6 +13,7 @@
 
 <script>
 import Dropdown from "primevue/dropdown";
+//todo לטפל באזהרות שיש לאחר שינוי נתונן
 
 export default {
   components: {
@@ -32,6 +33,15 @@ export default {
     emitInputs(event) {
       this.$emit("update:modelValue", event);
     }
+  },
+  mounted() {
+    //TODO לוודא שעובד
+    if (
+      this.field.DefaultValue !== undefined &&
+      (this.modelValue !== undefined || this.modelValue !== null)
+    )
+      this.value = this.field.DefaultValue;
+    // console.log("mounted dropdown", this.value, this.field.DefaultValue);
   }
 };
 // 1.	Format

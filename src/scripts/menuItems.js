@@ -21,7 +21,19 @@ export default [
     }
   },
   {
-    label: "סיור בקרת איכות",
+    label: "בקרה והבטחת איכות",
+    items: [
+      {
+        label: "בקרות איכות",
+        items: [
+          { label: "פתיחת בקרה חדשה", to: "/qualityControlAdd" },
+          { label: "בקרות לטיפול שלי" },
+          { label: "צפייה בבקרות" },
+          { label: "בקרות שפתחתי" }
+        ]
+      },
+      { label: "סדר מלאכות בדירה" }
+    ],
     command: () => {
       router.push({
         name: "Options",
