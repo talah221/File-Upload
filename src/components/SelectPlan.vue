@@ -96,7 +96,21 @@ export default {
             return plan.profession_id === p;
           }).profession_name
         }))
-        .sort();
+        .sort(function(a, b) {
+          if (
+            a.profession_name.toLocaleLowerCase() <
+            b.profession_name.toLocaleLowerCase()
+          ) {
+            return -1;
+          }
+          if (
+            a.profession_name.toLocaleLowerCase() >
+            b.profession_name.toLocaleLowerCase()
+          ) {
+            return 1;
+          }
+          return 0;
+        });
     },
     palns() {
       return this.allPlans.filter(

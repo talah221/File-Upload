@@ -1,0 +1,115 @@
+# Query: //todo
+# ContextLines: 1
+
+27 results - 10 files
+
+src\components\Login.vue:
+  98          // console.log("userObject", userObject);
+  99:         //TODO: test auto login feature
+  100          if (this.allowAutoLogin) {
+  כעצקרפעחקרןףע
+
+src\components\QualityControlDetails.vue:
+  243              this.zone2RowSource = result.Table2;
+  244:             //todo לתת מקור רשומה לפי השדה המחושב
+  245              // this.fields.find(f => f.num === 3).RowSource = this.filterZone2;
+
+  248            if (result.Table3.length > 0) {
+  249:             //todo לתת מקור רשומה לפי השדה המחושב
+  250              this.zone3RowSource = result.Table3;
+
+src\components\QualityControlsFilters.vue:
+  152          {
+  153:           //todo change optionLabel,optionValue and delete rowSource values
+  154            num: 6,
+
+  232          {
+  233:           //todo change
+  234            num: 11,
+
+  287          {
+  288:           //todo change optionLabel and optionValue
+  289            num: 14,
+
+  305          {
+  306:           //todo change optionLabel and optionValue
+  307            num: 15,
+
+  384        //       this.zone2RowSource = result.Table2;
+  385:       //       //todo לתת מקור רשומה לפי השדה המחושב
+  386        //       // this.fields.find(f => f.num === 3).RowSource = this.filterZone2;
+
+  389        //     if (result.Table3.length > 0) {
+  390:       //       //todo לתת מקור רשומה לפי השדה המחושב
+  391        //       this.zone3RowSource = result.Table3;
+
+src\components\SelectPlan.vue:
+   99          .sort();
+  100:       //todo לבדוק לפי מה ממוין
+  101      },
+
+src\scripts\menuItems.js:
+  29            { label: "פתיחת בקרה חדשה", to: "/QualityControlAdd" },
+  30:           { label: "בקרות לטיפול שלי", to: "/QualityControls" }, //todo לשלוח פרמטר כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
+  31:           { label: "צפייה בבקרות", to: "/QualityControls" }, //todo לשלוח פרמטר כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
+  32            { label: "בקרות שפתחתי" }
+
+src\services\APointAPI.js:
+   79      controller.abort;
+   80:     //TODO: לטפל במקרים של ניתוק תקשורת
+   81      throw { error: "connection timeout" };
+
+  134      controller.abort;
+  135:     //TODO: לטפל במקרים של ניתוק תקשורת
+  136      throw { error: "connection timeout" };
+
+  203      controller.abort;
+  204:     //TODO: לטפל במקרים של ניתוק תקשורת
+  205      throw { error: "connection timeout" };
+
+  233          store.commit("api/resetToken");
+  234:         //TODO: popup login page to re-login and get new token to continue current action
+  235:         //TODO: route to main login page with prev route info to return to after re-login
+  236        }
+
+  256      controller.abort;
+  257:     //TODO: לטפל במקרים של ניתוק תקשורת
+  258      throw { error: "connection timeout" };
+
+src\store\apiStore.js:
+  35      getCompGuidFromSecureCookie({ commit }, payload) {
+  36:       //TODO: get from secure cookie (only in vue component)
+  37        commit("setCompGuid", payload);
+
+src\store\index.js:
+  7      isDev() {
+  8:       //TODO: add window.location = localhost
+  9        return true;
+
+src\views\QualityControlAdd.vue:
+   57        showProjectList: true,
+   58:       //todo change description to object and display error(required) when field is empty
+   59        description: "",
+
+   93        // this.needCheckData = true;
+   94:       //todo how to await to emits?
+   95  
+
+  192      addQC() {
+  193:       //todo
+  194      },
+  195      plans() {
+  196:       //todo
+  197      },
+  198      addPoto() {
+  199:       //todo
+  200      }
+
+  202    mounted() {
+  203:     //todo get projects list by userLogin - callproc
+  204      this.projects.RowSource = [
+
+src\views\QualityControls.vue:
+  26  // import QualityControlsFilters from "@/QualityControlsFilters"
+  27: //todo לחצנים : סינון,דיווח,הצגת קבצים מצורפים
+  28  export default {

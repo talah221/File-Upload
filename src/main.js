@@ -30,7 +30,7 @@ import "primeflex/primeflex.css";
 
 router.beforeEach(function(to, from, next) {
   //window.scrollTo(0, 0); //גלילה של החלון להתחלה
-  console.log("router.beforeEach");
+  // console.log("router.beforeEach");
   next();
 });
 router.afterEach(() => {

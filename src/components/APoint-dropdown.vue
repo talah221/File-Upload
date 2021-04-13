@@ -1,7 +1,6 @@
 <template>
   <Dropdown
     v-model="value"
-    :value="modelValue"
     :options="field.RowSource"
     :optionLabel="field.optionLabel"
     :optionValue="field.optionValue"
@@ -13,35 +12,42 @@
 
 <script>
 import Dropdown from "primevue/dropdown";
-//todo לטפל באזהרות שיש לאחר שינוי נתונן
 
 export default {
   components: {
     Dropdown
   },
   props: {
-    field: {},
-    modelValue: String
+    field: { type: Object },
+    modelValue: {}
   },
   emits: ["update:modelValue"],
-  computed: {
-    value() {
-      return this.modelValue;
-    }
+
+  data() {
+    return {
+      value: null
+    };
   },
   methods: {
     emitInputs(event) {
+      this.value = event;
       this.$emit("update:modelValue", event);
     }
   },
   mounted() {
-    //TODO לוודא שעובד
+    this.value = this.modelValue;
     if (
       this.field.DefaultValue !== undefined &&
-      (this.modelValue !== undefined || this.modelValue !== null)
-    )
-      this.value = this.field.DefaultValue;
+      (this.modelValue === undefined || this.modelValue === null)
+    ) {
+      this.emitInputs(this.field.DefaultValue);
+    }
     // console.log("mounted dropdown", this.value, this.field.DefaultValue);
+  },
+  watch: {
+    modelValue(newValue) {
+      this.value = newValue;
+    }
   }
 };
 // 1.	Format

@@ -53,24 +53,34 @@ export default {
     InputText
   },
   props: {
-    field: {},
-    modelValue: String
+    field: { type: Object },
+    modelValue: {}
   },
   emits: ["update:modelValue"],
+  data() {
+    return {
+      value: null
+    };
+  },
   computed: {
     date() {
       return formats.dateFormats.find(f => this.field.Format == f.access);
     },
     number() {
       return formats.numberFormats.find(f => this.field.Format == f.access);
-    },
-    value() {
-      return this.modelValue;
     }
+  },
+  mounted() {
+    this.value = this.modelValue;
   },
   methods: {
     emitInputs(value) {
       this.$emit("update:modelValue", value);
+    }
+  },
+  watch: {
+    modelValue(newValue) {
+      this.value = newValue;
     }
   }
 };

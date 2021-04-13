@@ -2,47 +2,47 @@
   <div class="field p-d-flex p-ai-center p-m-4 p-flex-wrap">
     <div
       class="field p-d-flex p-ai-center p-m-4"
-      v-for="($field, $i) of fields"
-      :key="$i"
+      v-for="(field, i) of fields"
+      :key="i"
     >
-      <label :for="$field.Name" v-if="$field.show != false">
-        {{ $field.Caption }}
+      <label :for="field.Name" v-if="field.show != false">
+        {{ field.Caption }}
       </label>
       <div
         class="p-d-flex p-flex-column"
         ref=""
-        :id="$field.Name"
-        v-if="$field.show != false"
+        :id="field.Name"
+        v-if="field.show != false"
       >
         <a-point-textbox
-          :field="$field"
-          :modelValue="$field.ControlSource"
-          @update:model-value="$field.ControlSource = $event"
-          v-if="$field.apointType == 'text'"
+          :field="field"
+          :modelValue="field.ControlSource"
+          @update:model-value="field.ControlSource = $event"
+          v-if="field.apointType == 'text'"
         ></a-point-textbox>
 
         <a-point-checkbox
-          v-if="$field.apointType == 'checkbox'"
-          :field="$field"
-          :modelValue="$field.ControlSource"
-          @update:model-value="$field.ControlSource = $event"
+          v-if="field.apointType == 'checkbox'"
+          :field="field"
+          :modelValue="field.ControlSource"
+          @update:model-value="field.ControlSource = $event"
         ></a-point-checkbox>
 
         <a-point-dropdown
-          v-if="$field.apointType == 'dropdown'"
-          :field="$field"
-          :modelValue="$field.ControlSource"
-          @update:model-value="$field.ControlSource = $event"
+          v-if="field.apointType == 'dropdown'"
+          :field="field"
+          :modelValue="field.ControlSource"
+          @update:model-value="field.ControlSource = $event"
         ></a-point-dropdown>
 
         <SelectButton
-          v-if="$field.apointType == 'selectButton'"
-          v-model="$field.ControlSource"
-          :options="$field.RowSource"
-          :optionLabel="$field.optionLabel"
+          v-if="field.apointType == 'selectButton'"
+          v-model="field.ControlSource"
+          :options="field.RowSource"
+          :optionLabel="field.optionLabel"
           class="ltrDir"
         />
-        <span class="error p-mt-1 p-mr-2" v-if="$field.check">
+        <span class="error p-mt-1 p-mr-2" v-if="field.check">
           * שדה חובה
         </span>
       </div>
@@ -59,6 +59,7 @@ import APointCheckbox from "./APoint-checkbox.vue";
 import APointDropdown from "./APoint-dropdown.vue";
 import SelectButton from "primevue/selectbutton";
 import Button from "primevue/button";
+// import { callProc, apiParam, apiPType } from "../services/APointAPI";
 
 export default {
   components: {
@@ -69,7 +70,7 @@ export default {
     Button
   },
   props: {
-    filters: { p: "fgdf" }
+    filters: { type: Object }
   },
   emits: ["showData"],
   data() {
@@ -79,36 +80,28 @@ export default {
           num: 1,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "שם פרוייקט",
-          optionLabel: "lbl",
-          showClear: false,
+          optionLabel: "ProjectName",
+          optionValue: "ProjectId",
+          showClear: true,
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "פרוייקט 1" },
-            { val: 2, lbl: "פרוייקט 2" },
-            { val: 3, lbl: "פרוייקט 3" },
-            { val: 4, lbl: "פרוייקט 4" }
-          ],
+          RowSource: [],
           Enabled: true,
           Locked: false,
-          Name: "project"
+          Name: "projectId"
         },
         {
           num: 2,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "סטטוס",
-          optionLabel: "lbl",
-          showClear: false,
+          optionLabel: "status_name",
+          optionValue: "status_id",
+          showClear: true,
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "סטטוס 1" },
-            { val: 2, lbl: "סטטוס 2" },
-            { val: 3, lbl: "סטטוס 3" },
-            { val: 4, lbl: "סטטוס 4" }
-          ],
+          RowSource: [],
           Enabled: true,
           Locked: false,
           Name: "status"
@@ -117,7 +110,7 @@ export default {
           num: 3,
           apointType: "selectButton",
           check: false,
-          required: true,
+          required: false,
           Caption: "הצג בקרות",
           optionLabel: "lbl",
           showClear: false,
@@ -128,13 +121,13 @@ export default {
           ],
           Enabled: true,
           Locked: false,
-          Name: "showReports"
+          Name: "showControls"
         },
         {
           num: 4,
           apointType: "text",
           check: false,
-          required: true,
+          required: false,
           Caption: "מתאריך",
           manualInput: true,
           showButtonBar: true,
@@ -147,7 +140,7 @@ export default {
           num: 5,
           apointType: "text",
           check: false,
-          required: true,
+          required: false,
           Caption: "עד תאריך",
           manualInput: true,
           showButtonBar: true,
@@ -157,13 +150,15 @@ export default {
           Name: "toDate"
         },
         {
+          //todo change optionLabel,optionValue and delete rowSource values
           num: 6,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "בקרות בפיגור מעל",
           optionLabel: "lbl",
-          showClear: false,
+          optionValue: "",
+          showClear: true,
           ControlSource: null,
           RowSource: [
             { val: 1, lbl: "5 ימים" },
@@ -178,16 +173,13 @@ export default {
           num: 7,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "פרק",
-          optionLabel: "lbl",
-          showClear: false,
+          optionLabel: "chapter_name",
+          optionValue: "chapter_id",
+          showClear: true,
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "פרק 1" },
-            { val: 2, lbl: "פרק 2" },
-            { val: 3, lbl: "פרק 3" }
-          ],
+          RowSource: [],
           Enabled: true,
           Locked: false,
           Name: "chapter"
@@ -196,61 +188,53 @@ export default {
           num: 8,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "חלל 1",
-          optionLabel: "lbl",
+          optionLabel: "project_zone_name",
+          optionValue: "project_zones_id",
           showClear: true,
           Format: "",
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "חלל 1: 1" },
-            { val: 2, lbl: "חלל 1: 2" },
-            { val: 3, lbl: "חלל 1: 3" }
-          ],
+          RowSource: [],
           Enabled: true,
-          Name: "space1"
+          Name: "zone1"
         },
         {
           num: 9,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "חלל 2",
-          optionLabel: "lbl",
+          optionLabel: "project_zone_name",
+          optionValue: "project_zones_id",
           showClear: true,
           Format: "",
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "חלל 2: 1" },
-            { val: 2, lbl: "חלל 2: 2" },
-            { val: 3, lbl: "חלל 2: 3" }
-          ],
+          RowSource: [],
           Enabled: true,
-          Name: "space2"
+          Name: "zone2"
         },
         {
           num: 10,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "חלל 3",
-          optionLabel: "lbl",
+          optionLabel: "project_zone_name",
+          optionValue: "project_zones_id",
           showClear: true,
           Format: "",
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "חלל 3: 1" },
-            { val: 2, lbl: "חלל 3: 2" },
-            { val: 3, lbl: "חלל 3: 3" }
-          ],
+          RowSource: [],
           Enabled: true,
-          Name: "space3"
+          Name: "zone3"
         },
         {
+          //todo change
           num: 11,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "יעד לביצוע",
           optionLabel: "lbl",
           showClear: true,
@@ -262,7 +246,7 @@ export default {
             { val: 3, lbl: "יעד לביצוע 3" }
           ],
           Enabled: true,
-          Name: "performTarget",
+          Name: "planedDate",
           show: false,
           isHide: true
         },
@@ -270,19 +254,16 @@ export default {
           num: 12,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "סוג ליקוי",
-          optionLabel: "lbl",
+          optionLabel: "impairment_desc",
+          optionValue: "ID",
           showClear: true,
           Format: "",
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "סוג ליקוי 1" },
-            { val: 2, lbl: "סוג ליקוי 2" },
-            { val: 3, lbl: "סוג ליקוי 3" }
-          ],
+          RowSource: [],
           Enabled: true,
-          Name: "eclipseType",
+          Name: "impairment",
           show: false,
           isHide: true
         },
@@ -290,59 +271,52 @@ export default {
           num: 13,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "רמת חומרה",
-          optionLabel: "lbl",
+          optionLabel: "level_desc",
+          optionValue: "ID",
           showClear: true,
           Format: "",
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "רמת חומרה 1" },
-            { val: 2, lbl: "רמת חומרה 2" },
-            { val: 3, lbl: "רמת חומרה 3" }
-          ],
+          RowSource: [],
           Enabled: true,
-          Name: "stringencyLevel",
+          Name: "severityLevel",
           show: false,
           isHide: true
         },
         {
+          //todo change optionLabel and optionValue
           num: 14,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "פותח הבקרה",
-          optionLabel: "lbl",
+          optionLabel: "user_full_name",
+          optionValue: "user_id",
           showClear: true,
           Format: "",
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "פותח הבקרה 1" },
-            { val: 2, lbl: "פותח הבקרה 2" },
-            { val: 3, lbl: "פותח הבקרה 3" }
-          ],
+          RowSource: [],
           Enabled: true,
-          Name: "reportOpen",
+          Name: "createBy",
           show: false,
           isHide: true
         },
         {
+          //todo change optionLabel and optionValue
           num: 15,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "סוגר הבקרה",
-          optionLabel: "lbl",
+          optionLabel: "user_full_name",
+          optionValue: "user_id",
           showClear: true,
           Format: "",
           ControlSource: null,
-          RowSource: [
-            { val: 1, lbl: "סוגר הבקרה 1" },
-            { val: 2, lbl: "סוגר הבקרה 2" },
-            { val: 3, lbl: "סוגר הבקרה 3" }
-          ],
+          RowSource: [],
           Enabled: true,
-          Name: "reportClose",
+          Name: "closedBy",
           show: false,
           isHide: true
         }
@@ -357,6 +331,7 @@ export default {
       this.fields.forEach(f => {
         if (this.filters[f.Name]) f.ControlSource = this.filters[f.Name];
       });
+    this.getDdlData();
   },
   methods: {
     filterReport() {
@@ -386,6 +361,53 @@ export default {
         f.ControlSource = null;
       });
       this.filterReport();
+    },
+    getDdlData() {
+      // let procParams = [
+      //   apiParam("user_exec", this.userID, apiPType.Int),
+      //   apiParam("project_id", this.projectId, apiPType.Int)
+      // ];
+      // callProc("pr_qc_ddl_data", procParams)
+      //   .then(result => {
+      //     result = JSON.parse(result);
+      //     // console.log("pr_qc_ddl_data-result", result);
+      //     if (result.Table.length > 0) {
+      //       this.fields.find(f => f.num === 1).RowSource = result.Table;
+      //       // todo הצגת סטטוסים לבחירה לפי מוד הבקרה
+      //     }
+      //     if (result.Table1.length > 0) {
+      //       this.fields.find(f => f.num === 2).RowSource = result.Table1;
+      //       //   this.fields.find(f => f.num === 2).ControlSource =
+      //       //     result.Table1[0].project_zones_id;
+      //     }
+      //     if (result.Table2.length > 0) {
+      //       this.zone2RowSource = result.Table2;
+      //       //todo לתת מקור רשומה לפי השדה המחושב
+      //       // this.fields.find(f => f.num === 3).RowSource = this.filterZone2;
+      //       this.fields.find(f => f.num === 3).RowSource = result.Table2;
+      //     }
+      //     if (result.Table3.length > 0) {
+      //       //todo לתת מקור רשומה לפי השדה המחושב
+      //       this.zone3RowSource = result.Table3;
+      //       // this.fields.find(f => f.num === 4).RowSource = this.filterZone3;
+      //       this.fields.find(f => f.num === 4).RowSource = result.Table3;
+      //     }
+      //     if (result.Table4.length > 0) {
+      //       this.fields.find(f => f.num === 5).RowSource = result.Table4;
+      //     }
+      //     if (result.Table5.length > 0) {
+      //       this.fields.find(f => f.num === 6).RowSource = result.Table5;
+      //     }
+      //     if (result.Table6.length > 0) {
+      //       this.fields.find(f => f.num === 8).RowSource = result.Table6;
+      //     }
+      //     if (result.Table7.length > 0) {
+      //       this.fields.find(f => f.num === 9).RowSource = result.Table7;
+      //     }
+      //   })
+      //   .catch(error => {
+      //     console.log("pr_qc_ddl_data-error", error);
+      //   });
     }
   }
 };

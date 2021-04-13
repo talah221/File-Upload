@@ -5,7 +5,8 @@ import Home from "../views/Home.vue";
 import Detail from "../views/Detail.vue";
 import Options from "../views/Options.vue";
 import AttendanceReporting from "../views/AttendanceReporting.vue";
-import qualityControlAdd from "../views/qualityControlAdd.vue";
+import QualityControl from "../views/QualityControl.vue";
+import QualityControls from "../views/QualityControls.vue";
 import Plan from "../views/Plan.vue";
 
 const routes = [
@@ -30,14 +31,19 @@ const routes = [
     component: AttendanceReporting
   },
   {
-    path: "/qualityControlAdd",
-    name: "qualityControlAdd",
-    component: qualityControlAdd
+    path: "/QualityControl",
+    name: "QualityControl",
+    component: QualityControl
   },
   {
     path: "/Plan/:id",
     name: "Plan",
     component: Plan
+  },
+  {
+    path: "/QualityControls", //todo להוסיף פרמטר
+    name: "QualityControls",
+    component: QualityControls
   }
 ];
 // ,
