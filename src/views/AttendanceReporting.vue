@@ -112,7 +112,6 @@
       </Column>
     </DataTable>
   </div>
-  <Toast position="bottom-right" />
 </template>
 
 <script>

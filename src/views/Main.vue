@@ -4,6 +4,8 @@
   <ProgressSpinner v-if="displaySpinner" class="spinner" />
   <BlockUI :blocked="displaySpinner" :fullScreen="true"> </BlockUI>
   <router-view />
+  <Toast position="bottom-right" :baseZIndex="2000" />
+
   <!-- <About /> -->
 </template>
 

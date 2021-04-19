@@ -5,7 +5,7 @@
     :disabled="!field.Enabled || field.Locked"
     @input="emitInputs($event.target.value)"
     :value="modelValue"
-    :class="field.class"
+    :class="field.required && field.check ? 'p-invalid' : ''"
   />
   <Calendar
     v-if="date"
@@ -21,6 +21,7 @@
     :value="modelValue"
     v-model="value"
     :showIcon="field.showIcon"
+    :class="field.required && field.check ? 'p-invalid' : ''"
   />
   <InputNumber
     v-if="number"
@@ -38,6 +39,7 @@
     :currencyDisplay="field.currencyDisplay"
     :suffix="field.suffix"
     :prefix="field.prefix"
+    :class="field.required && field.check ? 'p-invalid' : ''"
   />
 </template>
 

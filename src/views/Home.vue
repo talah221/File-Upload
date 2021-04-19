@@ -1,24 +1,14 @@
 <template>
-  <!-- <qualityControlDetails ></qualityControlDetails> -->
-  <!-- <qaReports
-    v-if="show"
-    :filters="filter"
-    @showData="showData($event)"
-  ></qaReports>
-  <Button label="הצג " @click="show = !show" />
-  <div>{{ filter }}</div> -->
-  <!-- <carousel :items="caruselItems"></carousel> -->
+  <QCReporting :qc_id="25026" />
   <div></div>
 </template>
 
 <script>
-// import Carousel from "../components/Carousel.vue";
-// import QaReports from "@/components/qa-reports";
-// import QaReports from "@/components/inputs";
-// import qualityControlDetails from "@/components/qualityControlDetails";
-// import Button from "primevue/button";
+import QCReporting from "@/components/QCReporting.vue";
+
 export default {
   components: {
+    QCReporting
     // Carousel,
     // qualityControlDetails
     // Button

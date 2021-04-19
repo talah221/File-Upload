@@ -467,7 +467,28 @@ export default {
       filter: {},
       showAllBtn: false,
       showAllBtnLbl: "הצג מסננים נוספים",
-      displaySpinner: false
+      displaySpinner: false,
+      fields_enum: {
+        e_projectId: 1,
+        e_status: 2,
+        e_showControls: 3,
+        e_fromDate: 4,
+        e_toDate: 5,
+        e_notDone: 6,
+        e_chapter: 7,
+        e_zone1: 8,
+        e_zone2: 9,
+        e_zone3: 10,
+        e_planed_date: 11,
+        e_impairment: 12,
+        e_hardware_level: 13,
+        e_createBy: 14,
+        e_userClosed: 15,
+        e_responsible: 16,
+        e_zoneType1: 17,
+        e_zoneType2: 18
+        //todo לעדכן ולשנות בהתאם
+      }
     };
   },
   mounted() {
@@ -517,23 +538,26 @@ export default {
     changeDates() {
       const fromDate = new Date();
       const ToDate = new Date();
-      this.getField(5).ControlSource = ToDate;
-      this.setFilters(this.getField(5));
+      this.getField(this.fields_enum.e_toDate).ControlSource = ToDate;
+      this.setFilters(this.getField(this.fields_enum.e_toDate));
 
       fromDate.setDate(
-        fromDate.getDate() + this.getField(3).ControlSource * -1
+        fromDate.getDate() +
+          this.getField(this.fields_enum.e_showControls).ControlSource * -1
       );
 
-      this.getField(4).ControlSource = new Date(fromDate);
-      this.setFilters(this.getField(4));
+      this.getField(this.fields_enum.e_fromDate).ControlSource = new Date(
+        fromDate
+      );
+      this.setFilters(this.getField(this.fields_enum.e_fromDate));
 
-      this.getField(3).ControlSource = null;
+      this.getField(this.fields_enum.e_showControls).ControlSource = null;
     },
     getDdlData() {
       this.$store.commit("main/setSpinner", true);
 
       //todo get projects list by userLogin - callproc
-      this.getField(1).RowSource = [
+      this.getField(this.fields_enum.e_projectId).RowSource = [
         { ProjectId: 146, ProjectName: "אדרת הכרמל" },
         { ProjectId: 102, ProjectName: "אדרת הכפר" },
         { ProjectId: 91, ProjectName: "וולפסון" }
@@ -544,43 +568,55 @@ export default {
           result = JSON.parse(result);
           // console.log("pr_qc_ddl_data-result", result);
           if (result.Table.length > 0) {
-            this.getField(2).RowSource = result.Table;
+            this.getField(this.fields_enum.e_status).RowSource = result.Table;
           }
           if (result.Table1.length > 0) {
-            this.getField(8).allRowSource = result.Table1;
-            this.getField(17).allRowSource = result.Table1.map(f => ({
+            this.getField(this.fields_enum.e_zone1).allRowSource =
+              result.Table1;
+            this.getField(
+              this.fields_enum.e_zoneType1
+            ).allRowSource = result.Table1.map(f => ({
               zone_type_name: f.zone_type_name,
               project_id: f.project_id
             }));
           }
           if (result.Table2.length > 0) {
-            this.getField(9).allRowSource = result.Table2;
-            this.getField(18).allRowSource = result.Table2.map(f => ({
+            this.getField(this.fields_enum.e_zone2).allRowSource =
+              result.Table2;
+            this.getField(
+              this.fields_enum.e_zoneType2
+            ).allRowSource = result.Table2.map(f => ({
               zone_type_name: f.zone_type_name,
               project_id: f.project_id
             }));
           }
           if (result.Table3.length > 0) {
-            this.getField(10).allRowSource = result.Table3;
+            this.getField(this.fields_enum.e_zone3).allRowSource =
+              result.Table3;
           }
           if (result.Table4.length > 0) {
-            this.getField(7).RowSource = result.Table4;
+            this.getField(this.fields_enum.e_chapter).RowSource = result.Table4;
           }
           if (result.Table5.length > 0) {
-            this.getField(16).RowSource = result.Table5;
+            this.getField(this.fields_enum.e_responsible).RowSource =
+              result.Table5;
           }
           if (result.Table6.length > 0) {
-            this.getField(12).RowSource = result.Table6;
+            this.getField(this.fields_enum.e_impairment).RowSource =
+              result.Table6;
           }
           if (result.Table7.length > 0) {
-            this.getField(13).RowSource = result.Table7;
+            this.getField(this.fields_enum.e_hardware_level).RowSource =
+              result.Table7;
           }
           if (result.Table8.length > 0) {
-            this.getField(14).RowSource = result.Table8;
-            this.getField(15).RowSource = result.Table8;
+            this.getField(this.fields_enum.e_createBy).RowSource =
+              result.Table8;
+            this.getField(this.fields_enum.e_userClosed).RowSource =
+              result.Table8;
           }
           if (result.Table9.length > 0) {
-            this.getField(6).RowSource = result.Table9;
+            this.getField(this.fields_enum.e_notDone).RowSource = result.Table9;
           }
           this.filterZonesAndZoneTypes();
         })
@@ -596,59 +632,79 @@ export default {
     },
     filterZonesAndZoneTypes() {
       let projectIds;
-      projectIds = this.getField(1).ControlSource;
+      projectIds = this.getField(this.fields_enum.e_projectId).ControlSource;
       //הבאת כל הנתונים
-      this.getField(8).RowSource = this.getField(8).allRowSource;
-      this.getField(9).RowSource = this.getField(9).allRowSource;
-      this.getField(10).RowSource = this.getField(10).allRowSource;
-      this.getField(17).RowSource = this.getField(17).allRowSource;
-      this.getField(18).RowSource = this.getField(18).allRowSource;
+      this.getField(this.fields_enum.e_zone1).RowSource = this.getField(
+        this.fields_enum.e_zone1
+      ).allRowSource;
+      this.getField(this.fields_enum.e_zone2).RowSource = this.getField(
+        this.fields_enum.e_zone2
+      ).allRowSource;
+      this.getField(this.fields_enum.e_zone3).RowSource = this.getField(
+        this.fields_enum.e_zone3
+      ).allRowSource;
+      this.getField(this.fields_enum.e_zoneType1).RowSource = this.getField(
+        this.fields_enum.e_zoneType1
+      ).allRowSource;
+      this.getField(this.fields_enum.e_zoneType2).RowSource = this.getField(
+        this.fields_enum.e_zoneType2
+      ).allRowSource;
       //סינון לפי פרויקט
       if (projectIds !== null && projectIds.length > 0) {
-        this.getField(8).RowSource = this.getField(8).RowSource.filter(
-          z => projectIds.indexOf(z.project_id) >= 0
-        );
-        this.getField(9).RowSource = this.getField(9).RowSource.filter(
-          z => projectIds.indexOf(z.project_id) >= 0
-        );
-        this.getField(10).RowSource = this.getField(10).RowSource.filter(
-          z => projectIds.indexOf(z.project_id) >= 0
-        );
-        this.getField(17).RowSource = this.getField(17).RowSource.filter(
-          z => projectIds.indexOf(z.project_id) >= 0
-        );
-        this.getField(18).RowSource = this.getField(18).RowSource.filter(
-          z => projectIds.indexOf(z.project_id) >= 0
-        );
+        this.getField(this.fields_enum.e_zone1).RowSource = this.getField(
+          this.fields_enum.e_zone1
+        ).RowSource.filter(z => projectIds.indexOf(z.project_id) >= 0);
+        this.getField(this.fields_enum.e_zone2).RowSource = this.getField(
+          this.fields_enum.e_zone2
+        ).RowSource.filter(z => projectIds.indexOf(z.project_id) >= 0);
+        this.getField(this.fields_enum.e_zone3).RowSource = this.getField(
+          this.fields_enum.e_zone3
+        ).RowSource.filter(z => projectIds.indexOf(z.project_id) >= 0);
+        this.getField(this.fields_enum.e_zoneType1).RowSource = this.getField(
+          this.fields_enum.e_zoneType1
+        ).RowSource.filter(z => projectIds.indexOf(z.project_id) >= 0);
+        this.getField(this.fields_enum.e_zoneType2).RowSource = this.getField(
+          this.fields_enum.e_zoneType2
+        ).RowSource.filter(z => projectIds.indexOf(z.project_id) >= 0);
       }
       //הבאת שם החלל בלבד בדיסטינקט ממוין
-      this.getField(8).RowSource = this.getField(8)
+      this.getField(this.fields_enum.e_zone1).RowSource = this.getField(
+        this.fields_enum.e_zone1
+      )
         .RowSource.map(z => z.project_zone_name)
         .filter((value, index, self) => {
           return self.indexOf(value) === index && value !== "";
         })
         .sort();
 
-      this.getField(9).RowSource = this.getField(9)
+      this.getField(this.fields_enum.e_zone2).RowSource = this.getField(
+        this.fields_enum.e_zone2
+      )
         .RowSource.map(z => z.project_zone_name)
         .filter((value, index, self) => {
           return self.indexOf(value) === index && value !== "";
         })
         .sort();
-      this.getField(10).RowSource = this.getField(10)
+      this.getField(this.fields_enum.e_zone3).RowSource = this.getField(
+        this.fields_enum.e_zone3
+      )
         .RowSource.map(z => z.project_zone_name)
         .filter((value, index, self) => {
           return self.indexOf(value) === index && value !== "";
         })
         .sort();
       //הבאת סוגי חללים בדיסטינקט ממוין
-      this.getField(17).RowSource = this.getField(17)
+      this.getField(this.fields_enum.e_zoneType1).RowSource = this.getField(
+        this.fields_enum.e_zoneType1
+      )
         .RowSource.map(z => z.zone_type_name)
         .filter((value, index, self) => {
           return self.indexOf(value) === index && value !== "";
         })
         .sort();
-      this.getField(18).RowSource = this.getField(18)
+      this.getField(this.fields_enum.e_zoneType2).RowSource = this.getField(
+        this.fields_enum.e_zoneType2
+      )
         .RowSource.map(z => z.zone_type_name)
         .filter((value, index, self) => {
           return self.indexOf(value) === index && value !== "";
@@ -670,12 +726,16 @@ export default {
       this.clearFilters();
       switch (param) {
         case "myResponsibility":
-          this.getField(16).ControlSource = JSON.parse("[" + this.userID + "]");
-          this.setFilters(this.getField(16));
+          this.getField(
+            this.fields_enum.e_responsible
+          ).ControlSource = JSON.parse("[" + this.userID + "]");
+          this.setFilters(this.getField(this.fields_enum.e_responsible));
           break;
         case "ICreated":
-          this.getField(14).ControlSource = JSON.parse("[" + this.userID + "]");
-          this.setFilters(this.getField(14));
+          this.getField(this.fields_enum.e_createBy).ControlSource = JSON.parse(
+            "[" + this.userID + "]"
+          );
+          this.setFilters(this.getField(this.fields_enum.e_createBy));
 
           break;
         default:

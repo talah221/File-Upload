@@ -14,7 +14,6 @@
       optionValue="ID"
     />
     <Button label="הצג תוכנית" @click="displayPlan" />
-    <Toast position="bottom-right" />
   </div>
 </template>
 
@@ -30,6 +29,7 @@ export default {
       type: Number
     }
   },
+  emits: ["displayPlan"],
   components: {
     Dropdown,
     Button
@@ -65,10 +65,7 @@ export default {
   methods: {
     displayPlan() {
       if (this.profetionId > 0 && this.planId > 0) {
-        this.$router.push({
-          name: "Plan",
-          params: { id: this.planId }
-        });
+        this.$emit("displayPlan", this.planId);
       } else {
         this.$toast.add({
           severity: "error",
