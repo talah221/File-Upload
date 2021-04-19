@@ -5,6 +5,7 @@
     :disabled="!field.Enabled || field.Locked"
     @input="emitInputs($event.target.value)"
     :value="modelValue"
+    :class="field.class"
   />
   <Calendar
     v-if="date"

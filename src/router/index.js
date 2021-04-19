@@ -41,7 +41,7 @@ const routes = [
     component: Plan
   },
   {
-    path: "/QualityControls", //todo להוסיף פרמטר
+    path: "/QualityControls/:filter", //todo להוסיף פרמטר
     name: "QualityControls",
     component: QualityControls
   }

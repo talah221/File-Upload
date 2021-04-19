@@ -21,10 +21,12 @@ const mainStore = {
       " צור קשר",
       "נסיון הוספת "
     ],
-    showMenu: false
+    showMenu: false,
+    displaySpinner: false
   },
   mutations: {
-    setShowMenu: (state, payload) => (state.showMenu = payload)
+    setShowMenu: (state, payload) => (state.showMenu = payload),
+    setSpinner: (state, flag) => (state.displaySpinner = flag)
   },
   actions: {
     toggleMenuShow: function({ commit, getters }, show) {

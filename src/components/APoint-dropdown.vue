@@ -7,7 +7,9 @@
     :showClear="field.showClear"
     :disabled="!field.Enabled || field.Locked"
     @change="emitInputs($event.value)"
+    :class="field.check ? 'p-invalid' : ''"
   />
+  <!-- //todo במידה ויש יותר מ10 אפשרויות בחירה לאפשר חיפוש -->
 </template>
 
 <script>

@@ -1,70 +1,45 @@
 <template>
-  <div>
-    <!-- <div v-else> -->
-    <label :for="qcDesc.Name">{{ qcDesc.Caption }}</label>
-    <Textarea
-      v-model="value"
-      :name="qcDesc.Name"
-      class="textarea"
-      @input="emitValue($event.target.value)"
-    />
-    <span class="error p-mt-1 p-mr-2" v-if="qcDesc.check">
-      * שדה חובה
-    </span>
-    <Button label="שמור וסגור" @click="saveClose"></Button>
-    <Button label="בקרה חדשה" @click="addQC"></Button>
-    <Button label="תוכניות" @click="plans"></Button>
-    <Button label="" @click="addPoto" icon="pi pi-camera"></Button>
-    <!-- </div> -->
+  <div class="single_form_buttons">
+    <Button label="תוכניות" @click="plans" icon="pi pi-file-pdf"></Button>
+    <Button label="הוסף תמונה" @click="addPoto" icon="pi pi-camera"></Button>
+    <Button label="שמור וסגור" @click="saveClose" icon="pi pi-check"></Button>
+    <Button label="בקרה חדשה" @click="addQC" icon="pi pi-plus-circle"></Button>
   </div>
   {{ apartmentId }}
   <Dialog v-model:visible="displayPlans" modal>
     <div>
       <SelectPlan :apartmentId="apartmentId"></SelectPlan>
     </div>
-    //todo לשנות גובה של הדיילוג
   </Dialog>
   <Toast position="bottom-right" />
 </template>
-
 <script>
+//todo לשנות את קומפוננטת בחירת תוכנית לאבא
+//todo לאחר שבחרו תוכנית יש לפתוח את קומפוננטת עיכת תוכנית גם כן בדיילוג
 import Button from "primevue/button";
-import { mapState } from "vuex";
-import Textarea from "primevue/textarea";
 import Dialog from "primevue/dialog";
 import SelectPlan from "./SelectPlan.vue";
 
 export default {
   name: "QualityControlAdd",
   props: {
-    qcDesc: {
-      type: Object,
-      required: true
-    },
     modelValue: {},
     apartmentId: {
       type: Number
     }
   },
-  emits: ["updateDescription", "saveClose"],
+  emits: ["saveClose"],
   components: {
     Button,
-    Textarea,
     Dialog,
     SelectPlan
   },
   data() {
     return {
-      value: null,
       displayPlans: false
     };
   },
   methods: {
-    emitValue(value) {
-      this.value = value;
-      this.$emit("updateDescription", value);
-    },
-
     saveClose() {
       this.$emit("saveClose");
     },
@@ -79,30 +54,8 @@ export default {
     addPoto() {
       //todo
     }
-  },
-  mounted() {
-    this.value = this.modelValue;
-  },
-  computed: {
-    ...mapState({ userID: state => +state.api.userID })
-  },
-  watch: {
-    modelValue(newValue) {
-      this.value = newValue;
-    }
   }
 };
 </script>
 
-<style scoped>
-.error {
-  color: red;
-  font-size: 11px;
-}
-.field label {
-  width: 125px;
-}
-.textarea {
-  resize: none;
-}
-</style>
+<style scoped></style>

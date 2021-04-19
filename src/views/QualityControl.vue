@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="showProjectList" class="field p-d-flex p-ai-center p-m-4">
+    <div v-if="showProjectList" class="field p-d-flex p-ai-center p-m-2">
       <label :for="projects.Name">{{ projects.Caption }}</label>
       <div class="p-d-flex p-flex-column" ref="" :id="projects.Name">
         <a-point-dropdown
@@ -16,7 +16,7 @@
     </div>
     <div v-else class="single_form">
       <div
-        class="field p-d-flex p-ai-center p-m-4"
+        class="field p-d-flex p-ai-center p-m-2"
         v-for="(field, i) of detailsFields"
         :key="i"
       >
@@ -27,41 +27,45 @@
             :model-value="field.ControlSource"
             @update:model-value="field.ControlSource = $event"
             v-if="field.apointType == 'text'"
+            :class="field.class"
           ></a-point-textbox>
           <a-point-checkbox
-            v-if="field.apointType == 'checkbox'"
+            v-else-if="field.apointType == 'checkbox'"
             :field="field"
             :model-value="field.ControlSource"
             @update:model-value="field.ControlSource = $event"
           ></a-point-checkbox>
           <a-point-dropdown
-            v-if="field.apointType == 'dropdown'"
+            v-else-if="field.apointType == 'dropdown'"
             :field="field"
             :model-value="field.ControlSource"
             @update:model-value="updateField(field, $event)"
           ></a-point-dropdown>
+          <Textarea
+            v-else-if="field.apointType == 'textarea'"
+            :field="field"
+            :model-value="field.ControlSource"
+            @update:model-value="updateField(field, $event)"
+            style="resize:none"
+          ></Textarea>
           <!-- {{ field.RowSource }} -->
           <span class="error p-mt-1 p-mr-2" v-if="field.check">
             * שדה חובה
           </span>
         </div>
       </div>
-
-      <div v-if="qcMode === 'new'">
-        <QualityControlAdd
-          :qcDesc="description"
-          :model-value="description.ControlSource"
-          @updateDescription="description.ControlSource = $event"
-          @saveClose="saveClose"
-          :apartmentId="727"
-        />
-      </div>
+    </div>
+    <div v-if="qcMode === 'new'">
+      <QualityControlAdd @saveClose="saveClose" :apartmentId="727" />
     </div>
   </div>
 </template>
 
 <script>
 //todo לשנות בקומפוונטה QualityControlAdd את הפרופס של מספר דירה
+//חובה לבחור חלל 2 מסוג דירה על מנת להציג לחצן של תוכניות
+//לבדוק את כל השדות המנדטוריים לפני בחירת תוכנית
+//לאחר בחירת תוכנית אין לשנות פרטי בקרה רק דרך מסך עדכון נתונים
 import APointTextbox from "@/components/APoint-textbox.vue";
 import APointCheckbox from "@/components/APoint-checkbox.vue";
 import APointDropdown from "@/components/APoint-dropdown.vue";
@@ -70,15 +74,15 @@ import { mapState } from "vuex";
 import QualityControlAdd from "@/components/QualityControlAdd.vue";
 import { Nz } from "../services/APointAPI";
 import Button from "primevue/button";
-
+import Textarea from "primevue/textarea";
 export default {
   components: {
     APointTextbox,
     APointCheckbox,
     APointDropdown,
     Button,
-    QualityControlAdd
-    // Textarea
+    QualityControlAdd,
+    Textarea
   },
   data() {
     return {
@@ -250,7 +254,8 @@ export default {
           ControlSource: null,
           Enabled: true,
           Locked: false,
-          Name: "description"
+          Name: "description",
+          class: "decription"
         },
         {
           num: 12,
@@ -370,6 +375,7 @@ export default {
 
       //todo במידה ונשאר סטטוס טיוטה, הוא יתחלף ל"פתוחה" בלחיצה על "שמור וסגור".
       // todo change status in vue or in sql?
+      //sql
 
       let procParams = [
         apiParam("user_exec", this.userID, apiPType.Int),
@@ -420,7 +426,9 @@ export default {
               closable: true
             });
 
-            this.$router.push({ name: "Home" });
+            setTimeout(() => {
+              this.$router.push({ name: "Home" });
+            }, 3000);
           } else {
             this.$toast.add({
               severity: "error",
@@ -476,11 +484,9 @@ export default {
   },
   computed: {
     detailsFields() {
-      return this.fields.filter(field => field.num < 10);
+      return this.fields.filter(field => field.num < 10 || field.num === 11);
     },
-    description() {
-      return this.getField(11);
-    },
+
     projects() {
       return this.getField(10);
     },
@@ -491,41 +497,13 @@ export default {
 </script>
 
 <style scoped>
-@media screen and (min-width: 896px) {
-  .single_form .field {
-    width: 30%;
-  }
-}
-@media screen and (max-width: 896px) {
-  .single_form .field {
-    width: 49%;
-  }
-}
-@media screen and (max-width: 600px) {
-  .single_form .field {
-    width: 95%;
-  }
-}
-.single_form {
-  display: flex;
-  flex-wrap: wrap;
-}
-.single_form .field {
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-.single_form .field label {
-  width: 30%;
-}
-.single_form .field > div {
-  width: 69%;
-}
 .error {
   color: red;
   font-size: 11px;
 }
-
-.textarea {
-  resize: none;
+</style>
+<style>
+.decription {
+  height: 100px;
 }
 </style>

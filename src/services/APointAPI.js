@@ -1,7 +1,9 @@
 import store from "../store/index";
 
-const API_HOST = "https://api.apoint.co.il";
+// const API_HOST = "https://api.apoint.co.il";
 // const API_HOST = "https://localhost:44396"; //DEV
+const API_HOST = "https://apidev.apoint.co.il"; //DEV - Live
+
 const FETCH_DEFAULT_TIMEOUT = 10 * 1000; //10 seconds
 const PROC_DEFAULT_TIMEOUT = 10 * 1000; //10 seconds
 const FETCH_DEFAULT_HEADERS = {

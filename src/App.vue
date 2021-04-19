@@ -78,4 +78,55 @@ export default {
 .mainApp {
   margin-right: 20rem;
 }
+@media screen and (min-width: 896px) {
+  .single_form .field {
+    width: 30%;
+  }
+}
+@media screen and (max-width: 896px) {
+  .single_form .field {
+    width: 49%;
+  }
+}
+@media screen and (max-width: 600px) {
+  .single_form .field {
+    width: 95%;
+  }
+}
+.single_form {
+  display: flex;
+  flex-wrap: wrap;
+}
+.single_form .field {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.single_form .field label {
+  width: 25%;
+}
+.single_form .field > div {
+  width: 74%;
+}
+.single_form_buttons {
+  display: flex;
+  flex-wrap: wrap;
+}
+.single_form button {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.p-dialog {
+  width: 90vh;
+  height: 90vh;
+}
+.p-dialog-content {
+  height: 90vh;
+}
+.chipFilters {
+  display: flex;
+  flex-wrap: wrap;
+}
+.chipFilters > div {
+  border: 1px black solid;
+}
 </style>

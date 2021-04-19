@@ -27,9 +27,35 @@ export default [
         label: "בקרות איכות",
         items: [
           { label: "פתיחת בקרה חדשה", to: "/QualityControl" },
-          { label: "בקרות לטיפול שלי", to: "/QualityControls" }, //todo לשלוח פרמטר טקסטואלי כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
-          { label: "צפייה בבקרות", to: "/QualityControls" }, //todo לשלוח פרמטר טקסטואלי כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
-          { label: "בקרות שפתחתי" } //todo לשלוח פרמטר טקסטואלי כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
+          {
+            label: "בקרות לטיפול שלי",
+            command: () => {
+              router.push({
+                name: "QualityControls",
+                params: { filter: "myResponsibility" }
+              });
+            }
+          }, //todo לשלוח פרמטר טקסטואלי כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
+          {
+            label: "צפייה בבקרות",
+            // to: "/QualityControls",
+            // params: { filter: 4 }
+            command: () => {
+              router.push({
+                name: "QualityControls",
+                params: { filter: "all" }
+              });
+            }
+          }, //todo לשלוח פרמטר טקסטואלי כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
+          {
+            label: "בקרות שפתחתי",
+            command: () => {
+              router.push({
+                name: "QualityControls",
+                params: { filter: "ICreated" }
+              });
+            }
+          } //todo לשלוח פרמטר טקסטואלי כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
         ]
       },
       { label: "סדר מלאכות בדירה" }
