@@ -20,6 +20,7 @@
       <div class="single_form">
         <div
           class="field p-d-flex p-ai-center p-m-2"
+          :class="field.Name"
           v-for="(field, i) of detailsFields"
           :key="i"
         >
@@ -86,7 +87,7 @@ import APointTextbox from "@/components/APoint-textbox.vue";
 import APointCheckbox from "@/components/APoint-checkbox.vue";
 import APointDropdown from "@/components/APoint-dropdown.vue";
 import { callProc, apiParam, apiPType } from "../services/APointAPI";
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import QualityControlAdd from "@/components/QualityControlAdd.vue";
 import SelectPlan from "@/components/SelectPlan.vue";
 import { Nz } from "../services/APointAPI";
@@ -270,7 +271,7 @@ export default {
           apointType: "textarea",
           check: false,
           required: true,
-          Caption: "תיאור",
+          Caption: "תיאור:",
           Format: "",
           ControlSource: null,
           Enabled: true,
@@ -359,53 +360,47 @@ export default {
       }
     },
     getDdlData() {
-      let procParams = [
-        apiParam("user_exec", this.userID, apiPType.Int),
-        apiParam("project_id", this.projects.ControlSource, apiPType.Int)
-      ];
-      callProc("pr_qc_ddl_data", procParams)
-        .then(result => {
-          result = JSON.parse(result);
-          // console.log("pr_qc_ddl_data-result", result);
-          if (result.Table.length > 0) {
-            this.getField(this.fields_enum.e_status).AllRowSource =
-              result.Table;
-            this.getField(
-              this.fields_enum.e_status
-            ).RowSource = this.getStatus();
-          }
-          if (result.Table1.length > 0) {
-            this.getField(this.fields_enum.e_zone1).RowSource = result.Table1;
-          }
-          if (result.Table2.length > 0) {
-            this.getField(this.fields_enum.e_zone2).AllRowSource =
-              result.Table2;
-            this.filterZone2();
-          }
-          if (result.Table3.length > 0) {
-            this.getField(this.fields_enum.e_zone3).AllRowSource =
-              result.Table3;
-          }
+      this.$store.commit("main/setSpinner", true);
 
-          if (result.Table4.length > 0) {
-            this.getField(this.fields_enum.e_chapter).RowSource = result.Table4;
-          }
-          if (result.Table5.length > 0) {
-            this.getField(this.fields_enum.e_responsibles).RowSource =
-              result.Table5;
-          }
-          if (result.Table6.length > 0) {
-            this.getField(this.fields_enum.e_impairment).RowSource =
-              result.Table6;
-          }
-          if (result.Table7.length > 0) {
-            this.getField(this.fields_enum.e_severityLevel).RowSource =
-              result.Table7;
-          }
-        })
-        .catch(error => {
-          console.log("pr_qc_ddl_data-error", error);
-        });
+      let loadData = () => {
+        this.getField(
+          this.fields_enum.e_status
+        ).AllRowSource = this.getAllStatuses();
+        this.getField(this.fields_enum.e_status).RowSource = this.getStatus();
+        this.getField(this.fields_enum.e_zone1).RowSource = this.getZone1(
+          this.projects.ControlSource
+        );
+        this.getField(this.fields_enum.e_zone2).AllRowSource = this.getZone2(
+          this.projects.ControlSourc
+        );
+        this.filterZone2();
+        this.getField(this.fields_enum.e_zone3).AllRowSource = this.getZone3(
+          this.projects.ControlSourc
+        );
+        this.getField(
+          this.fields_enum.e_chapter
+        ).RowSource = this.getChapters();
+
+        this.getField(
+          this.fields_enum.e_responsibles
+        ).RowSource = this.getResponsibles();
+
+        this.getField(
+          this.fields_enum.e_impairment
+        ).RowSource = this.getImpairment();
+        this.getField(
+          this.fields_enum.e_severityLevel
+        ).RowSource = this.getHardwareLevel();
+      };
+      let i = 0;
+      let interval = setInterval(() => {
+        i++;
+        // console.log("interval", i);
+        if (this.isDataLoaded === false && i < 30000) return;
+        clearInterval(interval);
+        loadData();
+        this.$store.commit("main/setSpinner", false);
+      }, 1);
     },
     saveClose() {
       const funcOnSucces = () => {
@@ -609,7 +604,23 @@ export default {
       return Nz(currentZone.apartment_id);
     },
 
-    ...mapState({ userID: state => +state.api.userID })
+    ...mapState({
+      userID: state => +state.api.userID,
+      isDataLoaded: state => state.qc.isDataLoaded
+    }),
+    ...mapGetters({
+      getAllStatuses: "qc/getStatuses",
+      getZone1: "qc/getZone1",
+      getZone5: "qc/getZone5",
+      getZone2: "qc/getZone2",
+      getZone3: "qc/getZone3",
+      getChapters: "qc/getChapters",
+      getResponsibles: "qc/getResponsibles",
+      getImpairment: "qc/getImpairment",
+      getHardwareLevel: "qc/getHardwareLevel",
+      getAllUsers: "qc/getAllUsers",
+      getNotDone: "qc/getNotDone"
+    })
   }
 };
 </script>
@@ -619,5 +630,16 @@ export default {
   color: red;
   font-size: 11px;
 }
+@media screen and (min-width: 896px) {
+  .description {
+    width: 97% !important;
+    max-width: 950px !important;
+  }
+  .description label {
+    width: 8% !important;
+  }
+  .description div {
+    width: 91.5% !important;
+  }
+}
 </style>
-<style></style>

@@ -1,25 +1,36 @@
 <template>
+  {{ qc_id }}
   <div>
-    <div class="single_form">
-      <div
-        v-for="(field, i) of fields"
-        :key="i"
-        class="field p-d-flex p-ai-center p-m-2"
-      >
-        <label :for="field.Name">{{ field.Caption }}</label>
-        <div class="p-d-flex p-flex-column" ref="" :id="field.Name">
-          <a-point-dropdown
-            v-if="field.apointType == 'dropdown'"
+    <div>
+      <div v-for="(field, i) of fields" :key="i" class="p-m-2">
+        <div class="boldFont fieldLabel" :for="field.Name">
+          {{ field.Caption }}
+        </div>
+        <div class="" ref="" :id="field.Name">
+          <a-point-textbox
             :field="field"
             :model-value="field.ControlSource"
-            @update:model-value="updateField(field, $event)"
+            @update:model-value="field.ControlSource = $event"
+            v-if="field.apointType == 'text'"
+          ></a-point-textbox>
+          <a-point-checkbox
+            v-else-if="field.apointType == 'checkbox'"
+            :field="field"
+            :model-value="field.ControlSource"
+            @update:model-value="field.ControlSource = $event"
+          ></a-point-checkbox>
+          <a-point-dropdown
+            v-else-if="field.apointType == 'dropdown'"
+            :field="field"
+            :model-value="field.ControlSource"
+            @update:model-value="field.ControlSource = $event"
           ></a-point-dropdown>
           <Textarea
             v-else-if="field.apointType == 'textarea'"
             :field="field"
             :model-value="field.ControlSource"
-            @update:model-value="updateField(field, $event)"
-            style="resize:none"
+            @update:model-value="field.ControlSource = $event"
+            style="resize:none; background-color: #f2f2f2;"
           ></Textarea>
           <div
             v-else-if="field.apointType == 'radioButton'"
@@ -33,32 +44,59 @@
               :value="f[field.optionValue]"
               v-model="field.ControlSource"
             />
-            <label :for="f[field.optionValue]">{{
+            <label class="radioLabel" :for="f[field.optionValue]">{{
               f[field.optionLabel]
             }}</label>
           </div>
         </div>
+        <span class="error p-mt-1 p-mr-2" v-if="field.check">
+          * שדה חובה
+        </span>
       </div>
     </div>
+    <Button
+      class="myBtn"
+      label="שמור וסגור"
+      @click="saveClose"
+      icon="pi pi-check"
+    />
+    <Button
+      class="myBtn"
+      label="צרף תמונות"
+      @click="addPoto"
+      icon="pi pi-camera"
+    />
+    <Button
+      class="myBtn"
+      label="סגור בקרה"
+      @click="closeQC"
+      icon="pi pi-check-circle"
+    />
   </div>
 </template>
 
 <script>
 import RadioButton from "primevue/radiobutton";
 import APointDropdown from "@/components/APoint-dropdown.vue";
+import APointTextbox from "./APoint-textbox.vue";
+import APointCheckbox from "./APoint-checkbox.vue";
+import Button from "primevue/button";
 import Textarea from "primevue/textarea";
 import { callProc, apiParam, apiPType } from "../services/APointAPI";
-import { mapState } from "vuex";
-
+import { mapState, mapGetters } from "vuex";
 export default {
   components: {
     APointDropdown,
+    APointTextbox,
+    APointCheckbox,
     Textarea,
-    RadioButton
+    RadioButton,
+    Button
   },
   props: {
     qc_id: { type: Number, required: true }
   },
+  emits: ["closeReporting"],
   data() {
     return {
       fields: [
@@ -67,20 +105,11 @@ export default {
           apointType: "radioButton",
           check: false,
           required: true,
-          Caption: "סטטוס:",
+          Caption: "סטטוס חדש:",
           optionLabel: "status_name",
           optionValue: "status_id",
           ControlSource: null,
-          RowSource: [
-            {
-              status_id: 1100,
-              status_name: "טיוטה"
-            },
-            {
-              status_id: 1101,
-              status_name: "פתוח"
-            }
-          ],
+          RowSource: [],
           Enabled: true,
           Name: "status"
         },
@@ -89,13 +118,14 @@ export default {
           apointType: "textarea",
           check: false,
           required: true,
-          Caption: "מה בוצע",
+          Caption: "מה בוצע:",
           Format: "",
           ControlSource: null,
           Enabled: true,
           Locked: false,
-          Name: "remarks"
+          Name: "action_performed"
         },
+
         {
           num: 3,
           apointType: "dropdown",
@@ -109,30 +139,50 @@ export default {
           ControlSource: null,
           RowSource: [],
           Enabled: true,
-          Name: "responsibles"
+          Name: "responsible"
         }
       ],
       fields_enum: {
         e_status: 1,
-        e_remarks: 2,
-        e_responsibles: 3
+        e_action_performed: 2,
+        e_responsible: 3
       }
     };
   },
   mounted() {
+    this.$store.commit("main/setSpinner", true);
+    let loadData = () => {
+      this.getField(
+        this.fields_enum.e_status
+      ).RowSource = this.getStatuses().filter(
+        status => status.status_id !== 1100 && status.status_id !== 1109
+      );
+      this.getField(
+        this.fields_enum.e_responsible
+      ).RowSource = this.getResponsibles();
+    };
+    let i = 0;
+    let interval = setInterval(() => {
+      i++;
+      // console.log("interval", i);
+      if (this.isDataLoaded === false && i < 30000) return;
+      clearInterval(interval);
+      loadData();
+      this.$store.commit("main/setSpinner", false);
+    }, 1);
     let procParams = [
       apiParam("user_exec", this.userID, apiPType.Int),
       apiParam("quality_control_id", this.qc_id, apiPType.Int)
     ];
+
     callProc("pr_qc_select", procParams)
       .then(result => {
         result = JSON.parse(result);
+        console.log("pr_qc_select-redult", result);
         if (result.procReturnValue === 0) {
           this.getField(this.fields_enum.e_status).ControlSource =
             result.Table[0].status_id;
-          this.getField(this.fields_enum.e_remarks).ControlSource =
-            result.Table[0].quality_control_remarks;
-          this.getField(this.fields_enum.e_responsibles).ControlSource =
+          this.getField(this.fields_enum.e_responsible).ControlSource =
             result.Table[0].responsible_id;
         } else {
           this.$toast.add({
@@ -162,12 +212,112 @@ export default {
   methods: {
     getField(num) {
       return this.fields.find(f => f.num === num);
-    }
+    },
+    checkData() {
+      let flag = false;
+
+      this.fields.forEach(f => {
+        if (f.required && (f.ControlSource == null || f.ControlSource == "")) {
+          f.check = true;
+          flag = true;
+        } else f.check = false;
+      });
+      return flag;
+    },
+    saveData(blnCloseQc) {
+      //? איפה לשים ערך בשדה משתמש סוגר בקרה? VUE/SQL
+      if (this.checkData() === true) return;
+      let procParams = [
+        apiParam("user_exec", this.userID, apiPType.Int),
+        apiParam("quality_control_id", this.qc_id, apiPType.Int),
+        apiParam(
+          "status_id",
+          blnCloseQc === true
+            ? 1109
+            : this.getField(this.fields_enum.e_status).ControlSource,
+          apiPType.Int
+        ),
+        apiParam(
+          "responsible_id",
+          this.getField(this.fields_enum.e_responsible).ControlSource,
+          apiPType.Int
+        ),
+        apiParam(
+          "action_performed",
+          this.getField(this.fields_enum.e_action_performed).ControlSource,
+          apiPType.NVarChar
+        )
+      ];
+      callProc("pr_qc_reporting_ins", procParams)
+        .then(result => {
+          result = JSON.parse(result);
+          if (result.procReturnValue === 0) {
+            this.$toast.add({
+              severity: "success",
+              summary: "הדיווח נשמר בהצלחה",
+              detail: "",
+              life: 3000,
+              closable: true
+            });
+            this.$emit("closeReporting");
+          } else {
+            this.$toast.add({
+              severity: "error",
+              summary: "שגיאה בעדכון דיווח- פנה לתמיכה",
+              detail: "",
+              life: null,
+              closable: true
+            });
+            console.log(
+              "pr_qc_reporting_ins-error-procReturnValue",
+              result.procReturnValue
+            );
+          }
+        })
+        .catch(error => {
+          this.$toast.add({
+            severity: "error",
+            summary: "שגיאה - פנה לתמיכה",
+            detail: error,
+            life: null,
+            closable: true
+          });
+          console.log("pr_qc_reporting_ins-error", error);
+        });
+    },
+    saveClose() {
+      this.saveData(false);
+    },
+    closeQC() {
+      this.saveData(true);
+    },
+    addPoto() {}
   },
   computed: {
-    ...mapState({ userID: state => +state.api.userID })
+    ...mapState({
+      userID: state => +state.api.userID,
+      isDataLoaded: state => state.qc.isDataLoaded
+    }),
+    ...mapGetters({
+      getStatuses: "qc/getStatuses",
+      getResponsibles: "qc/getResponsibles"
+    })
   }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.radioLabel {
+  margin-right: 5px;
+}
+.fieldLabel {
+  margin-bottom: 5px;
+}
+#status {
+  display: grid;
+  grid-template-columns: 30% 30% 30%;
+}
+.myBtn {
+  margin-left: 10px;
+}
+</style>

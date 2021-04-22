@@ -1,8 +1,7 @@
 <template>
   <c-header></c-header>
   <c-mobile-menu />
-  <ProgressSpinner v-if="displaySpinner" class="spinner" />
-  <BlockUI :blocked="displaySpinner" :fullScreen="true"> </BlockUI>
+
   <router-view />
   <Toast position="bottom-right" :baseZIndex="2000" />
 
@@ -10,33 +9,30 @@
 </template>
 
 <script>
+//todo להציג לוגו בצד שמאל רק במקרה שהתפריט לא מוצג קבוע (התפריט נפתח ונסגר)
+//todo להוסיף כותרת שהתוכן שלה יהיה משתנה בסטור, ובעת טעינת קומפוננטה ישנו את הערך של המשתנה
 // import About from "./About";
 import CMobileMenu from "../components/c-mobile-menu";
 import CHeader from "../components/c-header";
-import ProgressSpinner from "primevue/progressspinner";
-import { mapState } from "vuex";
-import BlockUI from "primevue/blockui";
+
+// import { mapState } from "vuex";
 
 export default {
   name: "Main",
   components: {
     CMobileMenu,
-    CHeader,
-    ProgressSpinner,
-    BlockUI
+    CHeader
 
     // About
   },
+  mounted() {
+    this.$store.dispatch("qc/loadDdlData");
+    this.$store.dispatch("qc/check");
+  },
   computed: {
-    ...mapState({ displaySpinner: state => state.main.displaySpinner })
+    // ...mapState({ displaySpinner: state => state.main.displaySpinner })
   }
 };
 </script>
 
-<style scoped>
-.spinner {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-</style>
+<style scoped></style>

@@ -17,18 +17,18 @@ body {
 
 body {
 
-  background-size: auto 200px;
+  background-size: auto 100vh;
   background-repeat: no-repeat;
   background-position: bottom left;
   background-image: url(../img/effects/bg-bottom.png);
 
-  @include screen ('sm') {
-    background-size: auto 350px;
-  }
+  // @include screen ('sm') {
+  //   background-size: auto 350px;
+  // }
 
-  @include screen ('lg') {
-    background-size: auto 476px;
-  }
+  // @include screen ('lg') {
+  //   background-size: auto 476px;
+  // }
 
 }
 

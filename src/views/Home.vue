@@ -1,14 +1,10 @@
 <template>
-  <QCReporting :qc_id="25026" />
   <div></div>
 </template>
 
 <script>
-import QCReporting from "@/components/QCReporting.vue";
-
 export default {
   components: {
-    QCReporting
     // Carousel,
     // qualityControlDetails
     // Button
@@ -26,7 +22,8 @@ export default {
         require("../assets/img/items/item-detail.png")
       ],
       filter: {},
-      show: false
+      show: false,
+      displaySelectPlan: false
     };
   },
   methods: {

@@ -1,45 +1,45 @@
 primeVue- current version : ^3.2.0-rc.1
 
 =======================================================================================
-щйрей лгй щдъфшйи ъойг йдйд фъез
+пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 PanelMenu.vue:
-десфъ фшефший бщешд 36
+пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ 36
 alwaysOpen:{
             type: Boolean,
             default : false
         }
 
 panelmenu.esm.js:
-щйрей ферчцййъ isActive бщешд 46
+пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ isActive пїЅпїЅпїЅпїЅпїЅ 46
  isActive(item) {
             return item === this.activeItem || this.alwaysOpen;
         },
 
-щешд 134
-ферчцйд render
+пїЅпїЅпїЅпїЅ 134
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅ render
 //[vShow, item === $data.activeItem]
 [vShow,item === $data.activeItem || this.alwaysOpen]
 
-десфъ дфшефший бщешд 161
+пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ 161
 
         alwaysOpen:{
             type: Boolean,
             default : false
         }
 
-щйрей дферчцйд getPanelToggleIcon бщешд 198
+пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ getPanelToggleIcon пїЅпїЅпїЅпїЅпїЅ 198
 getPanelToggleIcon(item) {
             const active = item === this.activeItem || this.alwaysOpen;
             return ['p-panelmenu-icon pi', {'pi-chevron-right': !active,' pi-chevron-down': active}];
         },
 
-щйрей дферчцйд isActive бщешд 205
+пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ isActive пїЅпїЅпїЅпїЅпїЅ 205
         isActive(item) {
             return item === this.activeItem || this.alwaysOpen;
         },
 
-щешд 289
-ферчцйд render$1
+пїЅпїЅпїЅпїЅ 289
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅ render$1
 // [vShow,  item === $data.activeItem]
 [vShow, item === $data.activeItem || this.alwaysOpen]
 

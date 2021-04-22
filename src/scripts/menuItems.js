@@ -35,7 +35,7 @@ export default [
                 params: { filter: "myResponsibility" }
               });
             }
-          }, //todo לשלוח פרמטר טקסטואלי כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
+          },
           {
             label: "צפייה בבקרות",
             // to: "/QualityControls",
@@ -46,7 +46,7 @@ export default [
                 params: { filter: "all" }
               });
             }
-          }, //todo לשלוח פרמטר טקסטואלי כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
+          },
           {
             label: "בקרות שפתחתי",
             command: () => {
@@ -55,7 +55,7 @@ export default [
                 params: { filter: "ICreated" }
               });
             }
-          } //todo לשלוח פרמטר טקסטואלי כדי לדעת מה נבחר(צפייה בבקרות או בקרות לטיפול שלי)
+          }
         ]
       },
       { label: "סדר מלאכות בדירה" }

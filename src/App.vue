@@ -1,17 +1,24 @@
 <template>
+  <!-- {{ displaySpinner }} -->
+  <div class="block" v-show="displaySpinner">
+    <ProgressSpinner v-if="displaySpinner" class="spinner" />
+  </div>
   <div
     class="layout-rtl "
     :class="{ mainApp: isLoggedIn === true && isDesktop }"
   >
+    <BlockUI :blocked="displaySpinner && 1 === 0" :fullScreen="true"> </BlockUI>
+    <!-- <BlockUI :blocked="true" :fullScreen="true"> </BlockUI> -->
+    <Main v-if="isLoggedIn" />
+
     <Login
-      v-if="isLoggedIn === false"
+      v-else
       :allowAutoLogin="true"
       :logoImgSrc="logoImgSrc"
       :compName="compName"
       :compGUID="compGUID"
       loginHeader="כניסה רם קונטרול"
     />
-    <Main v-if="isLoggedIn" />
     <!-- <Main v-if="isLoggedIn" :logoImgSrc="logoImgSrc" :compName="compName" /> -->
   </div>
 </template>
@@ -21,11 +28,14 @@ import { mapState, mapGetters } from "vuex";
 import Login from "./components/Login";
 import Main from "./views/Main";
 import screen from "@/scripts/screen.js";
-
+import ProgressSpinner from "primevue/progressspinner";
+import BlockUI from "primevue/blockui";
 export default {
   components: {
     Login,
-    Main
+    Main,
+    ProgressSpinner,
+    BlockUI
   },
   data() {
     return {
@@ -68,13 +78,26 @@ export default {
     ...mapGetters("api", ["isLoggedIn"]),
     ...mapState({
       compID: state => state.api.compID,
-      compGUID: state => state.api.compGUID
+      compGUID: state => state.api.compGUID,
+      displaySpinner: state => state.main.displaySpinner
     }),
     isDesktop: () => screen.isDesktop()
   }
 };
 </script>
 <style>
+.spinner {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 40vh;
+}
+.block {
+  width: 100vw;
+  height: 100vh;
+  background-color: #f4f4f4;
+  z-index: 9000;
+}
 .mainApp {
   margin-right: 20rem;
 }
@@ -96,7 +119,10 @@ export default {
 .single_form {
   display: flex;
   flex-wrap: wrap;
+  max-width: 950px;
+  margin: auto;
 }
+
 .single_form .field {
   margin-left: auto !important;
   margin-right: auto !important;
@@ -107,26 +133,81 @@ export default {
 .single_form .field > div {
   width: 74%;
 }
+.single_form .field > div .p-inputwrapper,
+.single_form .field > div .p-inputwrapper input {
+  height: 45px;
+  width: 100%;
+}
+.single_form .field > div .p-buttonset .p-button {
+  height: 45px;
+}
+.single_form .field > div .p-buttonset .p-button:last-of-type {
+  width: 35%;
+}
+.single_form .field > div .p-buttonset .p-button:first-of-type {
+  width: 65%;
+}
 .single_form_buttons {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  position: absolute;
+  bottom: 25px;
+  width: 77vw;
+  max-width: 950px;
+}
+.single_form_buttons button {
+  margin-left: 10px;
+  border: 1px solid #bfbfbf;
 }
 .single_form button {
   margin-left: auto !important;
   margin-right: auto !important;
 }
 .p-dialog {
-  width: 90vh;
-  height: 90vh;
+  min-width: 45vw;
+  max-width: 90vw;
+  /* min-height: 60vh; */
 }
 .p-dialog-content {
-  height: 90vh;
+  min-height: 40vh;
+  max-height: 90vh;
 }
 .chipFilters {
   display: flex;
   flex-wrap: wrap;
 }
 .chipFilters > div {
-  border: 1px black solid;
+  border: 1px solid #bfbfbf;
+  background-color: #f2f2f2;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: 3px;
+}
+.chipFilters > div > div {
+  border-left: 1px solid;
+  padding-left: 5px;
+  margin-left: 5px;
+}
+.boldFont {
+  font-weight: bold;
+}
+.p-multiselect.p-multiselect-chip .p-multiselect-token {
+  border: 1px solid #bfbfbf;
+  background-color: #f2f2f2;
+  color: #000;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: 3px;
+}
+.p-multiselect-token-label {
+  border-left: 1px solid;
+  padding-left: 5px;
+}
+.pi-folder-open {
+  font-size: 17px;
+}
+.p-button.p-button-icon-only {
+  width: 45px;
 }
 </style>

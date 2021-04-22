@@ -223,8 +223,8 @@ export function callProc(procName, procParams, timeout = PROC_DEFAULT_TIMEOUT) {
         // console.log(raw);
         throw {
           errorCode: res.APIResponseCode,
-          errorDescription: res.APIResponseDescription
-          // responseText: res.APIResponseText,
+          errorDescription: res.APIResponseDescription,
+          responseText: res.APIResponseText
         };
       }
     })

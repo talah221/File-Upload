@@ -28,6 +28,8 @@ import "primeicons/primeicons.css"; //required: PrimeIcons
 //import './App.scss'; 	                            //your styles and overrides
 import "primeflex/primeflex.css";
 
+import "./registerServiceWorker";
+
 router.beforeEach(function(to, from, next) {
   //window.scrollTo(0, 0); //גלילה של החלון להתחלה
   // console.log("router.beforeEach");

@@ -1,16 +1,40 @@
 <template>
-  <div calss="chipFilters">
+  <div class="p-d-flex p-ai-center p-jc-end" style="width: 97%">
+    <Button
+      class="p-m-2"
+      icon="pi pi-filter"
+      label="הצג בקרות"
+      @click="showQc"
+    />
+    <Button
+      class="p-m-2"
+      icon="pi pi-filter-slash"
+      label="נקה"
+      @click="clearFilters()"
+    />
+  </div>
+  <div class="chipFilters">
     <Chip
       v-for="f of filterToShow"
       :key="f.num"
-      :label="f.caption + ': ' + f.value"
+      :label="f.caption + ': ' + f.value + ' '"
       removable
       @remove="clearFilters(f.Name)"
     />
   </div>
+  <div class="p-d-flex p-ai-center p-jc-center p-mb-4 p-mt-4">
+    <SelectButton
+      v-model="showControls.ControlSource"
+      :options="showControls.RowSource"
+      :optionLabel="showControls.optionLabel"
+      :optionValue="showControls.optionValue"
+      class="ltrDir"
+      @click="changeDates()"
+    />
+  </div>
   <div class="single_form">
     <div
-      class="field p-d-flex p-ai-center p-m-2"
+      class="field p-d-flex p-ai-center"
       v-for="(field, i) of fields"
       :key="i"
     >
@@ -18,7 +42,7 @@
         {{ field.Caption }}
       </label>
       <div
-        class="p-d-flex p-flex-column"
+        class="p-d-flex p-flex-column p-mb-2 p-mt-2"
         ref=""
         :id="field.Name"
         v-if="field.show != false"
@@ -43,15 +67,6 @@
           @update:model-value="updateField(field, $event)"
         ></a-point-dropdown>
 
-        <SelectButton
-          v-else-if="field.apointType == 'selectButton'"
-          v-model="field.ControlSource"
-          :options="field.RowSource"
-          :optionLabel="field.optionLabel"
-          :optionValue="field.optionValue"
-          class="ltrDir"
-          @click="field.FuncOnUpdate"
-        />
         <MultiSelect
           v-else-if="field.apointType == 'multiSelect'"
           v-model="field.ControlSource"
@@ -59,7 +74,11 @@
           :optionLabel="field.optionLabel"
           :optionValue="field.optionValue"
           display="chip"
-          :filter="field.RowSource.length > 10"
+          :filter="
+            field.RowSource !== null &&
+              field.RowSource !== undefined &&
+              field.RowSource.length > 10
+          "
           @change="field.FuncOnUpdate(field)"
         />
 
@@ -77,10 +96,14 @@
       </div>
     </div>
   </div>
-
-  <Button :label="showAllBtnLbl" @click="showAllFilters" />
-  <Button label="הצג בקרות" @click="showQc" />
-  <Button label="נקה" @click="clearFilters()" />
+  <div class=" p-d-flex p-flex-column p-ai-center">
+    <Button
+      class="p-mt-4 p-button-link"
+      :icon="showAllBtnIcon"
+      :label="showAllBtnLbl"
+      @click="showAllFilters"
+    />
+  </div>
 </template>
 
 <script>
@@ -89,11 +112,11 @@ import APointCheckbox from "./APoint-checkbox.vue";
 import APointDropdown from "./APoint-dropdown.vue";
 import SelectButton from "primevue/selectbutton";
 import Button from "primevue/button";
-import { callProc, apiParam, apiPType } from "../services/APointAPI";
+import { apiPType } from "../services/APointAPI";
 import MultiSelect from "primevue/multiselect";
 import AutoComplete from "primevue/autocomplete";
 import Chip from "primevue/chip";
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
 export default {
   components: {
@@ -111,7 +134,17 @@ export default {
   },
   emits: ["showData", "updateFilters", "clearFilters"],
   data() {
+    // todo בדיקות תקינות על תאריכים
     return {
+      showControls: {
+        optionLabel: "lbl",
+        optionValue: "val",
+        ControlSource: null,
+        RowSource: [
+          { val: 7, lbl: "בקרות מהשבוע האחרון" },
+          { val: 0, lbl: "בקרות מהיום" }
+        ]
+      },
       fields: [
         {
           num: 1,
@@ -150,26 +183,25 @@ export default {
           type: apiPType.NVarChar,
           FuncOnUpdate: field => this.setFilters(field)
         },
-
-        {
-          num: 3,
-          apointType: "selectButton",
-          check: false,
-          required: false,
-          Caption: "הצג בקרות",
-          optionLabel: "lbl",
-          optionValue: "val",
-          showClear: false,
-          ControlSource: null,
-          RowSource: [
-            { val: 7, lbl: "7 ימים אחרונים" },
-            { val: 0, lbl: "מהיום" }
-          ],
-          Enabled: true,
-          Locked: false,
-          Name: "showControls",
-          FuncOnUpdate: () => this.changeDates()
-        },
+        // {
+        //   num: 3,
+        //   apointType: "selectButton",
+        //   check: false,
+        //   required: false,
+        //   Caption: "הצג בקרות",
+        // optionLabel: "lbl",
+        // optionValue: "val",
+        // showClear: false,
+        // ControlSource: null,
+        // RowSource: [
+        //   { val: 7, lbl: "7 ימים אחרונים" },
+        //   { val: 0, lbl: "מהיום" }
+        // ],
+        //   Enabled: true,
+        //   Locked: false,
+        //   Name: "showControls",
+        //   FuncOnUpdate: () => this.changeDates()
+        // },
         {
           num: 4,
           apointType: "text",
@@ -467,6 +499,7 @@ export default {
       filter: {},
       showAllBtn: false,
       showAllBtnLbl: "הצג מסננים נוספים",
+      showAllBtnIcon: "pi pi-chevron-down",
       displaySpinner: false,
       fields_enum: {
         e_projectId: 1,
@@ -487,7 +520,6 @@ export default {
         e_responsible: 16,
         e_zoneType1: 17,
         e_zoneType2: 18
-        //todo לעדכן ולשנות בהתאם
       }
     };
   },
@@ -516,12 +548,14 @@ export default {
           if (!f.show) f.show = true;
         });
         this.showAllBtnLbl = "הסתר מסננים נוספים";
+        this.showAllBtnIcon = "pi pi-chevron-up";
       } else {
         this.showAllBtn = false;
         this.fields.forEach(f => {
           if (f.isHide) f.show = false;
         });
         this.showAllBtnLbl = "הצג מסננים נוספים";
+        this.showAllBtnIcon = "pi pi-chevron-down";
       }
     },
     clearFilters(fieldName) {
@@ -542,8 +576,7 @@ export default {
       this.setFilters(this.getField(this.fields_enum.e_toDate));
 
       fromDate.setDate(
-        fromDate.getDate() +
-          this.getField(this.fields_enum.e_showControls).ControlSource * -1
+        fromDate.getDate() + this.showControls.ControlSource * -1
       );
 
       this.getField(this.fields_enum.e_fromDate).ControlSource = new Date(
@@ -551,81 +584,66 @@ export default {
       );
       this.setFilters(this.getField(this.fields_enum.e_fromDate));
 
-      this.getField(this.fields_enum.e_showControls).ControlSource = null;
+      this.showControls.ControlSource = null;
     },
+
     getDdlData() {
       this.$store.commit("main/setSpinner", true);
+      let loadData = () => {
+        //todo get projects list by userLogin - callproc
+        this.getField(this.fields_enum.e_projectId).RowSource = [
+          { ProjectId: 146, ProjectName: "אדרת הכרמל" },
+          { ProjectId: 102, ProjectName: "אדרת הכפר" },
+          { ProjectId: 91, ProjectName: "וולפסון" }
+        ];
 
-      //todo get projects list by userLogin - callproc
-      this.getField(this.fields_enum.e_projectId).RowSource = [
-        { ProjectId: 146, ProjectName: "אדרת הכרמל" },
-        { ProjectId: 102, ProjectName: "אדרת הכפר" },
-        { ProjectId: 91, ProjectName: "וולפסון" }
-      ];
-      let procParams = [apiParam("user_exec", this.userID, apiPType.Int)];
-      callProc("pr_qc_ddl_data", procParams)
-        .then(result => {
-          result = JSON.parse(result);
-          // console.log("pr_qc_ddl_data-result", result);
-          if (result.Table.length > 0) {
-            this.getField(this.fields_enum.e_status).RowSource = result.Table;
-          }
-          if (result.Table1.length > 0) {
-            this.getField(this.fields_enum.e_zone1).allRowSource =
-              result.Table1;
-            this.getField(
-              this.fields_enum.e_zoneType1
-            ).allRowSource = result.Table1.map(f => ({
-              zone_type_name: f.zone_type_name,
-              project_id: f.project_id
-            }));
-          }
-          if (result.Table2.length > 0) {
-            this.getField(this.fields_enum.e_zone2).allRowSource =
-              result.Table2;
-            this.getField(
-              this.fields_enum.e_zoneType2
-            ).allRowSource = result.Table2.map(f => ({
-              zone_type_name: f.zone_type_name,
-              project_id: f.project_id
-            }));
-          }
-          if (result.Table3.length > 0) {
-            this.getField(this.fields_enum.e_zone3).allRowSource =
-              result.Table3;
-          }
-          if (result.Table4.length > 0) {
-            this.getField(this.fields_enum.e_chapter).RowSource = result.Table4;
-          }
-          if (result.Table5.length > 0) {
-            this.getField(this.fields_enum.e_responsible).RowSource =
-              result.Table5;
-          }
-          if (result.Table6.length > 0) {
-            this.getField(this.fields_enum.e_impairment).RowSource =
-              result.Table6;
-          }
-          if (result.Table7.length > 0) {
-            this.getField(this.fields_enum.e_hardware_level).RowSource =
-              result.Table7;
-          }
-          if (result.Table8.length > 0) {
-            this.getField(this.fields_enum.e_createBy).RowSource =
-              result.Table8;
-            this.getField(this.fields_enum.e_userClosed).RowSource =
-              result.Table8;
-          }
-          if (result.Table9.length > 0) {
-            this.getField(this.fields_enum.e_notDone).RowSource = result.Table9;
-          }
-          this.filterZonesAndZoneTypes();
-        })
-        .catch(error => {
-          console.log("pr_qc_ddl_data-error", error);
-        })
-        .then(() => {
-          this.$store.commit("main/setSpinner", false);
-        });
+        this.getField(this.fields_enum.e_status).RowSource = this.getStatuses();
+        this.getField(this.fields_enum.e_zone1).allRowSource = this.getZone1();
+        this.getField(
+          this.fields_enum.e_zoneType1
+        ).allRowSource = this.getZone1().map(f => ({
+          zone_type_name: f.zone_type_name,
+          project_id: f.project_id
+        }));
+        this.getField(this.fields_enum.e_zone2).allRowSource = this.getZone2();
+        this.getField(
+          this.fields_enum.e_zoneType2
+        ).allRowSource = this.getZone2().map(f => ({
+          zone_type_name: f.zone_type_name,
+          project_id: f.project_id
+        }));
+        this.getField(
+          this.fields_enum.e_chapter
+        ).RowSource = this.getChapters();
+        this.getField(this.fields_enum.e_zone3).allRowSource = this.getZone3();
+
+        this.getField(
+          this.fields_enum.e_responsible
+        ).RowSource = this.getResponsibles();
+        this.getField(
+          this.fields_enum.e_impairment
+        ).RowSource = this.getImpairment();
+        this.getField(
+          this.fields_enum.e_hardware_level
+        ).RowSource = this.getHardwareLevel();
+        this.getField(
+          this.fields_enum.e_createBy
+        ).RowSource = this.getAllUsers();
+        this.getField(
+          this.fields_enum.e_userClosed
+        ).RowSource = this.getAllUsers();
+        this.getField(this.fields_enum.e_notDone).RowSource = this.getNotDone();
+        this.filterZonesAndZoneTypes();
+      };
+      let i = 0;
+      let interval = setInterval(() => {
+        i++;
+        // console.log("interval", i);
+        if (this.isDataLoaded === false && i < 30000) return;
+        clearInterval(interval);
+        loadData();
+        this.$store.commit("main/setSpinner", false);
+      }, 1);
     },
     getField(num) {
       return this.fields.find(f => f.num === num);
@@ -768,7 +786,22 @@ export default {
           };
         });
     },
-    ...mapState({ userID: state => +state.api.userID })
+    ...mapState({
+      userID: state => +state.api.userID,
+      isDataLoaded: state => state.qc.isDataLoaded
+    }),
+    ...mapGetters({
+      getStatuses: "qc/getStatuses",
+      getZone1: "qc/getZone1",
+      getZone2: "qc/getZone2",
+      getZone3: "qc/getZone3",
+      getChapters: "qc/getChapters",
+      getResponsibles: "qc/getResponsibles",
+      getImpairment: "qc/getImpairment",
+      getHardwareLevel: "qc/getHardwareLevel",
+      getAllUsers: "qc/getAllUsers",
+      getNotDone: "qc/getNotDone"
+    })
   },
   watch: {
     "$route.params.filter"() {
@@ -778,7 +811,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style>
 .error {
   color: red;
   font-size: 11px;

@@ -1,5 +1,6 @@
 import { createStore } from "vuex";
 import { apiStore } from "./apiStore";
+import { qualityControl } from "./qualityControlStore";
 
 const mainStore = {
   namespaced: true,
@@ -26,7 +27,10 @@ const mainStore = {
   },
   mutations: {
     setShowMenu: (state, payload) => (state.showMenu = payload),
-    setSpinner: (state, flag) => (state.displaySpinner = flag)
+    setSpinner: (state, flag) => {
+      // console.log("setSpinner", "from", state.displaySpinner, "to", flag);
+      state.displaySpinner = flag;
+    }
   },
   actions: {
     toggleMenuShow: function({ commit, getters }, show) {
@@ -43,6 +47,7 @@ const mainStore = {
 export default createStore({
   modules: {
     api: apiStore,
-    main: mainStore
+    main: mainStore,
+    qc: qualityControl
   }
 });

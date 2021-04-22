@@ -1,19 +1,31 @@
 <template>
-  <div>
-    <Dropdown
-      v-model="profetionId"
-      :options="profetions"
-      optionLabel="profession_name"
-      optionValue="profession_id"
+  <div class="single_form">
+    <div class="myField">
+      <label for="profetionId">מקצוע</label>
+      <Dropdown
+        v-model="profetionId"
+        :options="profetions"
+        optionLabel="profession_name"
+        optionValue="profession_id"
+        id="profetionId"
+      />
+    </div>
+    <div class="myField">
+      <label for="planId">תוכנית</label>
+      <Dropdown
+        v-model="planId"
+        :options="palns"
+        optionLabel="FileName"
+        optionValue="ID"
+        id="planId"
+      />
+    </div>
+    <Button
+      class="p-mt-6"
+      icon="pi pi-file-pdf"
+      label="הצג תוכנית"
+      @click="displayPlan"
     />
-
-    <Dropdown
-      v-model="planId"
-      :options="palns"
-      optionLabel="FileName"
-      optionValue="ID"
-    />
-    <Button label="הצג תוכנית" @click="displayPlan" />
   </div>
 </template>
 
@@ -119,4 +131,18 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.single_form {
+  flex-direction: column;
+}
+.single_form .myField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 65%;
+  margin: 1rem auto;
+}
+.single_form .myField > div {
+  width: 74%;
+}
+</style>
