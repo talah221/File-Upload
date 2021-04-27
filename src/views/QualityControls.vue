@@ -37,17 +37,16 @@
           </div>
           <div class="buttonsDiv">
             <Button icon="pi pi-folder-open" style="padding: 3px"></Button>
-            <Button
-              label="דווח"
-              class="p-button-sm"
-              @click="reporting(qc.quality_control_id)"
-            />
+            <Button label="דווח" class="p-button-sm" @click="reporting(qc)" />
           </div>
         </div>
       </div>
       <Dialog v-model:visible="displayReporting" modal>
         <div>
-          <QCReporting :qc_id="qc_id" @closeReporting="closeReporting" />
+          <QCReporting
+            :qualityControl="qualityControl"
+            @closeReporting="closeReporting"
+          />
         </div>
         <template #footer> </template>
       </Dialog>
@@ -76,7 +75,7 @@ export default {
       displayFilters: false,
       filters: {},
       displayReporting: false,
-      qc_id: null
+      qualityControl: null
     };
   },
 
@@ -143,12 +142,17 @@ export default {
         };
       }
     },
-    reporting(qc_id) {
-      this.qc_id = qc_id;
+    reporting(qc) {
+      this.qualityControl = qc;
       this.displayReporting = true;
     },
-    closeReporting() {
-      //? האם יש לרענן נתונים לאחר דיווח?
+    closeReporting(qualityControl) {
+      console.log("closeReporting", qualityControl);
+      let qc = this.qualityControls.find(
+        qc => qc.quality_control_id === qualityControl.quality_control_id
+      );
+      qc.status_id = qualityControl.status_id;
+      qc.responsible_id = qualityControl.responsible_id;
       this.displayReporting = false;
     }
   },

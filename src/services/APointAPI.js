@@ -1,9 +1,10 @@
 import store from "../store/index";
 
-// const API_HOST = "https://api.apoint.co.il";
-// const API_HOST = "https://localhost:44396"; //DEV
-const API_HOST = "https://apidev.apoint.co.il"; //DEV - Live
+// Version 1.01
 
+//export const API_HOST = "https://api.apoint.co.il";
+// export const API_HOST = "https://localhost:44396"; //DEV - Localhost
+export const API_HOST = "https://apidev.apoint.co.il"; //DEV - Live
 const FETCH_DEFAULT_TIMEOUT = 10 * 1000; //10 seconds
 const PROC_DEFAULT_TIMEOUT = 10 * 1000; //10 seconds
 const FETCH_DEFAULT_HEADERS = {
@@ -169,11 +170,18 @@ export async function apiGetSessionToken(compGUID, userName, userPswd) {
   }
 }
 
-export function callProc(procName, procParams, timeout = PROC_DEFAULT_TIMEOUT) {
+// V 1.01
+export function callProc(
+  procName,
+  procParams,
+  timeout = PROC_DEFAULT_TIMEOUT,
+  dbName,
+  schemaName
+) {
   // console.log("callProc: ", procName, procParams, store.state.api.sessionToken);
   const raw = [
     apiParam("sessionToken", store.state.api.sessionToken, 16),
-    apiParam("procName", procName)
+    apiParam("procName", procName, 12)
   ];
   if (procParams != undefined) {
     //add missing @ to param name
@@ -191,6 +199,12 @@ export function callProc(procName, procParams, timeout = PROC_DEFAULT_TIMEOUT) {
         paramValue: JSON.stringify(procParams),
         paramType: 12
       });
+  }
+  if (dbName != undefined) {
+    raw.push(apiParam("dbName", dbName, 22));
+  }
+  if (schemaName != undefined) {
+    raw.push(apiParam("schemaName", schemaName, 22));
   }
   // console.log(raw);
   const controller = new AbortController();
@@ -223,13 +237,102 @@ export function callProc(procName, procParams, timeout = PROC_DEFAULT_TIMEOUT) {
         // console.log(raw);
         throw {
           errorCode: res.APIResponseCode,
-          errorDescription: res.APIResponseDescription,
-          responseText: res.APIResponseText
+          errorDescription: res.APIResponseDescription
+          // responseText: res.APIResponseText,
         };
       }
     })
     .catch(error => {
       // console.log(`callProc error: ${procName}`, error);
+      if (error.errorCode == -1) {
+        //sessionToken expired
+        store.commit("api/resetToken");
+        //TODO: popup login page to re-login and get new token to continue current action
+        //TODO: route to main login page with prev route info to return to after re-login
+      }
+      throw error;
+    });
+}
+
+// V 1.01
+export function dbFuncVal(
+  funcName,
+  funcParams,
+  timeout = PROC_DEFAULT_TIMEOUT,
+  dbName,
+  schemaName
+) {
+  console.log(
+    "dbFuncVal: ",
+    funcName,
+    funcParams,
+    store.state.api.sessionToken
+  );
+  const raw = [
+    apiParam("sessionToken", store.state.api.sessionToken, 16),
+    apiParam("funcName", funcName)
+  ];
+  if (funcParams != undefined) {
+    //add missing @ to param name
+    (funcParams = funcParams.map(item =>
+      item.paramName.substring(1, 1) === "@"
+        ? item
+        : {
+            paramName: "@" + item.paramName,
+            paramValue: item.paramValue,
+            paramType: item.paramType
+          }
+    )),
+      raw.push({
+        paramName: "funcParams",
+        paramValue: JSON.stringify(funcParams),
+        paramType: 12
+      });
+  }
+  if (dbName != undefined) {
+    raw.push(apiParam("dbName", dbName, 22));
+  }
+  if (schemaName != undefined) {
+    raw.push(apiParam("schemaName", schemaName, 22));
+  }
+  console.log(raw);
+  const controller = new AbortController();
+  const options = {
+    method: "POST",
+    headers: FETCH_DEFAULT_HEADERS,
+    signal: controller.signal,
+    body: JSON.stringify(raw),
+    redirect: "follow"
+  };
+  let timeoutID = setTimeout(() => {
+    controller.abort;
+    //TODO: לטפל במקרים של ניתוק תקשורת
+    throw { error: "connection timeout" };
+  }, timeout);
+
+  // console.log(options);
+  return fetch(API_HOST + "/dbActions/dbFuncVal", options)
+    .then(response => response.text()) //get text is async
+    .then(result => {
+      clearTimeout(timeoutID);
+      //parse and clean extra api data
+      let res = JSON.parse(result);
+      // console.log(res);
+      if (res.APIResponseCode == 0) {
+        // console.log(`dbFuncVal APIResponseText: ${responseText}`);
+        if (res.APIResponseText === "{}") return res.APIResponseCode;
+        else return res.APIResponseText;
+      } else {
+        // console.log(raw);
+        throw {
+          errorCode: res.APIResponseCode,
+          errorDescription: res.APIResponseDescription
+          // responseText: res.APIResponseText,
+        };
+      }
+    })
+    .catch(error => {
+      // console.log(`dbFuncVal error: ${funcName}`, error);
       if (error.errorCode == -1) {
         //sessionToken expired
         store.commit("api/resetToken");
@@ -296,4 +399,81 @@ export function decrypt(data, decryptionKey = "") {
   }
   let enc = require("simple-encryptor")(decryptionKey); //ENC_KEY is usually compGUID
   return enc.decrypt(data);
+}
+
+// V 1.01
+export function uploadB64(
+  parentType,
+  parentID,
+  createdBy,
+  srcFileName,
+  base64String,
+  orgID = 1,
+  timeout = PROC_DEFAULT_TIMEOUT
+) {
+  // console.log("callProc: ", procName, procParams, store.state.api.sessionToken);
+  const raw = [
+    apiParam("sessionToken", store.state.api.sessionToken, 16),
+    apiParam("parentType", parentType, 8),
+    apiParam("parentID", parentID, 8),
+    apiParam("orgID", orgID, 8),
+    apiParam("createdBy", createdBy, 8),
+    apiParam("srcFileName", srcFileName, 12),
+    apiParam("base64String", base64String, 12)
+  ];
+
+  // console.log(raw);
+  const controller = new AbortController();
+  const options = {
+    method: "POST",
+    headers: FETCH_DEFAULT_HEADERS,
+    signal: controller.signal,
+    body: JSON.stringify(raw),
+    redirect: "follow"
+  };
+  let timeoutID = setTimeout(() => {
+    controller.abort;
+    //TODO: לטפל במקרים של ניתוק תקשורת
+    throw { error: "connection timeout" };
+  }, timeout);
+
+  // console.log(options);
+  return fetch(API_HOST + "/files/upload/B64", options)
+    .then(response => response.text()) //get text is async
+    .then(result => {
+      clearTimeout(timeoutID);
+      //parse and clean extra api data
+      let res = JSON.parse(result);
+      // console.log(res);
+      if (res.APIResponseCode == 0) {
+        //// console.log(`callProc APIResponseText: ${responseText}`);
+        console.log(
+          "uploadB64",
+          "ResponseCode",
+          res.APIResponseCode,
+          "ResponseText",
+          res.APIResponseText
+        );
+        // if (res.APIResponseText === "{}") return res.APIResponseCode;
+        // else return res.APIResponseText;
+        return true;
+      } else {
+        // console.log(raw);
+        throw {
+          errorCode: res.APIResponseCode,
+          errorDescription: res.APIResponseDescription,
+          responseText: res.APIResponseText
+        };
+      }
+    })
+    .catch(error => {
+      // console.log(`callProc error: ${procName}`, error);
+      if (error.errorCode == -1) {
+        //sessionToken expired
+        store.commit("api/resetToken");
+        //TODO: popup login page to re-login and get new token to continue current action
+        //TODO: route to main login page with prev route info to return to after re-login
+      }
+      throw error;
+    });
 }

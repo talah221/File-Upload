@@ -13,12 +13,13 @@
     <div class="myField">
       <label for="planId">תוכנית</label>
       <Dropdown
-        v-model="planId"
+        v-model="selectedPlan"
         :options="palns"
         optionLabel="FileName"
-        optionValue="ID"
         id="planId"
+        showClear
       />
+      <!-- optionValue="ID" -->
     </div>
     <Button
       class="p-mt-6"
@@ -50,7 +51,7 @@ export default {
     return {
       allPlans: [],
       profetionId: null,
-      planId: null
+      selectedPlan: null
     };
   },
   mounted() {
@@ -76,8 +77,8 @@ export default {
   },
   methods: {
     displayPlan() {
-      if (this.profetionId > 0 && this.planId > 0) {
-        this.$emit("displayPlan", this.planId);
+      if (this.profetionId > 0 && this.selectedPlan !== null) {
+        this.$emit("displayPlan", this.selectedPlan);
       } else {
         this.$toast.add({
           severity: "error",

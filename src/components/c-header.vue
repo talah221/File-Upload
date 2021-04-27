@@ -11,6 +11,7 @@
             <c-icon name="menu" />
           </a>
         </div>
+        <div>{{ appHeader }}</div>
         <div class="header-logo">
           <router-link to="/">
             <img src="@/assets/img/logo-small.png" alt="Logo" />
@@ -23,6 +24,7 @@
 
 <script>
 import CIcon from "./c-icon";
+import { mapState } from "vuex";
 
 export default {
   props: {
@@ -35,14 +37,17 @@ export default {
     CIcon
   },
   data() {
-    return {
-      username: "אברהם לשבסקי"
-    };
+    return {};
   },
   methods: {
     toggleMenu() {
       this.$store.dispatch("main/toggleMenuShow", true);
     }
+  },
+  computed: {
+    ...mapState({
+      appHeader: state => state.main.appHeader
+    })
   }
 };
 </script>

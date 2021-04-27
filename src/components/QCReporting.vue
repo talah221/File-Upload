@@ -1,5 +1,5 @@
 <template>
-  {{ qc_id }}
+  {{ qualityControl.quality_control_id }}
   <div>
     <div>
       <div v-for="(field, i) of fields" :key="i" class="p-m-2">
@@ -94,7 +94,7 @@ export default {
     Button
   },
   props: {
-    qc_id: { type: Number, required: true }
+    qualityControl: { type: Object, required: true }
   },
   emits: ["closeReporting"],
   data() {
@@ -170,44 +170,13 @@ export default {
       loadData();
       this.$store.commit("main/setSpinner", false);
     }, 1);
-    let procParams = [
-      apiParam("user_exec", this.userID, apiPType.Int),
-      apiParam("quality_control_id", this.qc_id, apiPType.Int)
-    ];
 
-    callProc("pr_qc_select", procParams)
-      .then(result => {
-        result = JSON.parse(result);
-        console.log("pr_qc_select-redult", result);
-        if (result.procReturnValue === 0) {
-          this.getField(this.fields_enum.e_status).ControlSource =
-            result.Table[0].status_id;
-          this.getField(this.fields_enum.e_responsible).ControlSource =
-            result.Table[0].responsible_id;
-        } else {
-          this.$toast.add({
-            severity: "error",
-            summary: "שגיאה בהבאת נתונים- פנה לתמיכה",
-            detail: "",
-            life: null,
-            closable: true
-          });
-          console.log(
-            "pr_qc_select-error-procReturnValue",
-            result.procReturnValue
-          );
-        }
-      })
-      .catch(error => {
-        this.$toast.add({
-          severity: "error",
-          summary: "שגיאה - פנה לתמיכה",
-          detail: error,
-          life: null,
-          closable: true
-        });
-        console.log("pr_qc_select-error", error);
-      });
+    this.getField(
+      this.fields_enum.e_status
+    ).ControlSource = this.qualityControl.status_id;
+    this.getField(
+      this.fields_enum.e_responsible
+    ).ControlSource = this.qualityControl.responsible_id;
   },
   methods: {
     getField(num) {
@@ -229,7 +198,11 @@ export default {
       if (this.checkData() === true) return;
       let procParams = [
         apiParam("user_exec", this.userID, apiPType.Int),
-        apiParam("quality_control_id", this.qc_id, apiPType.Int),
+        apiParam(
+          "quality_control_id",
+          this.qualityControl.quality_control_id,
+          apiPType.Int
+        ),
         apiParam(
           "status_id",
           blnCloseQc === true
@@ -259,7 +232,12 @@ export default {
               life: 3000,
               closable: true
             });
-            this.$emit("closeReporting");
+            this.$emit("closeReporting", {
+              quality_control_id: this.qualityControl.quality_control_id,
+              status_id: this.getField(this.fields_enum.e_status).ControlSource,
+              responsible_id: this.getField(this.fields_enum.e_responsible)
+                .ControlSource
+            });
           } else {
             this.$toast.add({
               severity: "error",

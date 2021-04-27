@@ -21,6 +21,7 @@
     "simple-encryptor": "^4.0.0",
     "vue": "^3.0.5",
     "vue-cookie-next": "^1.0.3",
+    "vue-image-markup": "^3.2.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"
   },

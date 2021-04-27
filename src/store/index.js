@@ -23,13 +23,18 @@ const mainStore = {
       "נסיון הוספת "
     ],
     showMenu: false,
-    displaySpinner: false
+    displaySpinner: false,
+    appHeader: ""
   },
   mutations: {
     setShowMenu: (state, payload) => (state.showMenu = payload),
     setSpinner: (state, flag) => {
       // console.log("setSpinner", "from", state.displaySpinner, "to", flag);
       state.displaySpinner = flag;
+    },
+    setAppHeader(state, payload) {
+      if (state.appHeader === payload) return;
+      state.appHeader = payload;
     }
   },
   actions: {
