@@ -41,8 +41,14 @@
     >
       <c-icon name="cancel" />
     </a>
+
     <div class="sidebar-body">
       <h3>תפריט</h3>
+      <div class="header-logo" v-if="showLogo">
+        <router-link to="/">
+          <img src="@/assets/img/logo-small.png" alt="Logo" />
+        </router-link>
+      </div>
       <nav role="navigation">
         <PanelMenu :model="items" :alwaysOpen="true" />
       </nav>
@@ -77,6 +83,9 @@ export default {
       // return true;
       if (screen.isDesktop()) return false;
       return true;
+    },
+    showLogo() {
+      return !screen.isDesktop();
     }
   },
   watch: {
@@ -95,6 +104,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.header-logo {
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: 60px;
+  height: 60px;
+}
 .sidebar {
   &-close {
     top: 20px;

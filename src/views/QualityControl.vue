@@ -1,5 +1,12 @@
 <template>
   <!-- <Button label="test" @click="apartmentId" /> -->
+  <input
+    type="file"
+    v-show="false"
+    @change="uploadImage"
+    ref="evClickFile"
+    accept="image/*"
+  />
 
   <div>
     <div v-if="showProjectList" class="field p-d-flex p-ai-center p-m-2">
@@ -71,7 +78,6 @@
         //todo להביא קומפוננטת עריכת תוכנית
         <ImageEditor
           @saveImage="saveImage"
-          :needOpenEditor="imageEditor.needOpenEditor"
           :dataUrl="imageEditor.dataUrl"
         ></ImageEditor>
       </Dialog>
@@ -93,7 +99,7 @@
 import APointTextbox from "@/components/APoint-textbox.vue";
 import APointCheckbox from "@/components/APoint-checkbox.vue";
 import APointDropdown from "@/components/APoint-dropdown.vue";
-import { callProc, apiParam, apiPType } from "../services/APointAPI";
+import { callProc, apiParam, apiPType, uploadB64 } from "../services/APointAPI";
 import { mapState, mapGetters } from "vuex";
 import QualityControlAdd from "@/components/QualityControlAdd.vue";
 import SelectPlan from "@/components/SelectPlan.vue";
@@ -101,7 +107,6 @@ import { Nz } from "../services/APointAPI";
 import Button from "primevue/button";
 import Textarea from "primevue/textarea";
 import Dialog from "primevue/dialog";
-import { uploadB64 } from "@/services/APointAPI.js";
 import ImageEditor from "@/components/ImageEditor.vue";
 
 export default {
@@ -320,8 +325,8 @@ export default {
       selectedPlan: null,
       imageEditor: {
         displayImageEditor: false,
-        needOpenEditor: false,
-        dataUrl: ""
+        dataUrl: "",
+        fileName: ""
       }
     };
   },
@@ -353,6 +358,18 @@ export default {
     this.$store.commit("main/setAppHeader", header);
   },
   methods: {
+    clickFile() {
+      this.$refs.evClickFile.click();
+    },
+    uploadImage(e) {
+      let reader = new FileReader();
+      reader.onload = event => {
+        this.imageEditor.dataUrl = event.target.result;
+        this.imageEditor.displayImageEditor = true;
+      };
+      this.imageEditor.fileName = e.target.files[0].name;
+      reader.readAsDataURL(e.target.files[0]);
+    },
     updateField(field, value) {
       field.ControlSource = value;
       eval(field.funcOnUpdate);
@@ -517,6 +534,13 @@ export default {
           }
         })
         .catch(error => {
+          this.$toast.add({
+            severity: "error",
+            summary: "שגיאה בעדכון בקרה - פנה לתמיכה",
+            detail: error,
+            life: null,
+            closable: true
+          });
           console.log("pr_qc_ins_upd-error", error);
         });
     },
@@ -570,14 +594,11 @@ export default {
       this.displaySelectPlan = false;
       if (this.selectedPlan != null) {
         this.saveData(() => {
+          //todo לשנות לנתונים אמיתיים - לקבל את ה IMAGE_URL של התוכנית שנבחרה
+          this.imageEditor.dataUrl =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAYAAABxyNlsAAAD+UlEQVR4Xu3Y3U5cVRiH8WftPXv2nmEopUEwBVOZALFii0ar/bCNMWn86JEnnnjSy/AOvAAvoDfgmTGa2mgNmqhQW4uWNqaAmRiDUtphYPb3Xs0MTTCGNkD6HvHO8eY/4cfDypox6fIfNl1pUDo0jAl6cYMecH2MWwLjgDHoa28Cpn131q5PX6Jy/B3IcwhXybMMb+AIfv0EbrVfgfdmi8nCNfvg8084eOFj8tUGG3NfYdIQt3cQt/8wwcRZnGrfHuf3948ZmyW2eflT/ImzhAuz2LhF37mLYAuShRnwAoKxUxi/RwveZSvG5plt3/ySaPE63uAoJgkpDdbxRl7C5inpwk84PYcoDU/i1AYwjrPLt9i/jxtrC5v8Nc/a9CUOnPoIp3eA9M/r4Dh4I8cwjkvSuIkxThfYPXhYgXfYi7GdV9QinPsam8dUpi5gs4S08StFtE5l/DTWQNqYw2Yp5SOv4PQ+o0fEDoA3cW2B3bhP+PsViiSmdvJDinije+baeIPqy+9TRC3ihRmMF+DX38AEtR3M7+9HuribBJZi7V/Wb3yBU/KoHnsXazOi299jjCF44RxFa4XozjRu55o2dhInOKAFP6Gf/+BuAufNf0gWZ8ijFsH4GYxXJlm6Qb6xCqXOhwsPu34PU+mjcvQtnB69Bz/O93+4jwpuPyBevEbeWqE6eZ4iDWnf+hZTKlMePkp8+7vuTaI8NEYweR5Truzv///H/Pbb4EL3DA6bxHd+IG0ud69o6b0GQf0EydI13Eov3shxors/4o2+jv/smOJuI7At7tYZvEJ79jPi+39Te+0DiuYyNosJJt7EVPtJFn/GFgXB+GnF3R3u1hkc/XaFrPPlztAowcQZ3P5hbNKmPXeZ0lAd/7kpxd097qMzeH2VaP4qtsgIXnwbx68R3fqmC1yZeg/j67Vsu7qecCxsPd45gzvXsPb8VQibkMYYv9L9wOH2DQH6teSecTevwZYibBIt/YIpcvznX8Wp9Svszu+5enQ+TYEdHQtP8w3305biCv61FVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XEHch0SKbRqgl+f2AAAAAElFTkSuQmCC";
+          this.imageEditor.fileName = this.selectedPlan.FileName;
           this.imageEditor.displayImageEditor = true;
-          //שמירת קובץ מצורף
-          //todo לשנות לנתונים אמיתיים + לקרוא לפונקציה רק לאחר שמירת התמונה שנערכה
-          this.savePlanImage(
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAYAAABxyNlsAAAD+UlEQVR4Xu3Y3U5cVRiH8WftPXv2nmEopUEwBVOZALFii0ar/bCNMWn86JEnnnjSy/AOvAAvoDfgmTGa2mgNmqhQW4uWNqaAmRiDUtphYPb3Xs0MTTCGNkD6HvHO8eY/4cfDypox6fIfNl1pUDo0jAl6cYMecH2MWwLjgDHoa28Cpn131q5PX6Jy/B3IcwhXybMMb+AIfv0EbrVfgfdmi8nCNfvg8084eOFj8tUGG3NfYdIQt3cQt/8wwcRZnGrfHuf3948ZmyW2eflT/ImzhAuz2LhF37mLYAuShRnwAoKxUxi/RwveZSvG5plt3/ySaPE63uAoJgkpDdbxRl7C5inpwk84PYcoDU/i1AYwjrPLt9i/jxtrC5v8Nc/a9CUOnPoIp3eA9M/r4Dh4I8cwjkvSuIkxThfYPXhYgXfYi7GdV9QinPsam8dUpi5gs4S08StFtE5l/DTWQNqYw2Yp5SOv4PQ+o0fEDoA3cW2B3bhP+PsViiSmdvJDinije+baeIPqy+9TRC3ihRmMF+DX38AEtR3M7+9HuribBJZi7V/Wb3yBU/KoHnsXazOi299jjCF44RxFa4XozjRu55o2dhInOKAFP6Gf/+BuAufNf0gWZ8ijFsH4GYxXJlm6Qb6xCqXOhwsPu34PU+mjcvQtnB69Bz/O93+4jwpuPyBevEbeWqE6eZ4iDWnf+hZTKlMePkp8+7vuTaI8NEYweR5Truzv///H/Pbb4EL3DA6bxHd+IG0ud69o6b0GQf0EydI13Eov3shxors/4o2+jv/smOJuI7At7tYZvEJ79jPi+39Te+0DiuYyNosJJt7EVPtJFn/GFgXB+GnF3R3u1hkc/XaFrPPlztAowcQZ3P5hbNKmPXeZ0lAd/7kpxd097qMzeH2VaP4qtsgIXnwbx68R3fqmC1yZeg/j67Vsu7qecCxsPd45gzvXsPb8VQibkMYYv9L9wOH2DQH6teSecTevwZYibBIt/YIpcvznX8Wp9Svszu+5enQ+TYEdHQtP8w3305biCv61FVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XEHch0SKbRqgl+f2AAAAAElFTkSuQmCC",
-            this.getField(this.fields_enum.e_qc_id).ControlSource,
-            plan
-          );
         });
       }
     },
@@ -609,20 +630,19 @@ export default {
         }
       });
     },
-    savePlanImage(imgB64, qc_id, plan) {
-      //todo לבדוק אם אפשר לייעל
+    saveImage(imageUrl) {
       let parentType, parentID, createdBy, srcFileName, base64String;
       parentType = 254;
-      parentID = qc_id;
+      parentID = this.getField(this.fields_enum.e_qc_id).ControlSource;
       createdBy = this.userID;
-      srcFileName = plan.FileName;
-      base64String = imgB64;
+      srcFileName = this.imageEditor.fileName;
+      base64String = imageUrl; //this.imageEditor.dataUrl;
       uploadB64(parentType, parentID, createdBy, srcFileName, base64String)
         .then(result => {
           if (result === true) {
             this.$toast.add({
               severity: "success",
-              summary: "הקבצים צורפו בהצלחה",
+              summary: "הקובץ צורף בהצלחה",
               detail: "",
               life: null,
               closable: true
@@ -630,7 +650,7 @@ export default {
           } else {
             this.$toast.add({
               severity: "error",
-              summary: "שגיאה בצירוף קבצים",
+              summary: "שגיאה בצירוף קובץ",
               detail: "",
               life: null,
               closable: true
@@ -649,7 +669,17 @@ export default {
             closable: true
           });
           console.log("uploadB64-error", error);
+        })
+        .then(() => {
+          this.imageEditor.displayImageEditor = false;
+          this.imageEditor.dataUrl = "";
+          this.imageEditor.fileName = "";
         });
+    },
+    addPoto() {
+      this.saveData(() => {
+        this.clickFile();
+      });
     }
   },
   computed: {

@@ -69,10 +69,24 @@ export default {
           this.allPlans = result.Table;
         } else {
           console.log("pr_qc_get_planes-loload failad");
+          this.$toast.add({
+            severity: "warn",
+            summary: "אין נתונים להצגה",
+            detail: "",
+            life: null,
+            closable: true
+          });
         }
       })
       .catch(error => {
         console.log("pr_qc_get_planes-error", error);
+        this.$toast.add({
+          severity: "error",
+          summary: "שגיאה - פנה לתמיכה",
+          detail: error,
+          life: null,
+          closable: true
+        });
       });
   },
   methods: {

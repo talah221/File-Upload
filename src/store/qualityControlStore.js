@@ -74,6 +74,13 @@ export const qualityControl = {
         })
         .catch(error => {
           console.log("pr_qc_ddl_data-error-store", error);
+          this.$toast.add({
+            severity: "error",
+            summary: "שגיאה - פנה לתמיכה",
+            detail: error,
+            life: null,
+            closable: true
+          });
         })
         .then(() => {
           state.isDataLoaded = true;

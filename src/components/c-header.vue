@@ -11,11 +11,13 @@
             <c-icon name="menu" />
           </a>
         </div>
-        <div>{{ appHeader }}</div>
-        <div class="header-logo">
-          <router-link to="/">
-            <img src="@/assets/img/logo-small.png" alt="Logo" />
-          </router-link>
+        <h1>{{ appHeader }}</h1>
+        <div>
+          <div class="header-logo" v-if="showLogo">
+            <router-link to="/">
+              <img src="@/assets/img/logo-small.png" alt="Logo" />
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
@@ -25,6 +27,7 @@
 <script>
 import CIcon from "./c-icon";
 import { mapState } from "vuex";
+import screen from "@/scripts/screen.js";
 
 export default {
   props: {
@@ -45,6 +48,9 @@ export default {
     }
   },
   computed: {
+    showLogo() {
+      return screen.isDesktop();
+    },
     ...mapState({
       appHeader: state => state.main.appHeader
     })

@@ -1,5 +1,4 @@
 <template>
-  <button @click="test">בחירת קובץ</button>
   <button @click="zoom">zoom</button>
   <img :src="imgSrc" />
   <!-- <div>
@@ -347,13 +346,10 @@ export default {
     // ,Dropdown
   },
   props: {
-    needOpenEditor: {
-      type: Boolean,
-      default: true
-    },
     dataUrl: {
       type: String,
-      default: "/assets/img/item-sm-0.361a0872.png"
+      require: true
+      // default: "/assets/img/item-sm-0.361a0872.png" //todo remove
     }
   },
   emits: ["saveImage"],
@@ -382,23 +378,10 @@ export default {
     // this.dataUrl = "C:/Development/RamAderetYoman/DUDI/unnamed.jpg";
     // this.dataUrl = "/assets/img/item-1.551cf0cf.png";
     this.changeStrokeWidth();
-    if (this.needOpenEditor === true) {
-      this.$refs.uploadImage.click();
 
-      // setTimeout(() => {
-      //   // this.$refs.uploadImage.click();
-      //   this.test();
-      // }, 3000);
-    } else this.$refs.editor.drawImageInEditor(this.dataUrl);
+    this.$refs.editor.drawImageInEditor(this.dataUrl);
   },
   methods: {
-    test() {
-      this.$refs.uploadImage.focus();
-      this.$refs.uploadImage.click();
-      // let from_element = document.querySelector("#chooseImage");
-
-      // from_element.click();
-    },
     // drawImageInEditor(urlImg) {
     //   let img = new Image();
     //   img.src = urlImg;
@@ -481,9 +464,9 @@ export default {
     saveImage() {
       var image = this.$refs.editor.saveImage();
       console.log(image);
-      this.imgSrc = image;
+      // this.imgSrc = image;
       this.$emit("saveImage", image);
-      this.saveImageAsFile(image);
+      // this.saveImageAsFile(image);
     },
     saveImageAsFile: function(t) {
       var e = document.createElement("a");

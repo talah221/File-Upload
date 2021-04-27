@@ -154,6 +154,13 @@ export default {
       })
       .catch(error => {
         console.log(error);
+        this.$toast.add({
+          severity: "error",
+          summary: "שגיאה - פנה לתמיכה",
+          detail: error,
+          life: null,
+          closable: true
+        });
       });
   },
   computed: {
@@ -190,6 +197,13 @@ export default {
           })
           .catch(error => {
             console.log(error);
+            this.$toast.add({
+              severity: "error",
+              summary: "שגיאה - פנה לתמיכה",
+              detail: error,
+              life: null,
+              closable: true
+            });
           });
       } else {
         this.clearedProject();
@@ -303,6 +317,13 @@ export default {
         })
         .catch(error => {
           console.log(error);
+          this.$toast.add({
+            severity: "error",
+            summary: "שגיאה - פנה לתמיכה",
+            detail: error,
+            life: null,
+            closable: true
+          });
         });
     },
     workerSelected(data) {

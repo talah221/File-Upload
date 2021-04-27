@@ -78,7 +78,9 @@ export default {
       qualityControl: null
     };
   },
-
+  mounted() {
+    this.$store.commit("main/setAppHeader", "ריכוז בקרות");
+  },
   methods: {
     showFilters() {
       this.displayFilters = true;

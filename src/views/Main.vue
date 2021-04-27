@@ -9,7 +9,6 @@
 </template>
 
 <script>
-//todo להציג לוגו בצד שמאל רק במקרה שהתפריט לא מוצג קבוע (התפריט נפתח ונסגר)
 //todo להוסיף כותרת שהתוכן שלה יהיה משתנה בסטור, ובעת טעינת קומפוננטה ישנו את הערך של המשתנה
 // import About from "./About";
 import CMobileMenu from "../components/c-mobile-menu";
