@@ -23,7 +23,7 @@
       </span>
       <Button label="המשך" @click="chekProject"></Button>
     </div>
-    <div v-else>
+    <div v-else-if="!imageEditor.displayImageEditor">
       <div class="single_form">
         <div
           class="field p-d-flex p-ai-center p-m-2"
@@ -51,14 +51,16 @@
               :model-value="field.ControlSource"
               @update:model-value="updateField(field, $event)"
             ></a-point-dropdown>
+
             <Textarea
               v-else-if="field.apointType == 'textarea'"
               :field="field"
               :model-value="field.ControlSource"
               @update:model-value="updateField(field, $event)"
               style="resize:none"
+              :disabled="!field.Enabled || field.Locked"
             ></Textarea>
-            <!-- {{ field.RowSource }} -->
+            <!-- <div>{{ field.RowSource }}</div> -->
             <span class="error p-mt-1 p-mr-2" v-if="field.check">
               * שדה חובה
             </span>
@@ -66,23 +68,21 @@
         </div>
       </div>
       <Dialog v-model:visible="displaySelectPlan" modal>
+        <template #header>
+          <h3 style="margin: auto;">
+            בחירת תוכנית
+          </h3>
+        </template>
         <div>
           <SelectPlan
             :apartmentId="apartmentId"
             @displayPlan="displayPlan"
+            @close="displaySelectPlan = false"
           ></SelectPlan>
         </div>
       </Dialog>
-      <Dialog v-model:visible="imageEditor.displayImageEditor" modal>
-        <div>עריכת תוכנית {{ selectedPlan }}</div>
-        //todo להביא קומפוננטת עריכת תוכנית
-        <ImageEditor
-          @saveImage="saveImage"
-          :dataUrl="imageEditor.dataUrl"
-        ></ImageEditor>
-      </Dialog>
 
-      <div v-if="qcMode === 'new'">
+      <div v-if="qcMode === qcModes_enum.e_new">
         <QualityControlAdd
           @saveClose="saveClose"
           :apartmentId="apartmentId"
@@ -91,7 +91,36 @@
           @addPoto="addPoto"
         />
       </div>
+      <div v-else-if="qcMode === qcModes_enum.e_open">
+        <QualityControlOpen
+          @plans="selectPlan"
+          @reporting="reporting"
+          :apartmentId="apartmentId"
+        />
+      </div>
+      <div v-else>
+        close qc
+      </div>
+      <Dialog v-model:visible="displayReporting" modal>
+        <template #header>
+          <h3 style="margin: auto;">
+            דיווח טיפול בבקרה מס' {{ qualityControl.quality_control_id }}
+          </h3>
+        </template>
+        <div>
+          <QCReporting
+            :qualityControl="qcObject"
+            @closeReporting="closeReporting"
+          />
+        </div>
+        <template #footer> </template>
+      </Dialog>
     </div>
+    <ImageEditor
+      v-if="imageEditor.displayImageEditor"
+      @saveImage="saveImage"
+      :dataUrl="imageEditor.dataUrl"
+    ></ImageEditor>
   </div>
 </template>
 
@@ -108,7 +137,10 @@ import Button from "primevue/button";
 import Textarea from "primevue/textarea";
 import Dialog from "primevue/dialog";
 import ImageEditor from "@/components/ImageEditor.vue";
+import QualityControlOpen from "@/components/QualityControlOpen.vue";
+import QCReporting from "@/components/QCReporting.vue";
 
+//todo בבקרה פתוחה וסגורה להציג לחצן חזור
 export default {
   components: {
     APointTextbox,
@@ -119,7 +151,15 @@ export default {
     Dialog,
     Textarea,
     SelectPlan,
-    ImageEditor
+    ImageEditor,
+    QualityControlOpen,
+    QCReporting
+  },
+  props: {
+    qualityControl: {
+      type: Object,
+      require: false
+    }
   },
   data() {
     return {
@@ -156,7 +196,11 @@ export default {
           RowSource: [],
           Enabled: true,
           Name: "zone1",
-          funcOnUpdate: "this.filterZone2()"
+          FuncOnUpdate: () => {
+            this.getField(this.fields_enum.e_zone2).ControlSource = null;
+            this.getField(this.fields_enum.e_zone3).ControlSource = null;
+            this.filterZone2();
+          }
         },
         {
           num: 3,
@@ -173,13 +217,16 @@ export default {
           Enabled: true,
           Name: "zone2",
           AllRowSource: null,
-          funcOnUpdate: "this.filterZone3()"
+          FuncOnUpdate: () => {
+            this.getField(this.fields_enum.e_zone3).ControlSource = null;
+            this.filterZone3();
+          }
         },
         {
           num: 4,
           apointType: "dropdown",
           check: false,
-          required: true,
+          required: false,
           Caption: "חלל 3:",
           optionLabel: "project_zone_name",
           optionValue: "project_zones_id",
@@ -321,13 +368,19 @@ export default {
         e_qc_id: 12
       },
       qcMode: null,
+      qcModes_enum: {
+        e_new: 1,
+        e_open: 2,
+        e_close: 3
+      },
       displaySelectPlan: false,
       selectedPlan: null,
       imageEditor: {
         displayImageEditor: false,
         dataUrl: "",
         fileName: ""
-      }
+      },
+      displayReporting: false
     };
   },
   mounted() {
@@ -339,8 +392,9 @@ export default {
       { ProjectId: 91, ProjectName: "וולפסון" }
     ];
 
-    if (this.$route.params.id === undefined) {
-      this.qcMode = "new";
+    if (this.qualityControl === undefined) {
+      //בקרה חדשה
+      this.qcMode = this.qcModes_enum.e_new;
       header = "בקרה חדשה";
       this.getField(this.fields_enum.e_qc_id).ControlSource = null;
       //הצגת בחירת פרויקט רק אם למשתמש יש הרשאה על יותר מפרויקט אחד
@@ -352,10 +406,72 @@ export default {
         this.showProjectList = true;
       }
     } else {
+      //בקרה פתוחה/סגורה
       this.getDdlData();
-      //todo שינוי מוד הבקרה + הבאת נתונים אם קיימת משימה
+      header = "בקרה מס' " + this.qualityControl.quality_control_id;
+      this.showProjectList = false;
+      if (this.qualityControl.status_id === 1109) {
+        this.qcMode = this.qcModes_enum.e_close;
+      } else {
+        this.qcMode = this.qcModes_enum.e_open;
+      }
+      //הכנסת נתונים של הבקרה
+      this.fields.forEach(field => {
+        switch (field.num) {
+          case this.fields_enum.e_qc_id:
+            field.ControlSource = this.qualityControl.quality_control_id;
+            break;
+
+          case this.fields_enum.e_status:
+            field.ControlSource = this.qualityControl.status_id;
+            break;
+
+          case this.fields_enum.e_projectId:
+            field.ControlSource = this.qualityControl.project_id;
+            break;
+
+          case this.fields_enum.e_zone1:
+            field.ControlSource = this.qualityControl.zone_1_id;
+            this.filterZone2();
+            break;
+
+          case this.fields_enum.e_zone2:
+            field.ControlSource = this.qualityControl.zone_2_id;
+            this.filterZone3();
+            break;
+
+          case this.fields_enum.e_zone3:
+            field.ControlSource = this.qualityControl.zone_3_id;
+            break;
+
+          case this.fields_enum.e_chapter:
+            field.ControlSource = this.qualityControl.chapter_id;
+            break;
+
+          case this.fields_enum.e_responsibles:
+            field.ControlSource = this.qualityControl.responsible_id;
+            break;
+
+          case this.fields_enum.e_planedDate:
+            field.ControlSource = new Date(this.qualityControl.planed_date);
+            break;
+
+          case this.fields_enum.e_impairment:
+            field.ControlSource = this.qualityControl.impairment_id;
+            break;
+
+          case this.fields_enum.e_severityLevel:
+            field.ControlSource = this.qualityControl.hardware_level_id;
+            break;
+
+          case this.fields_enum.e_description:
+            field.ControlSource = this.qualityControl.quality_control_desc;
+            break;
+        }
+      });
     }
     this.$store.commit("main/setAppHeader", header);
+    this.setPermission();
   },
   methods: {
     clickFile() {
@@ -372,7 +488,7 @@ export default {
     },
     updateField(field, value) {
       field.ControlSource = value;
-      eval(field.funcOnUpdate);
+      if (field.FuncOnUpdate !== undefined) eval(field.FuncOnUpdate());
     },
     checkData() {
       let flag = false;
@@ -406,12 +522,13 @@ export default {
           this.projects.ControlSource
         );
         this.getField(this.fields_enum.e_zone2).AllRowSource = this.getZone2(
-          this.projects.ControlSourc
+          this.projects.ControlSource
+        );
+        this.getField(this.fields_enum.e_zone3).AllRowSource = this.getZone3(
+          this.projects.ControlSource
         );
         this.filterZone2();
-        this.getField(this.fields_enum.e_zone3).AllRowSource = this.getZone3(
-          this.projects.ControlSourc
-        );
+
         this.getField(
           this.fields_enum.e_chapter
         ).RowSource = this.getChapters();
@@ -443,7 +560,7 @@ export default {
           severity: "success",
           summary: "הבקרה נוספה בהצלחה",
           detail: "",
-          life: null,
+          life: 10000,
           closable: true
         });
 
@@ -528,7 +645,7 @@ export default {
               severity: "error",
               summary: "שגיאה בעדכון בקרה - פנה לתמיכה",
               detail: "",
-              life: null,
+              life: 10000,
               closable: true
             });
           }
@@ -538,7 +655,7 @@ export default {
             severity: "error",
             summary: "שגיאה בעדכון בקרה - פנה לתמיכה",
             detail: error,
-            life: null,
+            life: 10000,
             closable: true
           });
           console.log("pr_qc_ins_upd-error", error);
@@ -547,8 +664,8 @@ export default {
     filterZone2() {
       const zone1 = this.getField(this.fields_enum.e_zone1).ControlSource;
       let zone2 = this.getField(this.fields_enum.e_zone2);
-      zone2.ControlSource = null;
-      if (zone1 !== null) {
+      // zone2.ControlSource = null;
+      if (zone1 !== null && zone2.AllRowSource !== null) {
         zone2.RowSource = zone2.AllRowSource.filter(
           zone => zone.parent_id === zone1
         );
@@ -560,7 +677,7 @@ export default {
     filterZone3() {
       const zone2 = this.getField(this.fields_enum.e_zone2).ControlSource;
       let zone3 = this.getField(this.fields_enum.e_zone3);
-      zone3.ControlSource = null;
+      // zone3.ControlSource = null;
       if (zone2 !== null && zone3.AllRowSource !== null) {
         zone3.RowSource = zone3.AllRowSource.filter(
           zone => zone.parent_id === zone2
@@ -573,13 +690,11 @@ export default {
       return this.fields.find(f => f.num === num);
     },
     getStatus() {
-      if (this.qcMode === "new") {
+      if (this.qcMode === this.qcModes_enum.e_new) {
         return this.getField(this.fields_enum.e_status).AllRowSource.filter(
           status => [1100, 1107, 1108].indexOf(status.status_id) >= 0
         );
       }
-      // todo הצגת סטטוסים לבחירה לפי מוד הבקרה-> עדכון ובקרה סגורה
-
       return this.getField(this.fields_enum.e_status).AllRowSource;
     },
     selectPlan() {
@@ -608,7 +723,7 @@ export default {
           severity: "success",
           summary: "הבקרה נוספה בהצלחה",
           detail: "",
-          life: null,
+          life: 10000,
           closable: true
         });
 
@@ -644,7 +759,7 @@ export default {
               severity: "success",
               summary: "הקובץ צורף בהצלחה",
               detail: "",
-              life: null,
+              life: 10000,
               closable: true
             });
           } else {
@@ -652,7 +767,7 @@ export default {
               severity: "error",
               summary: "שגיאה בצירוף קובץ",
               detail: "",
-              life: null,
+              life: 10000,
               closable: true
             });
           }
@@ -665,7 +780,7 @@ export default {
             severity: "error",
             summary: "שגיאה בצירוף קבצים",
             detail: error,
-            life: null,
+            life: 10000,
             closable: true
           });
           console.log("uploadB64-error", error);
@@ -680,6 +795,24 @@ export default {
       this.saveData(() => {
         this.clickFile();
       });
+    },
+    setPermission() {
+      let enabledFields;
+      if (this.qcMode === this.qcModes_enum.e_new) enabledFields = true;
+      else enabledFields = false;
+      this.fields.forEach(field => {
+        field.Enabled = enabledFields;
+      });
+    },
+    reporting() {
+      this.displayReporting = true;
+    },
+    closeReporting(qualityControl) {
+      this.getField(this.fields_enum.e_status).ControlSource =
+        qualityControl.status_id;
+      this.getField(this.fields_enum.e_responsibles).ControlSource =
+        qualityControl.responsible_id;
+      this.displayReporting = false;
     }
   },
   computed: {
@@ -703,7 +836,27 @@ export default {
       if (currentZone === undefined) return 0;
       return Nz(currentZone.apartment_id);
     },
-
+    qcObject() {
+      return {
+        quality_control_id: this.getField(this.fields_enum.e_qc_id)
+          .ControlSource,
+        project_id: this.getField(this.fields_enum.e_projectId).ControlSource,
+        status_id: this.getField(this.fields_enum.e_status).ControlSource,
+        zone_1_id: this.getField(this.fields_enum.e_zone1).ControlSource,
+        zone_2_id: this.getField(this.fields_enum.e_zone2).ControlSource,
+        zone_3_id: this.getField(this.fields_enum.e_zone3).ControlSource,
+        chapter_id: this.getField(this.fields_enum.e_chapter).ControlSource,
+        responsible_id: this.getField(this.fields_enum.e_responsibles)
+          .ControlSource,
+        planed_date: this.getField(this.fields_enum.e_planedDate).ControlSource,
+        impairment_id: this.getField(this.fields_enum.e_impairment)
+          .ControlSource,
+        hardware_level_id: this.getField(this.fields_enum.e_severityLevel)
+          .ControlSource,
+        quality_control_desc: this.getField(this.fields_enum.e_description)
+          .ControlSource
+      };
+    },
     ...mapState({
       userID: state => +state.api.userID,
       isDataLoaded: state => state.qc.isDataLoaded
@@ -729,6 +882,9 @@ export default {
 .error {
   color: red;
   font-size: 11px;
+}
+.single_form {
+  margin-bottom: 20px;
 }
 @media screen and (min-width: 896px) {
   .description {

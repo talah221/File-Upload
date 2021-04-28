@@ -1,55 +1,71 @@
 <template>
   <div>
-    <div v-show="displayFilters">
-      <QualityControlsFilters
-        @showData="setFilters"
-        :filters="filters"
-        @updateFilters="updateFilters"
-        @clearFilters="clearFilters"
-      />
+    <div v-if="displayQualityControl">
+      <QualityControl :qualityControl="qualityControl"></QualityControl>
     </div>
-    <div v-show="!displayFilters">
-      <div class="p-d-flex p-ai-center p-jc-end" style="width: 97%">
-        <Button label="סינונים" @click="showFilters" icon="pi pi-filter" />
+    <div v-else>
+      <div v-show="displayFilters">
+        <QualityControlsFilters
+          @showData="setFilters"
+          :filters="filters"
+          @updateFilters="updateFilters"
+          @clearFilters="clearFilters"
+        />
       </div>
-      <div class="controls">
-        <div
-          v-for="qc of qualityControls"
-          :key="qc.quality_control_id"
-          class="qc"
-        >
-          <div>
-            <div>
-              ב&nbsp;{{ qc.quality_control_id }} - {{ qc.formattedCreate_date }}
+      <div v-show="!displayFilters">
+        <div class="p-d-flex p-ai-center p-jc-end" style="width: 97%">
+          <Button label="סינונים" @click="showFilters" icon="pi pi-filter" />
+        </div>
+        <div class="controls">
+          <div
+            v-for="qc of qualityControls"
+            :key="qc.quality_control_id"
+            class="qc"
+          >
+            <div @click="openQC(qc)">
+              <div>
+                ב&nbsp;{{ qc.quality_control_id }} -
+                {{ qc.formattedCreate_date }}
+              </div>
+              <div>
+                {{ qc.project_zone1_name }} - {{ qc.project_zone2_name }} -
+                {{ qc.project_zone3_name }}
+              </div>
+              <div>
+                <span class="p-text-bold">תיאור:</span>
+                {{ qc.quality_control_desc }}
+              </div>
             </div>
-            <div>
-              {{ qc.project_zone1_name }} - {{ qc.project_zone2_name }} -
-              {{ qc.project_zone3_name }}
+            <div @click="openQC(qc)">
+              <div class="p-text-bold">{{ qc.chapter_name }}</div>
+              <div>{{ qc.responsible_name }}</div>
             </div>
-            <div>
-              <span class="p-text-bold">תיאור:</span>
-              {{ qc.quality_control_desc }}
+            <div class="buttonsDiv">
+              <Button icon="pi pi-folder-open" class="folder-btn"></Button>
+              <Button
+                label="דווח"
+                class="p-button-sm report-btn"
+                @click="reporting(qc)"
+                :disabled="qc.status_id === 1109"
+              />
             </div>
-          </div>
-          <div>
-            <div class="p-text-bold">{{ qc.chapter_name }}</div>
-            <div>{{ qc.responsible_name }}</div>
-          </div>
-          <div class="buttonsDiv">
-            <Button icon="pi pi-folder-open" style="padding: 3px"></Button>
-            <Button label="דווח" class="p-button-sm" @click="reporting(qc)" />
           </div>
         </div>
+        <Dialog v-model:visible="displayReporting" modal>
+          <template #header>
+            <h3 style="margin: auto;">
+              דיווח טיפול בבקרה מס' {{ qualityControl.quality_control_id }}
+            </h3>
+          </template>
+          <div>
+            <QCReporting
+              :qualityControl="qualityControl"
+              @closeReporting="closeReporting"
+            />
+          </div>
+          <template #footer> </template>
+        </Dialog>
       </div>
-      <Dialog v-model:visible="displayReporting" modal>
-        <div>
-          <QCReporting
-            :qualityControl="qualityControl"
-            @closeReporting="closeReporting"
-          />
-        </div>
-        <template #footer> </template>
-      </Dialog>
     </div>
   </div>
 </template>
@@ -61,13 +77,15 @@ import { callProc, apiParam, apiPType, Nz } from "../services/APointAPI";
 import QualityControlsFilters from "@/components/QualityControlsFilters.vue";
 import Dialog from "primevue/dialog";
 import QCReporting from "@/components/QCReporting.vue";
+import QualityControl from "./QualityControl.vue";
 //todo לחצנים : הצגת קבצים מצורפים
 export default {
   components: {
     Button,
     QualityControlsFilters,
     Dialog,
-    QCReporting
+    QCReporting,
+    QualityControl
   },
   data() {
     return {
@@ -75,15 +93,20 @@ export default {
       displayFilters: false,
       filters: {},
       displayReporting: false,
-      qualityControl: null
+      qualityControl: null,
+      displayQualityControl: false,
+      isDesktop:true
     };
   },
-  mounted() {
-    this.$store.commit("main/setAppHeader", "ריכוז בקרות");
+  mounted() {},
+  created(){
+this.isDesktop = window.innerWidth > 896;
+
   },
   methods: {
     showFilters() {
       this.displayFilters = true;
+      this.$store.commit("main/setAppHeader", "סינון בקרות");
     },
     filterQualityControl() {
       let procParams = [apiParam("user_exec", this.userID, apiPType.Int)];
@@ -103,7 +126,7 @@ export default {
               severity: "error",
               summary: "שגיאה בהצגת בקרות - פנה לתמיכה",
               detail: "",
-              life: null,
+              life: 10000,
               closable: true
             });
           }
@@ -114,12 +137,14 @@ export default {
             severity: "error",
             summary: "שגיאה - פנה לתמיכה",
             detail: error,
-            life: null,
+            life: 10000,
             closable: true
           });
         });
     },
     setFilters() {
+      this.$store.commit("main/setAppHeader", "ריכוז בקרות");
+
       this.filterQualityControl();
     },
     clearFilters(fieldName) {
@@ -149,13 +174,19 @@ export default {
       this.displayReporting = true;
     },
     closeReporting(qualityControl) {
+      //?הנתונים לא מתרעננים בתצוגה
       console.log("closeReporting", qualityControl);
       let qc = this.qualityControls.find(
         qc => qc.quality_control_id === qualityControl.quality_control_id
       );
       qc.status_id = qualityControl.status_id;
       qc.responsible_id = qualityControl.responsible_id;
+      this.qualityControl = null;
       this.displayReporting = false;
+    },
+    openQC(qc) {
+      this.qualityControl = qc;
+      this.displayQualityControl = true;
     }
   },
   computed: {
@@ -164,15 +195,31 @@ export default {
 };
 </script>
 
-<style scoped>
-.qc {
-  border: 1px solid black;
-  display: grid;
-  grid-template-columns: 56% 31% 13%;
-  padding: 2px;
-  width: 99%;
-  max-width: 455px;
-  margin: 2px;
+<style scoped lang="scss">
+@media (min-width: 800px) {
+  .qc {
+  }
+  .controls {
+  }
+}
+@media (max-width: 800px) {
+  .qc {
+    // border: 1px solid black;
+    box-shadow: 0px 1px 10px 0px rgb(179 179 179 / 75%);
+    border-radius: 5px;
+    display: grid;
+    grid-template-columns: 56% 31% 13%;
+    padding: 2px;
+    width: 99%;
+    max-width: 455px;
+    margin: 6px;
+    cursor: pointer;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
 .buttonsDiv {
   display: flex;
@@ -180,9 +227,12 @@ export default {
   justify-content: space-around;
   flex-direction: column;
 }
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+
+.report-btn {
+  color: $color--primary;
+}
+.folder-btn {
+  padding: 3px;
+  color: $color--folder;
 }
 </style>

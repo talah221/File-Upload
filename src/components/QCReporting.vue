@@ -1,6 +1,5 @@
 <template>
-  {{ qualityControl.quality_control_id }}
-  <div>
+  <div class="report-container">
     <div>
       <div v-for="(field, i) of fields" :key="i" class="p-m-2">
         <div class="boldFont fieldLabel" :for="field.Name">
@@ -30,7 +29,7 @@
             :field="field"
             :model-value="field.ControlSource"
             @update:model-value="field.ControlSource = $event"
-            style="resize:none; background-color: #f2f2f2;"
+            style="resize: none; background-color: #f2f2f2; width: 100%"
           ></Textarea>
           <div
             v-else-if="field.apointType == 'radioButton'"
@@ -49,29 +48,29 @@
             }}</label>
           </div>
         </div>
-        <span class="error p-mt-1 p-mr-2" v-if="field.check">
-          * שדה חובה
-        </span>
+        <span class="error p-mt-1 p-mr-2" v-if="field.check"> * שדה חובה </span>
       </div>
     </div>
-    <Button
-      class="myBtn"
-      label="שמור וסגור"
-      @click="saveClose"
-      icon="pi pi-check"
-    />
-    <Button
-      class="myBtn"
-      label="צרף תמונות"
-      @click="addPoto"
-      icon="pi pi-camera"
-    />
-    <Button
-      class="myBtn"
-      label="סגור בקרה"
-      @click="closeQC"
-      icon="pi pi-check-circle"
-    />
+    <div class="actions-btns">
+      <Button
+        class="myBtn"
+        label="שמור וסגור"
+        @click="saveClose"
+        icon="pi pi-check"
+      />
+      <Button
+        class="myBtn"
+        label="צרף תמונות"
+        @click="addPoto"
+        icon="pi pi-camera"
+      />
+      <Button
+        class="myBtn"
+        label="סגור בקרה"
+        @click="closeQC"
+        icon="pi pi-check-circle"
+      />
+    </div>
   </div>
 </template>
 
@@ -91,10 +90,10 @@ export default {
     APointCheckbox,
     Textarea,
     RadioButton,
-    Button
+    Button,
   },
   props: {
-    qualityControl: { type: Object, required: true }
+    qualityControl: { type: Object, required: true },
   },
   emits: ["closeReporting"],
   data() {
@@ -111,7 +110,7 @@ export default {
           ControlSource: null,
           RowSource: [],
           Enabled: true,
-          Name: "status"
+          Name: "status",
         },
         {
           num: 2,
@@ -123,7 +122,7 @@ export default {
           ControlSource: null,
           Enabled: true,
           Locked: false,
-          Name: "action_performed"
+          Name: "action_performed",
         },
 
         {
@@ -139,14 +138,14 @@ export default {
           ControlSource: null,
           RowSource: [],
           Enabled: true,
-          Name: "responsible"
-        }
+          Name: "responsible",
+        },
       ],
       fields_enum: {
         e_status: 1,
         e_action_performed: 2,
-        e_responsible: 3
-      }
+        e_responsible: 3,
+      },
     };
   },
   mounted() {
@@ -155,7 +154,7 @@ export default {
       this.getField(
         this.fields_enum.e_status
       ).RowSource = this.getStatuses().filter(
-        status => status.status_id !== 1100 && status.status_id !== 1109
+        (status) => status.status_id !== 1100 && status.status_id !== 1109
       );
       this.getField(
         this.fields_enum.e_responsible
@@ -180,12 +179,12 @@ export default {
   },
   methods: {
     getField(num) {
-      return this.fields.find(f => f.num === num);
+      return this.fields.find((f) => f.num === num);
     },
     checkData() {
       let flag = false;
 
-      this.fields.forEach(f => {
+      this.fields.forEach((f) => {
         if (f.required && (f.ControlSource == null || f.ControlSource == "")) {
           f.check = true;
           flag = true;
@@ -194,7 +193,6 @@ export default {
       return flag;
     },
     saveData(blnCloseQc) {
-      //? איפה לשים ערך בשדה משתמש סוגר בקרה? VUE/SQL
       if (this.checkData() === true) return;
       let procParams = [
         apiParam("user_exec", this.userID, apiPType.Int),
@@ -219,10 +217,10 @@ export default {
           "action_performed",
           this.getField(this.fields_enum.e_action_performed).ControlSource,
           apiPType.NVarChar
-        )
+        ),
       ];
       callProc("pr_qc_reporting_ins", procParams)
-        .then(result => {
+        .then((result) => {
           result = JSON.parse(result);
           if (result.procReturnValue === 0) {
             this.$toast.add({
@@ -230,21 +228,21 @@ export default {
               summary: "הדיווח נשמר בהצלחה",
               detail: "",
               life: 3000,
-              closable: true
+              closable: true,
             });
             this.$emit("closeReporting", {
               quality_control_id: this.qualityControl.quality_control_id,
               status_id: this.getField(this.fields_enum.e_status).ControlSource,
               responsible_id: this.getField(this.fields_enum.e_responsible)
-                .ControlSource
+                .ControlSource,
             });
           } else {
             this.$toast.add({
               severity: "error",
               summary: "שגיאה בעדכון דיווח- פנה לתמיכה",
               detail: "",
-              life: null,
-              closable: true
+              life: 10000,
+              closable: true,
             });
             console.log(
               "pr_qc_reporting_ins-error-procReturnValue",
@@ -252,13 +250,13 @@ export default {
             );
           }
         })
-        .catch(error => {
+        .catch((error) => {
           this.$toast.add({
             severity: "error",
             summary: "שגיאה - פנה לתמיכה",
             detail: error,
-            life: null,
-            closable: true
+            life: 10000,
+            closable: true,
           });
           console.log("pr_qc_reporting_ins-error", error);
         });
@@ -269,22 +267,22 @@ export default {
     closeQC() {
       this.saveData(true);
     },
-    addPoto() {}
+    addPoto() {},
   },
   computed: {
     ...mapState({
-      userID: state => +state.api.userID,
-      isDataLoaded: state => state.qc.isDataLoaded
+      userID: (state) => +state.api.userID,
+      isDataLoaded: (state) => state.qc.isDataLoaded,
     }),
     ...mapGetters({
       getStatuses: "qc/getStatuses",
-      getResponsibles: "qc/getResponsibles"
-    })
-  }
+      getResponsibles: "qc/getResponsibles",
+    }),
+  },
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .radioLabel {
   margin-right: 5px;
 }
@@ -293,9 +291,20 @@ export default {
 }
 #status {
   display: grid;
-  grid-template-columns: 30% 30% 30%;
+  grid-template-columns: repeat(2, 50%);
 }
 .myBtn {
   margin-left: 10px;
 }
+
+.actions-btns {
+  display: flex;
+  justify-content: center;
+  button {
+    margin-top: 5px;
+    padding: 10px;
+  }
+}
+  .report-container{
+  }
 </style>

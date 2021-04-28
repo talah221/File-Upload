@@ -121,6 +121,7 @@ export default {
   flex-wrap: wrap;
   max-width: 950px;
   margin: auto;
+  width: 99%;
 }
 
 .single_form .field {
@@ -149,29 +150,23 @@ export default {
 }
 .single_form_buttons {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  position: absolute;
-  bottom: 25px;
-  width: 77vw;
-  max-width: 950px;
+
 }
-.single_form_buttons button {
-  margin-left: 10px;
-  border: 1px solid #bfbfbf;
+.p-dialog{
+  width: 35%;
 }
-.single_form button {
-  margin-left: auto !important;
-  margin-right: auto !important;
+
+@media (max-width:600px){
+
+  .p-dialog {
+  width: 85%;
+    /* min-height: 60vh; */
+  }
 }
-.p-dialog {
-  min-width: 45vw;
-  max-width: 90vw;
-  /* min-height: 60vh; */
-}
+
+
 .p-dialog-content {
-  min-height: 40vh;
-  max-height: 90vh;
+height: 350px;
 }
 .chipFilters {
   display: flex;

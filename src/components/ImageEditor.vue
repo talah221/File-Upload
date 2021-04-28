@@ -15,8 +15,8 @@
   </div> -->
   <div class="editorComponent">
     <div class="p-d-flex p-flex-column p-jc-center">
+       <div class="stroke-width-value"> {{ strokeWidth }}</div>
       <div class="textWidth">
-        {{ strokeWidth }}
         <Slider
           v-model="strokeWidth"
           :min="1"
@@ -150,6 +150,33 @@
               d="M432 416h-23.41L277.88 53.69A32 32 0 0 0 247.58 32h-47.16a32 32 0 0 0-30.3 21.69L39.41 416H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h128a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16h-19.58l23.3-64h152.56l23.3 64H304a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h128a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zM176.85 272L224 142.51 271.15 272z"
             ></path></svg
           ><!-- <i class="fas fa-font fa-lg"></i> -->
+        </div>
+        <div
+          class="tool zoom-and-move"
+          @click="setMode('zoom')"
+          :class="mode === 'zoom' ? 'active-tool' : ''"
+        >
+          <!-- <p>{{mode}}</p> -->
+          <svg
+            style="width: 1.5rem"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            version="1.1"
+            viewBox="0 0 512 512"
+            enable-background="new 0 0 512 512"
+          >
+            <g>
+              <g>
+                <path
+                  d="m289.8,200.2h-49.3v-49.3c0-11.3-9.1-20.4-20.4-20.4-11.3,0-20.4,9.1-20.4,20.4v49.3h-49.3c-11.3,0-20.4,9.1-20.4,20.4 0,11.3 9.1,20.4 20.4,20.4h49.3v49.3c0,11.3 9.1,20.4 20.4,20.4 11.3,0 20.4-9.1 20.4-20.4v-49.3h49.3c11.3,0 20.4-9.1 20.4-20.4 0-11.3-9.2-20.4-20.4-20.4z"
+                />
+                <path
+                  d="m220.2,388.7c-92.9,0-168.2-75.2-168.2-168.1s75.3-168.1 168.2-168.1 168.1,75.3 168.1,168.1-75.3,168.1-168.1,168.1zm274.8,78l-113.3-113.3c29.7-36.1 47.6-82.4 47.6-132.8 0-115.5-93.6-209.2-209.2-209.2s-209.1,93.7-209.1,209.2 93.6,209.2 209.2,209.2c50.4,0 96.6-17.8 132.7-47.5l113.3,113.3c5.2,5.3 21.1,7.9 28.9,0 7.9-8 7.9-20.9-0.1-28.9z"
+                />
+              </g>
+            </g>
+          </svg>
         </div>
         <div
           class="tool custom-circle"
@@ -301,7 +328,7 @@
             id="chooseImage"
             type="file"
             accept="image/*"
-            style="visibility: hidden; display:none"
+            style="visibility: hidden; display: none"
             @change="uploadImage"
             ref="uploadImage"
           />
@@ -348,9 +375,9 @@ export default {
   props: {
     dataUrl: {
       type: String,
-      require: true
-      // default: "/assets/img/item-sm-0.361a0872.png" //todo remove
-    }
+      require: true,
+      default: "/assets/img/item-sm-0.361a0872.png", //todo remove
+    },
   },
   emits: ["saveImage"],
   data() {
@@ -359,6 +386,7 @@ export default {
       width: 0,
       imgSrc: "",
       mode: "",
+      shouldUpdate: false,
       colors: [
         "#e40000",
         "#e8eb34",
@@ -367,19 +395,67 @@ export default {
         "#34b7eb",
         "#eb34df",
         "#1a10ad",
-        "#000"
+        "#000",
       ],
       activeColor: "#001",
-      strokeWidth: 2
+      strokeWidth: 2,
     };
   },
   mounted() {
-    // this.dataUrl = "/assets/img/logo-small.afbfaff4.png";
-    // this.dataUrl = "C:/Development/RamAderetYoman/DUDI/unnamed.jpg";
-    // this.dataUrl = "/assets/img/item-1.551cf0cf.png";
     this.changeStrokeWidth();
-
     this.$refs.editor.drawImageInEditor(this.dataUrl);
+    // let img = new Image();
+    // img.src = this.dataUrl;
+    // img.onload = (event) => {
+    //   let from_element = document
+    //     .querySelector(".tool.save-image")
+    //     .getBoundingClientRect();
+    //   // debugger;
+    //   let html = document.querySelector("html").getBoundingClientRect();
+    //   let canvas_height = Math.abs(html.height - from_element.top - 100);
+    //   let canvas_width = Math.abs(
+    //     html.width - (html.width - from_element.right) - html.width * 0.05
+    //   );
+    //   let img_height = event.target.height;
+    //   let img_width = event.target.width;
+    //   let rotate = 0;
+
+    //   if (
+    //     (img_height > img_width && canvas_height > canvas_width) ||
+    //     (img_height < img_width && canvas_height < canvas_width)
+    //   ) {
+    //     rotate = 0;
+    //   } else {
+    //     let x;
+    //     x = img_width;
+    //     img_width = img_height;
+    //     img_height = x;
+    //     rotate = 270;
+    //   }
+
+    //   let img_difference = img_width / img_height;
+    //   let canvas_difference = canvas_width / canvas_height;
+
+    //   if (img_difference > canvas_difference) {
+    //     this.height = (canvas_width / img_width) * img_height;
+    //     this.width = canvas_width;
+    //   } else {
+    //     this.height = canvas_height;
+    //     this.width = (canvas_height / img_height) * img_width;
+    //   }
+    //   this.$refs.editor.setSizes(this.height, this.width);
+    //   // this.$refs.editor.setZoom(this.width / img_width);
+    //   this.$refs.editor.setBackgroundImage(this.dataUrl, {
+    //     scaleX: 1 / 1,
+    //     scaleY: 1 / 1,
+    //     angle: rotate * -1,
+    //     left: (event.target.height * rotate * (100 / 270)) / 100,
+    //   });
+    // };
+  },
+  watch: {
+    mode: function () {
+    },
   },
   methods: {
     // drawImageInEditor(urlImg) {
@@ -421,7 +497,6 @@ export default {
     //       this.height = canvas_height;
     //       this.width = (canvas_height / img_height) * img_width;
     //     }
-    //     console.log(this.height, this.width);
     //     this.$refs.editor.setSizes(this.height, this.width);
     //     this.$refs.editor.setZoom(this.width / img_width);
     //     this.$refs.editor.setBackgroundImage(this.dataUrl, {
@@ -430,7 +505,6 @@ export default {
     //       angle: rotate * -1,
     //       left: (event.target.height * rotate * (100 / 270)) / 100
     //     });
-    //     // console.log(this.$refs.editor);
     //   };
     //   this.$refs.editor.setBackgroundImage(this.dataUrl);
     // },
@@ -439,6 +513,7 @@ export default {
       this.activeColor = color;
       this.$refs.editor.changeColor(color);
     },
+
     setMode(mode) {
       this.mode = mode;
       this.$refs.editor.set(mode);
@@ -468,7 +543,7 @@ export default {
       this.$emit("saveImage", image);
       // this.saveImageAsFile(image);
     },
-    saveImageAsFile: function(t) {
+    saveImageAsFile: function (t) {
       var e = document.createElement("a");
       e.setAttribute("href", t),
         e.setAttribute("download", "image-markup"),
@@ -486,8 +561,11 @@ export default {
     },
     zoom() {
       this.$refs.editor.setZoom(2);
-    }
-  }
+    },
+    mobileAndTabletCheck() {
+      return window.innerWidth <= 800 && window.innerHeight <= 600;
+    },
+  },
 };
 </script>
 
@@ -510,6 +588,7 @@ svg {
   justify-content: space-between;
   font-size: 16px;
   padding: 2px 5px;
+  cursor: pointer;
 }
 .editor-container {
   flex-direction: column;
@@ -567,6 +646,14 @@ svg:not(:root).svg-inline--fa {
   width: 0.875em;
 }
 .textWidth {
-  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+.p-slider-vertical .p-slider-handle{
+  left: auto;
+}
+.stroke-width-value{
+  text-align: center;
+  margin-bottom: 10px;
 }
 </style>

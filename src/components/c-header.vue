@@ -1,7 +1,7 @@
 <template>
   <header id="header" class="header">
     <div class="header-top">
-      <div class="p-p-relative p-d-flex p-ai-center p-jc-between">
+      <div class="p-d-flex p-ai-center space-evenly">
         <div>
           <a
             href="#toggle-menu"
@@ -62,6 +62,8 @@ export default {
 @import "../assets/scss/mixins";
 
 .header {
+  z-index: 50;
+  background: white;
   .toggle-menu {
     top: 0;
     right: 0;
@@ -91,18 +93,15 @@ export default {
   &-top {
     position: relative;
 
-    padding: 10px 15px 5px;
+    // padding: 10px 15px 5px;
 
     @include screen("md") {
-      padding: 40px 35px 10px;
+      // padding: 40px 35px 10px;
     }
 
     h1 {
-      font-size: 16px;
-
-      @include screen("md") {
-        font-size: 25px;
-      }
+ font-size: 35px;
+ color: $color--primary;
     }
 
     p {
@@ -208,6 +207,24 @@ export default {
 }
 .header-logo,
 .toggle-menu {
-  position: static !important;
+  position: static;
+  img{
+    width: 80px;
+    padding: 3px;
+  }
+}
+.space-evenly{
+  justify-content: space-evenly;
+}
+
+@media (max-width:500px) {
+.header{
+  background-color:#f7f7f7;
+  .toggle-menu{
+    position: absolute;
+    top: 25px;
+    right: 15px;
+  }
+}
 }
 </style>

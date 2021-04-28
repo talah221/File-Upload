@@ -19,14 +19,8 @@
         id="planId"
         showClear
       />
-      <!-- optionValue="ID" -->
     </div>
-    <Button
-      class="p-mt-6"
-      icon="pi pi-file-pdf"
-      label="הצג תוכנית"
-      @click="displayPlan"
-    />
+    <Button icon="pi pi-file-pdf" label="הצג תוכנית" @click="displayPlan" />
   </div>
 </template>
 
@@ -42,7 +36,7 @@ export default {
       type: Number
     }
   },
-  emits: ["displayPlan"],
+  emits: ["displayPlan", "close"],
   components: {
     Dropdown,
     Button
@@ -71,11 +65,12 @@ export default {
           console.log("pr_qc_get_planes-loload failad");
           this.$toast.add({
             severity: "warn",
-            summary: "אין נתונים להצגה",
-            detail: "",
-            life: null,
+            summary: "בחירת תוכנית",
+            detail: "אין נתונים להצגה",
+            life: 10000,
             closable: true
           });
+          this.$emit("close");
         }
       })
       .catch(error => {
@@ -84,7 +79,7 @@ export default {
           severity: "error",
           summary: "שגיאה - פנה לתמיכה",
           detail: error,
-          life: null,
+          life: 10000,
           closable: true
         });
       });
@@ -98,7 +93,7 @@ export default {
           severity: "error",
           summary: "נתונים חסרים",
           detail: "יש לבחור תוכנית",
-          life: null,
+          life: 10000,
           closable: true
         });
       }
@@ -149,13 +144,14 @@ export default {
 <style scoped>
 .single_form {
   flex-direction: column;
+  width: 85%;
 }
 .single_form .myField {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 65%;
-  margin: 1rem auto;
+  width: 100%;
+  margin-bottom: 15px;
 }
 .single_form .myField > div {
   width: 74%;

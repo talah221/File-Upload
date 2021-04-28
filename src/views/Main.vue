@@ -1,8 +1,10 @@
 <template>
-  <c-header></c-header>
+  <c-header class="c-header"></c-header>
   <c-mobile-menu />
+<div class="router-view">
 
-  <router-view />
+  <router-view  />
+</div>
   <Toast position="bottom-right" :baseZIndex="2000" />
 
   <!-- <About /> -->
@@ -34,4 +36,16 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.c-header{
+
+  position: fixed;
+  width: 100%;
+  margin-bottom: 10px;
+  top: 0;
+box-shadow: 0px 1px 20px 0px rgb(103 103 103 / 75%);
+}
+.router-view{
+  padding-top: 100px;
+}
+</style>

@@ -1,5 +1,7 @@
 <template>
   <div></div>
+
+  <!-- <image-editor></image-editor> -->
 </template>
 
 <script>
@@ -13,7 +15,9 @@ export default {
     this.$store.dispatch("main/toggleMenuShow", true);
   },
   data() {
-    return {};
+    return {
+      visible: true
+    };
   },
   methods: {}
 };

@@ -1,11 +1,6 @@
 <template>
   <div class="p-d-flex p-ai-center p-jc-end" style="width: 97%">
-    <Button
-      class="p-m-2"
-      icon="pi pi-filter"
-      label="הצג בקרות"
-      @click="showQc"
-    />
+    <Button class="p-m-2" label="הצג בקרות" @click="showQc" />
     <Button
       class="p-m-2"
       icon="pi pi-filter-slash"
@@ -524,7 +519,7 @@ export default {
     };
   },
   mounted() {
-    // this.setBasicFilters();
+    console.log("Here");
     this.getDdlData();
     this.setBasicFilter();
   },

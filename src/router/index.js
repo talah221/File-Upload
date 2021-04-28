@@ -35,6 +35,7 @@ const routes = [
     name: "QualityControl",
     component: QualityControl
   },
+
   {
     path: "/Plan/:id",
     name: "Plan",

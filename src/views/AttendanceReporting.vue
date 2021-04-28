@@ -158,7 +158,7 @@ export default {
           severity: "error",
           summary: "שגיאה - פנה לתמיכה",
           detail: error,
-          life: null,
+          life: 10000,
           closable: true
         });
       });
@@ -201,7 +201,7 @@ export default {
               severity: "error",
               summary: "שגיאה - פנה לתמיכה",
               detail: error,
-              life: null,
+              life: 10000,
               closable: true
             });
           });
@@ -321,7 +321,7 @@ export default {
             severity: "error",
             summary: "שגיאה - פנה לתמיכה",
             detail: error,
-            life: null,
+            life: 10000,
             closable: true
           });
         });
