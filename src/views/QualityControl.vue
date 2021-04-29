@@ -9,21 +9,12 @@
   />
 
   <div>
-    <div v-if="showProjectList" class="field p-d-flex p-ai-center p-m-2">
-      <label :for="projects.Name">{{ projects.Caption }}</label>
-      <div class="p-d-flex p-flex-column" ref="" :id="projects.Name">
-        <a-point-dropdown
-          :field="projects"
-          :model-value="projects.ControlSource"
-          @update:model-value="projects.ControlSource = $event"
-        ></a-point-dropdown>
-      </div>
-      <span class="error p-mt-1 p-mr-2" v-if="projects.check">
-        * שדה חובה
-      </span>
-      <Button label="המשך" @click="chekProject"></Button>
-    </div>
-    <div v-else-if="!imageEditor.displayImageEditor">
+    <div v-if="!imageEditor.displayImageEditor">
+      <Button
+        v-if="qcMode !== qcModes_enum.e_new"
+        @click="backToParent"
+        icon="pi pi-angle-left"
+      ></Button>
       <div class="single_form">
         <div
           class="field p-d-flex p-ai-center p-m-2"
@@ -60,7 +51,7 @@
               style="resize:none"
               :disabled="!field.Enabled || field.Locked"
             ></Textarea>
-            <!-- <div>{{ field.RowSource }}</div> -->
+            <!-- <div>{{ field.ControlSource }}</div> -->
             <span class="error p-mt-1 p-mr-2" v-if="field.check">
               * שדה חובה
             </span>
@@ -161,12 +152,34 @@ export default {
       require: false
     }
   },
+  emits: ["close"],
   data() {
     return {
       showProjectList: true,
       fields: [
         {
           num: 1,
+          apointType: "dropdown",
+          check: false,
+          required: true,
+          Caption: "פרויקט",
+          optionLabel: "ProjectName",
+          optionValue: "ProjectId",
+          showClear: false,
+          ControlSource: null,
+          RowSource: [],
+          Enabled: true,
+          Name: "projectId",
+          FuncOnUpdate: () => {
+            this.getField(this.fields_enum.e_zone1).ControlSource = null;
+            this.getField(this.fields_enum.e_zone2).ControlSource = null;
+            this.getField(this.fields_enum.e_zone3).ControlSource = null;
+            this.getField(this.fields_enum.e_responsibles).ControlSource = null;
+            this.getDdlDataLinkedToProject();
+          }
+        },
+        {
+          num: 2,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -183,7 +196,7 @@ export default {
           AllRowSource: null
         },
         {
-          num: 2,
+          num: 3,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -203,7 +216,7 @@ export default {
           }
         },
         {
-          num: 3,
+          num: 4,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -223,7 +236,7 @@ export default {
           }
         },
         {
-          num: 4,
+          num: 5,
           apointType: "dropdown",
           check: false,
           required: false,
@@ -239,7 +252,7 @@ export default {
           AllRowSource: null
         },
         {
-          num: 5,
+          num: 6,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -254,7 +267,7 @@ export default {
           Name: "chapter"
         },
         {
-          num: 6,
+          num: 7,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -269,7 +282,7 @@ export default {
           Name: "responsibles"
         },
         {
-          num: 7,
+          num: 8,
           apointType: "text",
           check: false,
           required: true,
@@ -285,7 +298,7 @@ export default {
           showIcon: true
         },
         {
-          num: 8,
+          num: 9,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -300,7 +313,7 @@ export default {
           Name: "impairment"
         },
         {
-          num: 9,
+          num: 10,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -313,20 +326,6 @@ export default {
           RowSource: [],
           Enabled: true,
           Name: "severityLevel"
-        },
-        {
-          num: 10,
-          apointType: "dropdown",
-          check: false,
-          required: true,
-          Caption: "פרויקט",
-          optionLabel: "ProjectName",
-          optionValue: "ProjectId",
-          showClear: false,
-          ControlSource: null,
-          RowSource: [],
-          Enabled: true,
-          Name: "projectId"
         },
         {
           num: 11,
@@ -354,16 +353,16 @@ export default {
         }
       ],
       fields_enum: {
-        e_status: 1,
-        e_zone1: 2,
-        e_zone2: 3,
-        e_zone3: 4,
-        e_chapter: 5,
-        e_responsibles: 6,
-        e_planedDate: 7,
-        e_impairment: 8,
-        e_severityLevel: 9,
-        e_projectId: 10,
+        e_projectId: 1,
+        e_status: 2,
+        e_zone1: 3,
+        e_zone2: 4,
+        e_zone3: 5,
+        e_chapter: 6,
+        e_responsibles: 7,
+        e_planedDate: 8,
+        e_impairment: 9,
+        e_severityLevel: 10,
         e_description: 11,
         e_qc_id: 12
       },
@@ -385,12 +384,8 @@ export default {
   },
   mounted() {
     let header = "";
-    //todo get projects list by userLogin - callproc
-    this.getField(this.fields_enum.e_projectId).RowSource = [
-      { ProjectId: 146, ProjectName: "אדרת הכרמל" },
-      { ProjectId: 102, ProjectName: "אדרת הכפר" },
-      { ProjectId: 91, ProjectName: "וולפסון" }
-    ];
+
+    this.getDdlData();
 
     if (this.qualityControl === undefined) {
       //בקרה חדשה
@@ -398,18 +393,16 @@ export default {
       header = "בקרה חדשה";
       this.getField(this.fields_enum.e_qc_id).ControlSource = null;
       //הצגת בחירת פרויקט רק אם למשתמש יש הרשאה על יותר מפרויקט אחד
-      if (this.projects.RowSource.length === 1) {
-        this.projects.ControlSource = this.projects.RowSource[0].ProjectId;
-        this.showProjectList = false;
-        this.getDdlData();
-      } else {
-        this.showProjectList = true;
+      if (this.getField(this.fields_enum.e_projectId).RowSource.length === 1) {
+        this.getField(
+          this.fields_enum.e_projectId
+        ).ControlSource = this.getField(
+          this.fields_enum.e_projectId
+        ).RowSource[0].ProjectId;
       }
     } else {
       //בקרה פתוחה/סגורה
-      this.getDdlData();
       header = "בקרה מס' " + this.qualityControl.quality_control_id;
-      this.showProjectList = false;
       if (this.qualityControl.status_id === 1109) {
         this.qcMode = this.qcModes_enum.e_close;
       } else {
@@ -480,6 +473,7 @@ export default {
     uploadImage(e) {
       let reader = new FileReader();
       reader.onload = event => {
+        console.log(event.target.result);
         this.imageEditor.dataUrl = event.target.result;
         this.imageEditor.displayImageEditor = true;
       };
@@ -501,41 +495,25 @@ export default {
       });
       return flag;
     },
-    chekProject() {
-      if (this.projects.required && Nz(this.projects.ControlSource) === 0)
-        this.projects.check = true;
-      else {
-        this.projects.check = false;
-        this.showProjectList = false;
-        this.getDdlData();
-      }
-    },
+
     getDdlData() {
       this.$store.commit("main/setSpinner", true);
 
       let loadData = () => {
+        //todo get projects list by userLogin - callproc
+        this.getField(this.fields_enum.e_projectId).RowSource = [
+          { ProjectId: 146, ProjectName: "אדרת הכרמל" },
+          { ProjectId: 102, ProjectName: "אדרת הכפר" },
+          { ProjectId: 91, ProjectName: "וולפסון" }
+        ];
         this.getField(
           this.fields_enum.e_status
         ).AllRowSource = this.getAllStatuses();
         this.getField(this.fields_enum.e_status).RowSource = this.getStatus();
-        this.getField(this.fields_enum.e_zone1).RowSource = this.getZone1(
-          this.projects.ControlSource
-        );
-        this.getField(this.fields_enum.e_zone2).AllRowSource = this.getZone2(
-          this.projects.ControlSource
-        );
-        this.getField(this.fields_enum.e_zone3).AllRowSource = this.getZone3(
-          this.projects.ControlSource
-        );
-        this.filterZone2();
 
         this.getField(
           this.fields_enum.e_chapter
         ).RowSource = this.getChapters();
-
-        this.getField(
-          this.fields_enum.e_responsibles
-        ).RowSource = this.getResponsibles();
 
         this.getField(
           this.fields_enum.e_impairment
@@ -543,6 +521,7 @@ export default {
         this.getField(
           this.fields_enum.e_severityLevel
         ).RowSource = this.getHardwareLevel();
+        this.getDdlDataLinkedToProject();
       };
       let i = 0;
       let interval = setInterval(() => {
@@ -553,6 +532,30 @@ export default {
         loadData();
         this.$store.commit("main/setSpinner", false);
       }, 1);
+    },
+    getDdlDataLinkedToProject() {
+      let projectId = this.getField(this.fields_enum.e_projectId).ControlSource;
+      let zone1, zone2, zone3, responsible;
+
+      zone1 = this.getField(this.fields_enum.e_zone1);
+      zone2 = this.getField(this.fields_enum.e_zone2);
+      zone3 = this.getField(this.fields_enum.e_zone3);
+      responsible = this.getField(this.fields_enum.e_responsibles);
+
+      if (projectId !== null) {
+        zone1.RowSource = this.getZone1(projectId);
+        zone2.AllRowSource = this.getZone2(projectId);
+        zone3.AllRowSource = this.getZone3(projectId);
+        this.filterZone2();
+        responsible.RowSource = this.getResponsibles(projectId);
+      } else {
+        zone1.RowSource = null;
+        zone2.AllRowSource = null;
+        zone3.AllRowSource = null;
+        this.filterZone2();
+
+        responsible.RowSource = null;
+      }
     },
     saveClose() {
       const funcOnSucces = () => {
@@ -579,7 +582,11 @@ export default {
           this.getField(this.fields_enum.e_qc_id).ControlSource,
           apiPType.Int
         ),
-        apiParam("project_id", this.projects.ControlSource, apiPType.Int),
+        apiParam(
+          "project_id",
+          this.getField(this.fields_enum.e_projectId).ControlSource,
+          apiPType.Int
+        ),
         apiParam(
           "status_id",
           this.getField(this.fields_enum.e_status).ControlSource,
@@ -797,12 +804,12 @@ export default {
       });
     },
     setPermission() {
-      let enabledFields;
-      if (this.qcMode === this.qcModes_enum.e_new) enabledFields = true;
-      else enabledFields = false;
-      this.fields.forEach(field => {
-        field.Enabled = enabledFields;
-      });
+      // let enabledFields;
+      // if (this.qcMode === this.qcModes_enum.e_new) enabledFields = true;
+      // else enabledFields = false;
+      // this.fields.forEach(field => {
+      //   field.Enabled = enabledFields;
+      // });
     },
     reporting() {
       this.displayReporting = true;
@@ -813,16 +820,19 @@ export default {
       this.getField(this.fields_enum.e_responsibles).ControlSource =
         qualityControl.responsible_id;
       this.displayReporting = false;
+    },
+    backToParent() {
+      this.$emit("close");
     }
   },
   computed: {
     detailsFields() {
-      return this.fields.filter(field => field.num < 10 || field.num === 11);
+      return this.fields.filter(field => field.num < 12);
     },
 
-    projects() {
-      return this.getField(this.fields_enum.e_projectId);
-    },
+    // projects() {
+    //   return this.getField(this.fields_enum.e_projectId);
+    // },
     apartmentId() {
       let allZone2 = this.getField(this.fields_enum.e_zone2).AllRowSource;
 

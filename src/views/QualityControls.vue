@@ -1,7 +1,10 @@
 <template>
   <div>
     <div v-if="displayQualityControl">
-      <QualityControl :qualityControl="qualityControl"></QualityControl>
+      <QualityControl
+        @close="displayQualityControl = false"
+        :qualityControl="qualityControl"
+      ></QualityControl>
     </div>
     <div v-else>
       <div v-show="displayFilters">
@@ -17,54 +20,77 @@
           <Button label="סינונים" @click="showFilters" icon="pi pi-filter" />
         </div>
         <div class="controls">
-          <div
-            v-for="qc of qualityControls"
-            :key="qc.quality_control_id"
-            class="qc"
-          >
-            <div @click="openQC(qc)">
-              <div>
-                ב&nbsp;{{ qc.quality_control_id }} -
-                {{ qc.formattedCreate_date }}
+          .
+          <div v-if="isDesktop" class="qc-table-headers">
+            <h5 class="table-header">מס' בקרה</h5>
+            <h5 class="table-header">תאריך פתיחה</h5>
+            <h5 class="table-header">סטטוס</h5>
+            <h5 class="table-header">פרק</h5>
+            <h5 class="table-header">סוג ליקוי</h5>
+            <h5 class="table-header">רמת חומרה</h5>
+            <h5 class="table-header">o</h5>
+          </div>
+          <div class="qc-list">
+            <div
+              v-for="qc of qualityControls"
+              :key="qc.quality_control_id"
+              class="qc"
+            >
+              <div class="qc-not-desktop" v-if="!isDesktop">
+                <div @click="openQC(qc)">
+                  <div>
+                    ב&nbsp;{{ qc.quality_control_id }} -
+                    {{ qc.formattedCreate_date }}
+                  </div>
+                  <div>
+                    {{ qc.project_zone1_name }} - {{ qc.project_zone2_name }} -
+                    {{ qc.project_zone3_name }}
+                  </div>
+                  <div>
+                    <span class="p-text-bold">תיאור:</span>
+                    {{ qc.quality_control_desc }}
+                  </div>
+                </div>
+                <div @click="openQC(qc)">
+                  <div class="p-text-bold">{{ qc.chapter_name }}</div>
+                  <div>{{ qc.responsible_name }}</div>
+                </div>
+                <div class="buttonsDiv">
+                  <Button icon="pi pi-folder-open" class="folder-btn"></Button>
+                  <Button
+                    label="דווח"
+                    class="p-button-sm report-btn"
+                    @click="reporting(qc)"
+                    :disabled="qc.status_id === 1109"
+                  />
+                </div>
               </div>
-              <div>
-                {{ qc.project_zone1_name }} - {{ qc.project_zone2_name }} -
-                {{ qc.project_zone3_name }}
-              </div>
-              <div>
-                <span class="p-text-bold">תיאור:</span>
-                {{ qc.quality_control_desc }}
-              </div>
+              <section class="qc-desktop" v-if="isDesktop">
+                <div class="qc-id">{{ qc.quality_control_id }}</div>
+                <div class="qc-create-date">{{ qc.create_date }}</div>
+                <div class="qc-status">{{ qc.status_name }}</div>
+                <div class="qc-chapter">{{ qc.chapter_name }}</div>
+                <div class="qc-impairment">{{ qc.impairment_desc }}</div>
+                <div class="qc-level">{{ qc.level_desc }}</div>
+              </section>
             </div>
-            <div @click="openQC(qc)">
-              <div class="p-text-bold">{{ qc.chapter_name }}</div>
-              <div>{{ qc.responsible_name }}</div>
-            </div>
-            <div class="buttonsDiv">
-              <Button icon="pi pi-folder-open" class="folder-btn"></Button>
-              <Button
-                label="דווח"
-                class="p-button-sm report-btn"
-                @click="reporting(qc)"
-                :disabled="qc.status_id === 1109"
+          </div>
+          <Dialog v-model:visible="displayReporting" modal>
+            <template #header>
+              <h3 style="margin: auto">
+                דיווח טיפול בבקרה מס' {{ qualityControl.quality_control_id }}
+              </h3>
+            </template>
+            <div>
+              <QCReporting
+                :qualityControl="qualityControl"
+                @closeReporting="closeReporting"
               />
             </div>
-          </div>
+
+            <template #footer> </template>
+          </Dialog>
         </div>
-        <Dialog v-model:visible="displayReporting" modal>
-          <template #header>
-            <h3 style="margin: auto;">
-              דיווח טיפול בבקרה מס' {{ qualityControl.quality_control_id }}
-            </h3>
-          </template>
-          <div>
-            <QCReporting
-              :qualityControl="qualityControl"
-              @closeReporting="closeReporting"
-            />
-          </div>
-          <template #footer> </template>
-        </Dialog>
       </div>
     </div>
   </div>
@@ -85,7 +111,7 @@ export default {
     QualityControlsFilters,
     Dialog,
     QCReporting,
-    QualityControl
+    QualityControl,
   },
   data() {
     return {
@@ -95,13 +121,17 @@ export default {
       displayReporting: false,
       qualityControl: null,
       displayQualityControl: false,
-      isDesktop:true
+      isDesktop: true,
     };
   },
   mounted() {},
-  created(){
-this.isDesktop = window.innerWidth > 896;
-
+  created() {
+    this.isDesktop = window.innerWidth > 896;
+  },
+  watch: {
+    qualityControls: function () {
+      console.log("QC", this.qualityControls[0]);
+    },
   },
   methods: {
     showFilters() {
@@ -110,13 +140,13 @@ this.isDesktop = window.innerWidth > 896;
     },
     filterQualityControl() {
       let procParams = [apiParam("user_exec", this.userID, apiPType.Int)];
-      Object.keys(this.filters).forEach(key => {
+      Object.keys(this.filters).forEach((key) => {
         procParams.push(
           apiParam(key, this.filters[key].value, this.filters[key].type)
         );
       });
       callProc("pr_qc_select", procParams)
-        .then(result => {
+        .then((result) => {
           result = JSON.parse(result);
           if (result.procReturnValue === 0) {
             this.qualityControls = result.Table;
@@ -127,18 +157,18 @@ this.isDesktop = window.innerWidth > 896;
               summary: "שגיאה בהצגת בקרות - פנה לתמיכה",
               detail: "",
               life: 10000,
-              closable: true
+              closable: true,
             });
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.log("pr_qc_select-error", error);
           this.$toast.add({
             severity: "error",
             summary: "שגיאה - פנה לתמיכה",
             detail: error,
             life: 10000,
-            closable: true
+            closable: true,
           });
         });
     },
@@ -165,7 +195,7 @@ this.isDesktop = window.innerWidth > 896;
             field.apointType === "multiSelect"
               ? field.ControlSource.toString()
               : field.ControlSource,
-          type: field.type
+          type: field.type,
         };
       }
     },
@@ -177,7 +207,7 @@ this.isDesktop = window.innerWidth > 896;
       //?הנתונים לא מתרעננים בתצוגה
       console.log("closeReporting", qualityControl);
       let qc = this.qualityControls.find(
-        qc => qc.quality_control_id === qualityControl.quality_control_id
+        (qc) => qc.quality_control_id === qualityControl.quality_control_id
       );
       qc.status_id = qualityControl.status_id;
       qc.responsible_id = qualityControl.responsible_id;
@@ -187,19 +217,49 @@ this.isDesktop = window.innerWidth > 896;
     openQC(qc) {
       this.qualityControl = qc;
       this.displayQualityControl = true;
-    }
+    },
   },
   computed: {
-    ...mapState({ userID: state => +state.api.userID })
-  }
+    ...mapState({ userID: (state) => +state.api.userID }),
+  },
 };
 </script>
 
 <style scoped lang="scss">
-@media (min-width: 800px) {
+@media (min-width: 880px) {
+  // DESKTOP STYLING
+  .qc-table-container-desktop {
+    display: flex;
+    width: 100%;
+  }
   .qc {
   }
   .controls {
+    .qc-table-headers {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      .table-header {
+        background: white;
+        margin: 0;
+        text-align: center;
+      }
+    }
+    .qc-list {
+      .qc:nth-of-type(even) {
+        background: white;
+      }
+      .qc {
+        margin: 0;
+        text-align: center;
+        padding: 8px 0;
+
+        .qc-desktop {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+        }
+      }
+    }
   }
 }
 @media (max-width: 800px) {

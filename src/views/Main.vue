@@ -1,10 +1,9 @@
 <template>
   <c-header class="c-header"></c-header>
   <c-mobile-menu />
-<div class="router-view">
-
-  <router-view  />
-</div>
+  <div class="router-view">
+    <router-view />
+  </div>
   <Toast position="bottom-right" :baseZIndex="2000" />
 
   <!-- <About /> -->
@@ -22,7 +21,7 @@ export default {
   name: "Main",
   components: {
     CMobileMenu,
-    CHeader
+    CHeader,
 
     // About
   },
@@ -32,20 +31,19 @@ export default {
   },
   computed: {
     // ...mapState({ displaySpinner: state => state.main.displaySpinner })
-  }
+  },
 };
 </script>
 
 <style scoped>
-.c-header{
-
+.c-header {
   position: fixed;
   width: 100%;
   margin-bottom: 10px;
   top: 0;
-box-shadow: 0px 1px 20px 0px rgb(103 103 103 / 75%);
+  box-shadow: 0px 1px 20px 0px rgb(103 103 103 / 75%);
 }
-.router-view{
+.router-view {
   padding-top: 100px;
 }
 </style>
