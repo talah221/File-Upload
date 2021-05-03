@@ -12,6 +12,7 @@
 import Checkbox from "primevue/checkbox";
 
 export default {
+  name: "APoint-checkbox",
   components: {
     Checkbox
   },

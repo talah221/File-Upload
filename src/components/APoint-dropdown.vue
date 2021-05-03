@@ -20,6 +20,7 @@
 import Dropdown from "primevue/dropdown";
 
 export default {
+  name: "APoint-dropdown",
   components: {
     Dropdown
   },

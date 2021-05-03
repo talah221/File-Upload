@@ -14,6 +14,7 @@ import CAllItems from "../components/c-all-items";
 import CDetailItem from "../components/c-detail-item";
 
 export default {
+  name: "Detail",
   components: {
     CHeader,
     CFooter,

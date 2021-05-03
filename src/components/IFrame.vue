@@ -4,6 +4,7 @@
 
 <script>
 export default {
+  name: "IFrame",
   props: {
     src: {
       type: String

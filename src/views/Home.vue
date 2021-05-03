@@ -6,6 +6,7 @@
 
 <script>
 export default {
+  name: "Home",
   components: {
     // Carousel,
     // qualityControlDetails
@@ -13,6 +14,7 @@ export default {
   },
   mounted() {
     this.$store.dispatch("main/toggleMenuShow", true);
+    this.$store.commit("main/setAppHeader", "");
   },
   data() {
     return {

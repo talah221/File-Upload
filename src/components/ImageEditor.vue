@@ -14,8 +14,8 @@
     ></Dropdown>
   </div> -->
   <div class="editorComponent">
-    <div class="p-d-flex p-flex-column p-jc-center">
-       <div class="stroke-width-value"> {{ strokeWidth }}</div>
+    <div class="editor-styling">
+      <div class="stroke-width-value">{{ strokeWidth }}</div>
       <div class="textWidth">
         <Slider
           v-model="strokeWidth"
@@ -226,7 +226,9 @@
           class="tool arrow"
           @click="setMode('arrow')"
           :class="mode == 'arrow' ? 'active-tool' : ''"
+          v-if="false"
         >
+          <!-- לחצן זה מוסתר כרגע היות ויש איתו שגיאות -->
           <svg
             class="svg-inline--fa fa-long-arrow-alt-down fa-w-8 fa-lg"
             aria-hidden="true"
@@ -351,6 +353,33 @@
             ></path></svg
           ><!-- <i class="fas fa-save fa-lg"></i> -->
         </div>
+        <div class="tool cancel" @click="cancel">
+          <svg
+            class="svg-inline--fa fa-save fa-w-14 fa-lg"
+            version="1.1"
+            id="Capa_1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            x="0px"
+            y="0px"
+            width="416.979px"
+            height="416.979px"
+            viewBox="0 0 416.979 416.979"
+            style="enable-background:new 0 0 416.979 416.979;"
+            xml:space="preserve"
+          >
+            <g>
+              <path
+                d="M355.914,61.065c-81.42-81.42-213.428-81.42-294.849,0s-81.421,213.427,0,294.849c81.42,81.42,213.428,81.42,294.849,0
+                  C437.334,274.492,437.334,142.485,355.914,61.065z M312.525,258.763c4.454,4.454,4.454,11.675,0,16.129l-37.632,37.632
+                  c-4.454,4.454-11.675,4.453-16.13,0l-50.273-50.275l-50.275,50.275c-4.453,4.455-11.674,4.453-16.128,0l-37.632-37.632
+                  c-4.454-4.454-4.453-11.674,0-16.127l50.275-50.276l-50.275-50.275c-4.453-4.454-4.453-11.675,0-16.128l37.633-37.632
+                  c4.454-4.454,11.675-4.454,16.127,0l50.275,50.275l50.274-50.275c4.454-4.454,11.675-4.454,16.129,0l37.632,37.632
+                  c4.453,4.454,4.454,11.675,0,16.128l-50.275,50.275L312.525,258.763z"
+              />
+            </g>
+          </svg>
+        </div>
       </div>
       <Editor
         :canvasWidth="width"
@@ -367,6 +396,7 @@ import Editor from "vue-image-markup";
 import Slider from "primevue/slider";
 // import Dropdown from "primevue/dropdown";
 export default {
+  name: "ImageEditor",
   components: {
     Editor,
     Slider
@@ -375,11 +405,10 @@ export default {
   props: {
     dataUrl: {
       type: String,
-      require: true,
-      default: "/assets/img/item-sm-0.361a0872.png", //todo remove
-    },
+      require: true
+    }
   },
-  emits: ["saveImage"],
+  emits: ["saveImage", "cancel"],
   data() {
     return {
       height: 0,
@@ -395,10 +424,10 @@ export default {
         "#34b7eb",
         "#eb34df",
         "#1a10ad",
-        "#000",
+        "#000"
       ],
       activeColor: "#001",
-      strokeWidth: 2,
+      strokeWidth: 2
     };
   },
   mounted() {
@@ -454,8 +483,7 @@ export default {
     // };
   },
   watch: {
-    mode: function () {
-    },
+    mode: function() {}
   },
   methods: {
     // drawImageInEditor(urlImg) {
@@ -543,7 +571,7 @@ export default {
       this.$emit("saveImage", image);
       // this.saveImageAsFile(image);
     },
-    saveImageAsFile: function (t) {
+    saveImageAsFile: function(t) {
       var e = document.createElement("a");
       e.setAttribute("href", t),
         e.setAttribute("download", "image-markup"),
@@ -565,13 +593,27 @@ export default {
     mobileAndTabletCheck() {
       return window.innerWidth <= 800 && window.innerHeight <= 600;
     },
-  },
+    cancel() {
+      this.$emit("cancel");
+    }
+  }
 };
 </script>
 
-<style>
-.editorComponent,
-.editor-container,
+<style lang="scss">
+.editorComponent {
+  display: grid;
+  grid-template-columns: 20% 75%;
+  .editor-styling {
+  }
+  .editor-container {
+    .editor {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(32px, 1fr));
+    }
+  }
+}
+
 .tool,
 .editor {
   display: flex;
@@ -649,10 +691,10 @@ svg:not(:root).svg-inline--fa {
   display: flex;
   justify-content: center;
 }
-.p-slider-vertical .p-slider-handle{
+.p-slider-vertical .p-slider-handle {
   left: auto;
 }
-.stroke-width-value{
+.stroke-width-value {
   text-align: center;
   margin-bottom: 10px;
 }

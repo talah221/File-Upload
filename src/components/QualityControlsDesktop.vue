@@ -5,19 +5,19 @@
 
 <script>
 export default {
+  name: "QualityControlsDesktop",
   props: {
     qualityControls: {
       type: Array,
-      required: true,
-    },
+      required: true
+    }
   },
 
-  mounted(){
-      console.log("Mounted");
-      console.log(this.qualityControls);
+  mounted() {
+    console.log("Mounted");
+    console.log(this.qualityControls);
   }
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

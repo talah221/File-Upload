@@ -13,6 +13,7 @@
 import icons from "../assets/img/icons.svg";
 
 export default {
+  name: "c-icon",
   props: {
     name: {
       type: String,

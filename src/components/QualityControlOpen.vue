@@ -6,13 +6,12 @@
       @click="plans"
       icon="pi pi-file-pdf"
     ></Button>
-    <Button label="דיווח" @click="reporting" />
+    <Button label="דיווח" @click="reporting" icon="pi pi-arrow-circle-up" />
   </div>
 </template>
 
 <script>
 import Button from "primevue/button";
-//todo add icon to reporting
 export default {
   name: "QualityControlOpen",
   components: {
@@ -40,7 +39,8 @@ export default {
 </script>
 
 <style scoped>
-.single_form_buttons{
+.single_form_buttons {
   display: flex;
   justify-content: space-around;
-}</style>
+}
+</style>

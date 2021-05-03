@@ -14,17 +14,13 @@ export const qualityControl = {
     hardware_level: [],
     allUsers: [],
     notDone: [],
-    timeOut: 3600000, //3600000,
+    projectsUser: [],
+    timeOut: 3600000,
     timeOutId: null,
-    startLoad: null,
-    endLoaded: null,
     isDataLoaded: false
   },
   mutations: {},
   actions: {
-    check(state) {
-      console.log(state);
-    },
     loadDdlData({ state, dispatch }) {
       if (state.timeOut !== null) {
         clearTimeout(state.timeOutId);
@@ -32,8 +28,7 @@ export const qualityControl = {
       state.timeOutId = setTimeout(() => {
         dispatch("loadDdlData");
       }, state.timeOut);
-      console.log("qcStore-loadDdlData", state, new Date());
-      state.startLoad = new Date();
+      // console.log("qcStore-loadDdlData", state, new Date());
       let procParams = [
         apiParam("user_exec", apiStore.state.userID, apiPType.Int)
       ];
@@ -71,6 +66,9 @@ export const qualityControl = {
           if (result.Table9.length > 0) {
             state.notDone = result.Table9;
           }
+          if (result.Table10.length > 0) {
+            state.projectsUser = result.Table10;
+          }
         })
         .catch(error => {
           console.log("pr_qc_ddl_data-error-store", error);
@@ -84,8 +82,7 @@ export const qualityControl = {
         })
         .then(() => {
           state.isDataLoaded = true;
-          state.endLoaded = new Date();
-          console.log("qcStore-loadDdlData-finish", state, new Date());
+          // console.log("qcStore-loadDdlData-finish", state, new Date());
         });
     }
   },
@@ -161,10 +158,11 @@ export const qualityControl = {
     },
     getNotDone: state => () => {
       return state.notDone;
+    },
+    getProjectsUser: state => () => {
+      return state.projectsUser;
     }
   }
 };
 
-//todo ברגע שיש סינון שמשתמשים בו יותר מפעם אחת יש להעבירו לסטור כפרמטר לפונקציה
-
-//todo להוסיף לקומבו בפריים
+//! ברגע שיש סינון שמשתמשים בו יותר מפעם אחת יש להעבירו לסטור כפרמטר לפונקציה

@@ -39,7 +39,7 @@
       class="sidebar-close"
       @click.prevent="$store.dispatch('main/toggleMenuShow', false)"
     >
-      <c-icon name="cancel" />
+      <c-icon name="cancel" style="" />
     </a>
 
     <div class="sidebar-body">
@@ -63,6 +63,7 @@ import CSidebar from "primevue/sidebar";
 import CIcon from "./c-icon";
 import screen from "@/scripts/screen.js";
 export default {
+  name: "c-mobile-menu",
   components: {
     PanelMenu,
     CSidebar,
@@ -121,7 +122,7 @@ export default {
       width: 18px;
       height: 18px;
 
-      color: white;
+      color: #6d8dbe;
     }
   }
 

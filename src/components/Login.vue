@@ -44,8 +44,9 @@ import Password from "primevue/password";
 import Button from "primevue/button";
 import CheckBox from "primevue/checkbox";
 import { encrypt, decrypt, apiGetSessionToken } from "../services/APointAPI";
+import { spinnerInstances } from "../scripts/enums.js";
+
 // import { mapState } from "vuex"
-//todo יש לשים ספינר בעת ביצוע לוגין(המטרה - למנוע מהמשתמש לראות את מסך הלוגין בעת ריענון הדף)
 export default {
   name: "Login",
   props: {
@@ -86,7 +87,10 @@ export default {
   },
   methods: {
     autoLogin() {
-      this.$store.commit("main/setSpinner", true);
+      this.$store.commit("main/setSpinner", {
+        id: spinnerInstances.e_testLogin,
+        flag: true
+      });
       this.rememberMe = this.$cookie.getCookie("main-user-remember") === "true";
       // console.log("main-user-remember", this.rememberMe, this.compGUID);
       // console.log("compGUID", this.compGUID);
@@ -97,20 +101,29 @@ export default {
         );
         this.userName = userObject.userName;
         // console.log("userObject", userObject);
-        //TODO: test auto login feature
+        //! TODO error: test auto login feature
         if (this.allowAutoLogin) {
           this.password = userObject.pswd;
           if (this.password !== "") {
             console.log("auto login");
             this.login();
           } else {
-            this.$store.commit("main/setSpinner", false);
+            this.$store.commit("main/setSpinner", {
+              id: spinnerInstances.e_testLogin,
+              flag: false
+            });
           }
         } else {
-          this.$store.commit("main/setSpinner", false);
+          this.$store.commit("main/setSpinner", {
+            id: spinnerInstances.e_testLogin,
+            flag: false
+          });
         }
       } else if (!this.rememberMe) {
-        this.$store.commit("main/setSpinner", false);
+        this.$store.commit("main/setSpinner", {
+          id: spinnerInstances.e_testLogin,
+          flag: false
+        });
       }
     },
     async validateLogin() {
@@ -145,7 +158,10 @@ export default {
 
         this.$cookie.setCookie("main-user-remember", this.rememberMe);
         // this.$emit("loginOK");
-        this.$store.commit("main/setSpinner", false);
+        this.$store.commit("main/setSpinner", {
+          id: spinnerInstances.e_testLogin,
+          flag: false
+        });
       } else {
         //login failed
         // console.log('login fail')
@@ -156,7 +172,10 @@ export default {
           life: 3000,
           closable: true
         });
-        this.$store.commit("main/setSpinner", false);
+        this.$store.commit("main/setSpinner", {
+          id: spinnerInstances.e_testLogin,
+          flag: false
+        });
       }
     }
   },
@@ -174,6 +193,12 @@ export default {
   // },
   mounted() {
     this.autoLogin();
+  },
+  unmounted() {
+    this.$store.commit("main/setSpinner", {
+      id: spinnerInstances.e_testLogin,
+      flag: false
+    });
   }
 };
 </script>

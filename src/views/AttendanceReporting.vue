@@ -125,6 +125,7 @@ import { callProc, apiParam, apiPType } from "../services/APointAPI";
 import { mapState } from "vuex";
 
 export default {
+  name: "AttendanceReporting",
   components: { Calendar, Dropdown, DataTable, Column, Checkbox, RadioButton },
   data() {
     return {

@@ -1,11 +1,12 @@
 <template>
   <c-carousel
-    :numScroll="1"
-    :numVisible="1"
+    :numScroll="numScroll"
+    :numVisible="numVisible"
     :value="items"
     :autoplayInterval="3000"
     :circular="true"
     class="effect--shadow"
+    :orientation="orientation"
   >
     <template #item="slotProps">
       <img :src="slotProps.data" :alt="slotProps.data" class="thumbnail" />
@@ -17,10 +18,16 @@
 import CCarousel from "primevue/carousel";
 
 export default {
+  name: "Carousel",
   components: {
     CCarousel
   },
-  props: { items: [] }
+  props: {
+    items: { type: Array },
+    numScroll: { type: Number, default: 1 },
+    numVisible: { type: Number, default: 1 },
+    orientation: { type: String, default: "horizontal" }
+  }
 };
 </script>
 

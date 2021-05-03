@@ -45,6 +45,7 @@ import APointCheckbox from "./APoint-checkbox.vue";
 import APointDropdown from "./APoint-dropdown.vue";
 
 export default {
+  name: "inputs",
   components: {
     Button,
     APointTextbox,

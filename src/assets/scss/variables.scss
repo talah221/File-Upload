@@ -10,10 +10,24 @@ $color--light: #efefef;
 $color--default: #f2f2f2;
 $color--primary: #6d8dbe;
 $color--secondary: #929292;
-$color--folder:#e5ab00;
+$color--folder: #e5ab00ba;
 
 $effect--overlay: linear-gradient(to bottom, rgba(0, 0, 0, 0), #000000);
-$effect--overlay-light: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), #ffffff);
+$effect--overlay-light: linear-gradient(
+  to bottom,
+  rgba(255, 255, 255, 0.4),
+  #ffffff
+);
 
-$SCREENS: (sm: $screen--sm, md: $screen--md, lg: $screen--lg, xl: $screen--xl);
-$COLORS: (primary: $color--primary, secondary: $color--secondary, light: $color--light, dark: $color--dark);
+$SCREENS: (
+  sm: $screen--sm,
+  md: $screen--md,
+  lg: $screen--lg,
+  xl: $screen--xl,
+);
+$COLORS: (
+  primary: $color--primary,
+  secondary: $color--secondary,
+  light: $color--light,
+  dark: $color--dark,
+);

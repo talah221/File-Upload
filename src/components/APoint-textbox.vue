@@ -50,6 +50,7 @@ import InputText from "primevue/inputtext";
 import formats from "@/scripts/accsessAndPrimevueFormats";
 
 export default {
+  name: "APoint-textbox",
   components: {
     Calendar,
     InputNumber,

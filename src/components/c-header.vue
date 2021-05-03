@@ -30,6 +30,7 @@ import { mapState } from "vuex";
 import screen from "@/scripts/screen.js";
 
 export default {
+  name: "c-header",
   props: {
     icon: {
       type: Boolean,
@@ -100,8 +101,8 @@ export default {
     }
 
     h1 {
- font-size: 35px;
- color: $color--primary;
+      font-size: 35px;
+      color: $color--primary;
     }
 
     p {
@@ -208,23 +209,23 @@ export default {
 .header-logo,
 .toggle-menu {
   position: static;
-  img{
+  img {
     width: 80px;
     padding: 3px;
   }
 }
-.space-evenly{
+.space-evenly {
   justify-content: space-evenly;
 }
 
-@media (max-width:500px) {
-.header{
-  background-color:#f7f7f7;
-  .toggle-menu{
-    position: absolute;
-    top: 25px;
-    right: 15px;
+@media (max-width: 500px) {
+  .header {
+    background-color: #f7f7f7;
+    .toggle-menu {
+      position: absolute;
+      top: 25px;
+      right: 15px;
+    }
   }
-}
 }
 </style>

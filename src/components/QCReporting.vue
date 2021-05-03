@@ -61,7 +61,7 @@
       <Button
         class="myBtn"
         label="צרף תמונות"
-        @click="addPoto"
+        @click="addPoto($event)"
         icon="pi pi-camera"
       />
       <Button
@@ -72,6 +72,7 @@
       />
     </div>
   </div>
+  <ConfirmPopup class="max-z-index" />
 </template>
 
 <script>
@@ -83,7 +84,12 @@ import Button from "primevue/button";
 import Textarea from "primevue/textarea";
 import { callProc, apiParam, apiPType } from "../services/APointAPI";
 import { mapState, mapGetters } from "vuex";
+import ConfirmPopup from "primevue/confirmpopup";
+import { qcStatuses } from "../scripts/enums.js";
+import { spinnerInstances } from "../scripts/enums.js";
+
 export default {
+  name: "QCReporting",
   components: {
     APointDropdown,
     APointTextbox,
@@ -91,11 +97,12 @@ export default {
     Textarea,
     RadioButton,
     Button,
+    ConfirmPopup
   },
   props: {
-    qualityControl: { type: Object, required: true },
+    qualityControl: { type: Object, required: true }
   },
-  emits: ["closeReporting"],
+  emits: ["closeReporting", "addPoto"],
   data() {
     return {
       fields: [
@@ -110,7 +117,7 @@ export default {
           ControlSource: null,
           RowSource: [],
           Enabled: true,
-          Name: "status",
+          Name: "status"
         },
         {
           num: 2,
@@ -122,7 +129,7 @@ export default {
           ControlSource: null,
           Enabled: true,
           Locked: false,
-          Name: "action_performed",
+          Name: "action_performed"
         },
 
         {
@@ -138,23 +145,28 @@ export default {
           ControlSource: null,
           RowSource: [],
           Enabled: true,
-          Name: "responsible",
-        },
+          Name: "responsible"
+        }
       ],
       fields_enum: {
         e_status: 1,
         e_action_performed: 2,
-        e_responsible: 3,
-      },
+        e_responsible: 3
+      }
     };
   },
   mounted() {
-    this.$store.commit("main/setSpinner", true);
+    this.$store.commit("main/setSpinner", {
+      id: spinnerInstances.e_QCReporting_loadDdl,
+      flag: true
+    });
     let loadData = () => {
       this.getField(
         this.fields_enum.e_status
       ).RowSource = this.getStatuses().filter(
-        (status) => status.status_id !== 1100 && status.status_id !== 1109
+        status =>
+          status.status_id !== qcStatuses.e_draft &&
+          status.status_id !== qcStatuses.e_close
       );
       this.getField(
         this.fields_enum.e_responsible
@@ -167,7 +179,10 @@ export default {
       if (this.isDataLoaded === false && i < 30000) return;
       clearInterval(interval);
       loadData();
-      this.$store.commit("main/setSpinner", false);
+      this.$store.commit("main/setSpinner", {
+        id: spinnerInstances.e_QCReporting_loadDdl,
+        flag: false
+      });
     }, 1);
 
     this.getField(
@@ -179,12 +194,12 @@ export default {
   },
   methods: {
     getField(num) {
-      return this.fields.find((f) => f.num === num);
+      return this.fields.find(f => f.num === num);
     },
     checkData() {
       let flag = false;
 
-      this.fields.forEach((f) => {
+      this.fields.forEach(f => {
         if (f.required && (f.ControlSource == null || f.ControlSource == "")) {
           f.check = true;
           flag = true;
@@ -192,7 +207,7 @@ export default {
       });
       return flag;
     },
-    saveData(blnCloseQc) {
+    saveData(blnCloseQc, blnAddPoto) {
       if (this.checkData() === true) return;
       let procParams = [
         apiParam("user_exec", this.userID, apiPType.Int),
@@ -204,7 +219,7 @@ export default {
         apiParam(
           "status_id",
           blnCloseQc === true
-            ? 1109
+            ? qcStatuses.e_close
             : this.getField(this.fields_enum.e_status).ControlSource,
           apiPType.Int
         ),
@@ -217,10 +232,10 @@ export default {
           "action_performed",
           this.getField(this.fields_enum.e_action_performed).ControlSource,
           apiPType.NVarChar
-        ),
+        )
       ];
       callProc("pr_qc_reporting_ins", procParams)
-        .then((result) => {
+        .then(result => {
           result = JSON.parse(result);
           if (result.procReturnValue === 0) {
             this.$toast.add({
@@ -228,21 +243,26 @@ export default {
               summary: "הדיווח נשמר בהצלחה",
               detail: "",
               life: 3000,
-              closable: true,
+              closable: true
             });
-            this.$emit("closeReporting", {
+            let updatedQC = {
               quality_control_id: this.qualityControl.quality_control_id,
               status_id: this.getField(this.fields_enum.e_status).ControlSource,
               responsible_id: this.getField(this.fields_enum.e_responsible)
-                .ControlSource,
-            });
+                .ControlSource
+            };
+            if (blnAddPoto) {
+              this.$emit("addPoto", updatedQC);
+            } else {
+              this.$emit("closeReporting", updatedQC);
+            }
           } else {
             this.$toast.add({
               severity: "error",
               summary: "שגיאה בעדכון דיווח- פנה לתמיכה",
               detail: "",
               life: 10000,
-              closable: true,
+              closable: true
             });
             console.log(
               "pr_qc_reporting_ins-error-procReturnValue",
@@ -250,13 +270,13 @@ export default {
             );
           }
         })
-        .catch((error) => {
+        .catch(error => {
           this.$toast.add({
             severity: "error",
             summary: "שגיאה - פנה לתמיכה",
             detail: error,
             life: 10000,
-            closable: true,
+            closable: true
           });
           console.log("pr_qc_reporting_ins-error", error);
         });
@@ -267,22 +287,60 @@ export default {
     closeQC() {
       this.saveData(true);
     },
-    addPoto() {},
+    addPoto(event) {
+      // let dataChanged = false;
+      // if (
+      //   this.getField(this.fields_enum.e_status).ControlSource !==
+      //   this.qualityControl.status_id
+      // )
+      //   dataChanged = true;
+      // else if (
+      //   this.getField(this.fields_enum.e_responsible).ControlSource !==
+      //   this.qualityControl.responsible_id
+      // )
+      //   dataChanged = true;
+      // else if (
+      //   this.getField(this.fields_enum.e_responsible).ControlSource !== null
+      // )
+      //   dataChanged = true;
+      if (this.checkData() === true)
+        this.$confirm.require({
+          target: event.currentTarget,
+          message: "לא ניתן לשמור האם לצאת ללא שמירה?",
+          icon: "pi pi-exclamation-triangle",
+          accept: () => {
+            this.$emit("addPoto");
+          },
+          reject: () => {
+            return;
+          }
+        });
+      else this.saveData(false, true);
+    }
   },
   computed: {
     ...mapState({
-      userID: (state) => +state.api.userID,
-      isDataLoaded: (state) => state.qc.isDataLoaded,
+      userID: state => +state.api.userID,
+      isDataLoaded: state => state.qc.isDataLoaded
     }),
     ...mapGetters({
       getStatuses: "qc/getStatuses",
-      getResponsibles: "qc/getResponsibles",
-    }),
+      getResponsibles: "qc/getResponsibles"
+    })
   },
+  unmounted() {
+    this.$store.commit("main/setSpinner", {
+      id: spinnerInstances.e_QCReporting_loadDdl,
+      flag: false
+    });
+  }
 };
 </script>
 
 <style scoped lang="scss">
+.max-z-index {
+  z-index: 1200;
+}
 .radioLabel {
   margin-right: 5px;
 }
@@ -305,6 +363,4 @@ export default {
     padding: 10px;
   }
 }
-  .report-container{
-  }
 </style>

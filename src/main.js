@@ -20,6 +20,7 @@ import ToastService from "primevue/toastservice";
 import Toast from "primevue/toast";
 import Ripple from "primevue/ripple";
 import Tooltip from "primevue/tooltip";
+import ConfirmationService from "primevue/confirmationservice";
 // import CodeHighlight from './AppCodeHighlight'
 
 import "primevue/resources/primevue.min.css"; //required: PrimeVue components
@@ -32,7 +33,7 @@ import "./registerServiceWorker";
 
 router.beforeEach(function(to, from, next) {
   //window.scrollTo(0, 0); //גלילה של החלון להתחלה
-  // console.log("router.beforeEach");
+  console.log("router.beforeEach", to, from);
   store.commit("main/setAppHeader", "");
 
   next();
@@ -47,7 +48,7 @@ app.use(ToastService).use(PrimeVue, {
   locale: primeVueLocale,
   ripple: true
 });
-
+app.use(ConfirmationService);
 app.config.globalProperties.$appState = reactive({ inputStyle: "outlined" });
 // app.config.globalProperties.$primevue.ripple = true;
 

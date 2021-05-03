@@ -37,6 +37,7 @@
 import CIcon from "./c-icon";
 
 export default {
+  name: "c-footer",
   props: {
     screen: {
       type: String,

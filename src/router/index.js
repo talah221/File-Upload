@@ -7,7 +7,6 @@ import Options from "../views/Options.vue";
 import AttendanceReporting from "../views/AttendanceReporting.vue";
 import QualityControl from "../views/QualityControl.vue";
 import QualityControls from "../views/QualityControls.vue";
-import Plan from "../views/Plan.vue";
 
 const routes = [
   {
@@ -34,12 +33,6 @@ const routes = [
     path: "/QualityControl",
     name: "QualityControl",
     component: QualityControl
-  },
-
-  {
-    path: "/Plan/:id",
-    name: "Plan",
-    component: Plan
   },
   {
     path: "/QualityControls/:filter",

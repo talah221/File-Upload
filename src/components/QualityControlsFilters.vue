@@ -112,8 +112,10 @@ import MultiSelect from "primevue/multiselect";
 import AutoComplete from "primevue/autocomplete";
 import Chip from "primevue/chip";
 import { mapState, mapGetters } from "vuex";
+import { spinnerInstances } from "../scripts/enums.js";
 
 export default {
+  name: "QualityControlsFilters",
   components: {
     APointTextbox,
     APointCheckbox,
@@ -129,7 +131,6 @@ export default {
   },
   emits: ["showData", "updateFilters", "clearFilters"],
   data() {
-    // todo בדיקות תקינות על תאריכים
     return {
       showControls: {
         optionLabel: "lbl",
@@ -203,7 +204,7 @@ export default {
           check: false,
           required: false,
           Caption: "מתאריך",
-          manualInput: true,
+          manualInput: false,
           showButtonBar: true,
           Format: "Long Date",
           ControlSource: null,
@@ -218,7 +219,7 @@ export default {
           check: false,
           required: false,
           Caption: "עד תאריך",
-          manualInput: true,
+          manualInput: false,
           showButtonBar: true,
           Format: "Long Date",
           ControlSource: null,
@@ -383,7 +384,7 @@ export default {
           Caption: "יעד לביצוע",
           minDate: null,
           maxDate: null,
-          manualInput: true,
+          manualInput: false,
           showButtonBar: true,
           Format: "Long Date",
           ControlSource: "",
@@ -519,7 +520,6 @@ export default {
     };
   },
   mounted() {
-    console.log("Here");
     this.getDdlData();
     this.setBasicFilter();
   },
@@ -583,15 +583,14 @@ export default {
     },
 
     getDdlData() {
-      this.$store.commit("main/setSpinner", true);
+      this.$store.commit("main/setSpinner", {
+        id: spinnerInstances.e_QualityControlsFilters_loadDdl,
+        flag: true
+      });
       let loadData = () => {
-        //todo get projects list by userLogin - callproc
-        this.getField(this.fields_enum.e_projectId).RowSource = [
-          { ProjectId: 146, ProjectName: "אדרת הכרמל" },
-          { ProjectId: 102, ProjectName: "אדרת הכפר" },
-          { ProjectId: 91, ProjectName: "וולפסון" }
-        ];
-
+        this.getField(
+          this.fields_enum.e_projectId
+        ).RowSource = this.getProjectsUser();
         this.getField(this.fields_enum.e_status).RowSource = this.getStatuses();
         this.getField(this.fields_enum.e_zone1).allRowSource = this.getZone1();
         this.getField(
@@ -637,7 +636,10 @@ export default {
         if (this.isDataLoaded === false && i < 30000) return;
         clearInterval(interval);
         loadData();
-        this.$store.commit("main/setSpinner", false);
+        this.$store.commit("main/setSpinner", {
+          id: spinnerInstances.e_QualityControlsFilters_loadDdl,
+          flag: false
+        });
       }, 1);
     },
     getField(num) {
@@ -758,6 +760,7 @@ export default {
     }
   },
   computed: {
+    //todo להעביר את תצוגת הצ'יפים למסך הראשי
     filterToShow() {
       return this.fields
         .filter(f => this.filters[f.Name] !== undefined)
@@ -795,13 +798,20 @@ export default {
       getImpairment: "qc/getImpairment",
       getHardwareLevel: "qc/getHardwareLevel",
       getAllUsers: "qc/getAllUsers",
-      getNotDone: "qc/getNotDone"
+      getNotDone: "qc/getNotDone",
+      getProjectsUser: "qc/getProjectsUser"
     })
   },
   watch: {
     "$route.params.filter"() {
       this.setBasicFilter();
     }
+  },
+  unmounted() {
+    this.$store.commit("main/setSpinner", {
+      id: spinnerInstances.e_QualityControlsFilters_loadDdl,
+      flag: false
+    });
   }
 };
 </script>

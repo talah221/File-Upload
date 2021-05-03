@@ -31,6 +31,7 @@ import { callProc, apiParam, apiPType } from "../services/APointAPI";
 import { mapState } from "vuex";
 
 export default {
+  name: "SelectPlan",
   props: {
     apartmentId: {
       type: Number
@@ -62,7 +63,6 @@ export default {
         if (result.Table.length > 0) {
           this.allPlans = result.Table;
         } else {
-          console.log("pr_qc_get_planes-loload failad");
           this.$toast.add({
             severity: "warn",
             summary: "בחירת תוכנית",

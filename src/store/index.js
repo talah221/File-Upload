@@ -1,13 +1,14 @@
 import { createStore } from "vuex";
 import { apiStore } from "./apiStore";
 import { qualityControl } from "./qualityControlStore";
-
+import { spinnerInstances } from "../scripts/enums.js";
 const mainStore = {
   namespaced: true,
   state: {
     isDev() {
-      //TODO: add window.location = localhost
-      return true;
+      return window.location.host.substring(0, 9) === "localhost"
+        ? true
+        : false;
     },
     baseHost() {
       if (this.isDev()) return "https://ramaderet.apoint.co.il/";
@@ -23,16 +24,37 @@ const mainStore = {
       "נסיון הוספת "
     ],
     showMenu: false,
+    appHeader: "",
     displaySpinner: false,
-    appHeader: ""
+    displaySpinnerObj: {
+      [spinnerInstances.e_testLogin]: false,
+      [spinnerInstances.e_QCReporting_loadDdl]: false,
+      [spinnerInstances.e_QualityControlsFilters_loadDdl]: false,
+      [spinnerInstances.e_QualityControl_loadDdl]: false
+    }
   },
   mutations: {
     setShowMenu: (state, payload) => (state.showMenu = payload),
-    setSpinner: (state, flag) => {
-      // console.log("setSpinner", "from", state.displaySpinner, "to", flag);
-      state.displaySpinner = flag;
+    setSpinner: (state, payload) => {
+      state.displaySpinnerObj[payload.id] = payload.flag;
+
+      let displaySpinner = false;
+      if (!payload.flag) {
+        Object.values(state.displaySpinnerObj).every(val => {
+          if (val) {
+            displaySpinner = true;
+            return false;
+          }
+          return true;
+        });
+      } else {
+        displaySpinner = true;
+      }
+
+      state.displaySpinner = displaySpinner;
     },
     setAppHeader(state, payload) {
+      // console.log("setAppHeader", "from", state.appHeader, "to", payload);
       if (state.appHeader === payload) return;
       state.appHeader = payload;
     }

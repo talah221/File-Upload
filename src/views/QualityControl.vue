@@ -1,5 +1,4 @@
 <template>
-  <!-- <Button label="test" @click="apartmentId" /> -->
   <input
     type="file"
     v-show="false"
@@ -7,8 +6,40 @@
     ref="evClickFile"
     accept="image/*"
   />
-
-  <div>
+  <Dialog v-model:visible="displaySelectPlan" modal>
+    <template #header>
+      <h3 style="margin: auto">בחירת תוכנית</h3>
+    </template>
+    <div>
+      <SelectPlan
+        :apartmentId="apartmentId"
+        @displayPlan="displayPlan"
+        @close="displaySelectPlan = false"
+      ></SelectPlan>
+    </div>
+  </Dialog>
+  <Dialog v-model:visible="displayReporting" modal>
+    <template #header>
+      <h3 style="margin: auto">
+        דיווח טיפול בבקרה מס' {{ qualityControl.quality_control_id }}
+      </h3>
+    </template>
+    <div>
+      <QCReporting
+        :qualityControl="qcObject"
+        @closeReporting="closeReporting"
+        @addPoto="closeReportingAndAddPoto"
+      />
+    </div>
+    <template #footer> </template>
+  </Dialog>
+  <ImageEditor
+    v-if="imageEditor.displayImageEditor"
+    @saveImage="saveImage"
+    :dataUrl="imageEditor.dataUrl"
+    @cancel="displayReporting = false"
+  ></ImageEditor>
+  <div class="container" v-if="!isDesktop || qcMode === qcModes_enum.e_new">
     <div v-if="!imageEditor.displayImageEditor">
       <Button
         v-if="qcMode !== qcModes_enum.e_new"
@@ -48,30 +79,16 @@
               :field="field"
               :model-value="field.ControlSource"
               @update:model-value="updateField(field, $event)"
-              style="resize:none"
+              style="resize: none"
               :disabled="!field.Enabled || field.Locked"
             ></Textarea>
-            <!-- <div>{{ field.ControlSource }}</div> -->
+            <!-- <div>{{ field.RowSource }}</div> -->
             <span class="error p-mt-1 p-mr-2" v-if="field.check">
               * שדה חובה
             </span>
           </div>
         </div>
       </div>
-      <Dialog v-model:visible="displaySelectPlan" modal>
-        <template #header>
-          <h3 style="margin: auto;">
-            בחירת תוכנית
-          </h3>
-        </template>
-        <div>
-          <SelectPlan
-            :apartmentId="apartmentId"
-            @displayPlan="displayPlan"
-            @close="displaySelectPlan = false"
-          ></SelectPlan>
-        </div>
-      </Dialog>
 
       <div v-if="qcMode === qcModes_enum.e_new">
         <QualityControlAdd
@@ -89,30 +106,110 @@
           :apartmentId="apartmentId"
         />
       </div>
-      <div v-else>
-        close qc
+      <div v-else-if="qcMode === qcModes_enum.e_close">close qc</div>
+      <div
+        class="the-files"
+        v-for="attFile of attached_files"
+        :key="attFile.id"
+      >
+        <img :src="attFile.fileName" :alt="attFile.SrcFile" />
       </div>
-      <Dialog v-model:visible="displayReporting" modal>
-        <template #header>
-          <h3 style="margin: auto;">
-            דיווח טיפול בבקרה מס' {{ qualityControl.quality_control_id }}
-          </h3>
-        </template>
-        <div>
-          <QCReporting
-            :qualityControl="qcObject"
-            @closeReporting="closeReporting"
-          />
-        </div>
-        <template #footer> </template>
-      </Dialog>
     </div>
-    <ImageEditor
-      v-if="imageEditor.displayImageEditor"
-      @saveImage="saveImage"
-      :dataUrl="imageEditor.dataUrl"
-    ></ImageEditor>
   </div>
+  <section
+    class="quality-control-dekstop"
+    v-if="
+      isDesktop &&
+        qcMode &&
+        qcMode !== qcModes_enum.e_new &&
+        !imageEditor.displayImageEditor
+    "
+  >
+    <div class="qc-container">
+      <div class="qc-preview">
+        <h5>
+          מספר בקרה: <span>{{ qualityControl.quality_control_id }}</span>
+        </h5>
+        <h5>
+          תאריך פתיחה: <span>{{ qualityControl.formattedCreate_date }}</span>
+        </h5>
+      </div>
+      <div class="qc-info">
+        <div class="info-first">
+          <h5>
+            סטטוס: <span> {{ qualityControl.status_name }}</span>
+          </h5>
+          <h5>
+            ימי פיגור: <span> {{ qualityControl.pigur }} </span>
+          </h5>
+          <h5>
+            פרק: <span>{{ qualityControl.chapter_name }}</span>
+          </h5>
+          <h5>
+            סוג ליקוי: <span>{{ qualityControl.chapter_name }}</span>
+          </h5>
+          <h5>
+            רמת חומרה: <span>{{ qualityControl.impairment_desc }}</span>
+          </h5>
+
+          <div class="info-location">
+            <h5>מיקום:</h5>
+            <h5>
+              חלל 1: <span>{{ qualityControl.project_zone1_name }}</span>
+            </h5>
+            <h5>
+              חלל 2: <span>{{ qualityControl.project_zone2_name }}</span>
+            </h5>
+            <h5>
+              חלל 3: <span> {{ qualityControl.project_zone3_name }}</span>
+            </h5>
+          </div>
+        </div>
+        <div class="info-second-and-btns">
+          <div class="info-second">
+            <h5>
+              פותח הבקרה: <span>{{ qualityControl.creater_name }}</span>
+            </h5>
+            <h5>
+              אחראי לביצוע: <span>{{ qualityControl.responsible_name }}</span>
+            </h5>
+            <h5>
+              יעד לביצוע: <span>{{ qualityControl.formattedPlaned_date }}</span>
+            </h5>
+          </div>
+          <div class="btns">
+            <QualityControlOpen
+              v-if="qcMode === qcModes_enum.e_open"
+              @plans="selectPlan"
+              @reporting="reporting"
+              :apartmentId="apartmentId"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="qc-desc">
+        <Textarea
+          :value="qualityControl.impairment_desc"
+          :autoResize="false"
+          disabled
+          rows="1"
+          cols="70"
+        />
+      </div>
+      <div class="qc-files">
+        <h5>קבצים מצורפים:</h5>
+        <div class="the-files">
+          <!-- <img
+            v-for="attFile of attached_files"
+            :key="attFile.id"
+            :src="'data:image/png;base64,' + attFile.fileName"
+            :alt="attFile.SrcFile"
+          /> -->
+          <carousel :items="attFielsImg" :numScroll="3" :numVisible="3" />
+        </div>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -130,9 +227,12 @@ import Dialog from "primevue/dialog";
 import ImageEditor from "@/components/ImageEditor.vue";
 import QualityControlOpen from "@/components/QualityControlOpen.vue";
 import QCReporting from "@/components/QCReporting.vue";
-
-//todo בבקרה פתוחה וסגורה להציג לחצן חזור
+import { qcStatuses, fileTypes } from "@/scripts/enums.js";
+import Carousel from "../components/Carousel.vue";
+import { spinnerInstances } from "../scripts/enums.js";
+//todo עיצוב תמונות מצורפות (שתי מקומות)
 export default {
+  name: "QualityControl",
   components: {
     APointTextbox,
     APointCheckbox,
@@ -144,7 +244,8 @@ export default {
     SelectPlan,
     ImageEditor,
     QualityControlOpen,
-    QCReporting
+    QCReporting,
+    Carousel
   },
   props: {
     qualityControl: {
@@ -152,7 +253,7 @@ export default {
       require: false
     }
   },
-  emits: ["close"],
+  emits: ["close", "closeReportingAndAddPoto"],
   data() {
     return {
       showProjectList: true,
@@ -192,7 +293,7 @@ export default {
           RowSource: [],
           Enabled: true,
           Name: "status",
-          DefaultValue: 1100,
+          DefaultValue: qcStatuses.e_draft,
           AllRowSource: null
         },
         {
@@ -289,7 +390,7 @@ export default {
           Caption: "יעד לביצוע:",
           minDate: null,
           maxDate: null,
-          manualInput: true,
+          manualInput: false,
           showButtonBar: true,
           Format: "Long Date",
           ControlSource: "",
@@ -344,6 +445,30 @@ export default {
           apointType: "text",
           check: false,
           required: false,
+          Caption: "סוגר הבקרה",
+          Format: "",
+          ControlSource: null,
+          Enabled: true,
+          Locked: false,
+          Name: "closed_name"
+        },
+        {
+          num: 13,
+          apointType: "text",
+          check: false,
+          required: false,
+          Caption: "תאריך סגירת הבקרה",
+          Format: "",
+          ControlSource: null,
+          Enabled: true,
+          Locked: false,
+          Name: "formattedCreate_date"
+        },
+        {
+          num: 14,
+          apointType: "text",
+          check: false,
+          required: false,
           Caption: "מספר בקרה",
           Format: "",
           ControlSource: null,
@@ -364,7 +489,9 @@ export default {
         e_impairment: 9,
         e_severityLevel: 10,
         e_description: 11,
-        e_qc_id: 12
+        e_closed_name: 12,
+        e_closed_date: 13,
+        e_qc_id: 14
       },
       qcMode: null,
       qcModes_enum: {
@@ -379,94 +506,135 @@ export default {
         dataUrl: "",
         fileName: ""
       },
-      displayReporting: false
+      displayReporting: false,
+      isDesktop: false,
+      attached_files: []
     };
   },
+  created() {
+    this.isDesktop = window.innerWidth > 896;
+  },
   mounted() {
-    let header = "";
-
     this.getDdlData();
-
-    if (this.qualityControl === undefined) {
-      //בקרה חדשה
-      this.qcMode = this.qcModes_enum.e_new;
-      header = "בקרה חדשה";
-      this.getField(this.fields_enum.e_qc_id).ControlSource = null;
-      //הצגת בחירת פרויקט רק אם למשתמש יש הרשאה על יותר מפרויקט אחד
-      if (this.getField(this.fields_enum.e_projectId).RowSource.length === 1) {
-        this.getField(
-          this.fields_enum.e_projectId
-        ).ControlSource = this.getField(
-          this.fields_enum.e_projectId
-        ).RowSource[0].ProjectId;
-      }
-    } else {
-      //בקרה פתוחה/סגורה
-      header = "בקרה מס' " + this.qualityControl.quality_control_id;
-      if (this.qualityControl.status_id === 1109) {
-        this.qcMode = this.qcModes_enum.e_close;
-      } else {
-        this.qcMode = this.qcModes_enum.e_open;
-      }
-      //הכנסת נתונים של הבקרה
-      this.fields.forEach(field => {
-        switch (field.num) {
-          case this.fields_enum.e_qc_id:
-            field.ControlSource = this.qualityControl.quality_control_id;
-            break;
-
-          case this.fields_enum.e_status:
-            field.ControlSource = this.qualityControl.status_id;
-            break;
-
-          case this.fields_enum.e_projectId:
-            field.ControlSource = this.qualityControl.project_id;
-            break;
-
-          case this.fields_enum.e_zone1:
-            field.ControlSource = this.qualityControl.zone_1_id;
-            this.filterZone2();
-            break;
-
-          case this.fields_enum.e_zone2:
-            field.ControlSource = this.qualityControl.zone_2_id;
-            this.filterZone3();
-            break;
-
-          case this.fields_enum.e_zone3:
-            field.ControlSource = this.qualityControl.zone_3_id;
-            break;
-
-          case this.fields_enum.e_chapter:
-            field.ControlSource = this.qualityControl.chapter_id;
-            break;
-
-          case this.fields_enum.e_responsibles:
-            field.ControlSource = this.qualityControl.responsible_id;
-            break;
-
-          case this.fields_enum.e_planedDate:
-            field.ControlSource = new Date(this.qualityControl.planed_date);
-            break;
-
-          case this.fields_enum.e_impairment:
-            field.ControlSource = this.qualityControl.impairment_id;
-            break;
-
-          case this.fields_enum.e_severityLevel:
-            field.ControlSource = this.qualityControl.hardware_level_id;
-            break;
-
-          case this.fields_enum.e_description:
-            field.ControlSource = this.qualityControl.quality_control_desc;
-            break;
-        }
-      });
-    }
-    this.$store.commit("main/setAppHeader", header);
-    this.setPermission();
+    this.getQcData();
   },
   methods: {
+    getQcData() {
+      let header = "";
+
+      if (this.qualityControl === undefined) {
+        //בקרה חדשה
+        this.qcMode = this.qcModes_enum.e_new;
+        header = "בקרה חדשה";
+        this.getField(this.fields_enum.e_qc_id).ControlSource = null;
+        //הצגת בחירת פרויקט רק אם למשתמש יש הרשאה על יותר מפרויקט אחד
+        if (
+          this.getField(this.fields_enum.e_projectId).RowSource.length === 1
+        ) {
+          this.getField(
+            this.fields_enum.e_projectId
+          ).ControlSource = this.getField(
+            this.fields_enum.e_projectId
+          ).RowSource[0].ProjectId;
+        }
+      } else {
+        //בקרה פתוחה/סגורה
+        header = "בקרה מס' " + this.qualityControl.quality_control_id;
+
+        if (this.qualityControl.status_id === qcStatuses.e_close) {
+          this.qcMode = this.qcModes_enum.e_close;
+        } else {
+          this.qcMode = this.qcModes_enum.e_open;
+        }
+        //הכנסת נתונים של הבקרה
+        this.fields.forEach(field => {
+          switch (field.num) {
+            case this.fields_enum.e_qc_id:
+              field.ControlSource = this.qualityControl.quality_control_id;
+              break;
+
+            case this.fields_enum.e_status:
+              field.ControlSource = this.qualityControl.status_id;
+              break;
+
+            case this.fields_enum.e_projectId:
+              field.ControlSource = this.qualityControl.project_id;
+              break;
+
+            case this.fields_enum.e_zone1:
+              field.ControlSource = this.qualityControl.zone_1_id;
+              this.filterZone2();
+              break;
+
+            case this.fields_enum.e_zone2:
+              field.ControlSource = this.qualityControl.zone_2_id;
+              this.filterZone3();
+              break;
+
+            case this.fields_enum.e_zone3:
+              field.ControlSource = this.qualityControl.zone_3_id;
+              break;
+
+            case this.fields_enum.e_chapter:
+              field.ControlSource = this.qualityControl.chapter_id;
+              break;
+
+            case this.fields_enum.e_responsibles:
+              field.ControlSource = this.qualityControl.responsible_id;
+              break;
+
+            case this.fields_enum.e_planedDate:
+              field.ControlSource = new Date(this.qualityControl.planed_date);
+              break;
+
+            case this.fields_enum.e_impairment:
+              field.ControlSource = this.qualityControl.impairment_id;
+              break;
+
+            case this.fields_enum.e_severityLevel:
+              field.ControlSource = this.qualityControl.hardware_level_id;
+              break;
+
+            case this.fields_enum.e_description:
+              field.ControlSource = this.qualityControl.quality_control_desc;
+              break;
+
+            case this.fields_enum.e_closed_name:
+              field.ControlSource = this.qualityControl.closed_name;
+              break;
+
+            case this.fields_enum.e_closed_date:
+              field.ControlSource = this.qualityControl.formattedCreate_date;
+              break;
+          }
+        });
+        let procParams = [
+          apiParam("user_exec", this.userID, apiPType.Int),
+          apiParam(
+            "quality_control_id",
+            this.qualityControl.quality_control_id,
+            apiPType.Int
+          )
+        ];
+        callProc("pr_qc_get_attached_files", procParams)
+          .then(result => {
+            result = JSON.parse(result);
+            this.attached_files = result.Table;
+          })
+          .catch(error => {
+            this.$toast.add({
+              severity: "error",
+              summary: "שגיאה - פנה לתמיכה",
+              detail: error,
+              life: 10000,
+              closable: true
+            });
+            console.log("pr_qc_reporting_ins-error", error);
+          });
+      }
+      this.$store.commit("main/setAppHeader", header);
+      this.setPermission();
+    },
     clickFile() {
       this.$refs.evClickFile.click();
     },
@@ -495,17 +663,16 @@ export default {
       });
       return flag;
     },
-
     getDdlData() {
-      this.$store.commit("main/setSpinner", true);
+      this.$store.commit("main/setSpinner", {
+        id: spinnerInstances.e_QualityControl_loadDdl,
+        flag: true
+      });
 
       let loadData = () => {
-        //todo get projects list by userLogin - callproc
-        this.getField(this.fields_enum.e_projectId).RowSource = [
-          { ProjectId: 146, ProjectName: "אדרת הכרמל" },
-          { ProjectId: 102, ProjectName: "אדרת הכפר" },
-          { ProjectId: 91, ProjectName: "וולפסון" }
-        ];
+        this.getField(
+          this.fields_enum.e_projectId
+        ).RowSource = this.getProjectsUser();
         this.getField(
           this.fields_enum.e_status
         ).AllRowSource = this.getAllStatuses();
@@ -530,7 +697,10 @@ export default {
         if (this.isDataLoaded === false && i < 30000) return;
         clearInterval(interval);
         loadData();
-        this.$store.commit("main/setSpinner", false);
+        this.$store.commit("main/setSpinner", {
+          id: spinnerInstances.e_QualityControl_loadDdl,
+          flag: false
+        });
       }, 1);
     },
     getDdlDataLinkedToProject() {
@@ -566,8 +736,10 @@ export default {
           life: 10000,
           closable: true
         });
-
-        this.$router.push({ name: "Home" });
+        this.$router.push({
+          name: "QualityControls",
+          params: { filter: "ICreated" }
+        });
       };
 
       this.saveData(funcOnSucces);
@@ -699,7 +871,12 @@ export default {
     getStatus() {
       if (this.qcMode === this.qcModes_enum.e_new) {
         return this.getField(this.fields_enum.e_status).AllRowSource.filter(
-          status => [1100, 1107, 1108].indexOf(status.status_id) >= 0
+          status =>
+            [
+              qcStatuses.e_draft,
+              qcStatuses.e_existing_situation,
+              qcStatuses.e_reminder
+            ].indexOf(status.status_id) >= 0
         );
       }
       return this.getField(this.fields_enum.e_status).AllRowSource;
@@ -716,11 +893,32 @@ export default {
       this.displaySelectPlan = false;
       if (this.selectedPlan != null) {
         this.saveData(() => {
-          //todo לשנות לנתונים אמיתיים - לקבל את ה IMAGE_URL של התוכנית שנבחרה
-          this.imageEditor.dataUrl =
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAYAAABxyNlsAAAD+UlEQVR4Xu3Y3U5cVRiH8WftPXv2nmEopUEwBVOZALFii0ar/bCNMWn86JEnnnjSy/AOvAAvoDfgmTGa2mgNmqhQW4uWNqaAmRiDUtphYPb3Xs0MTTCGNkD6HvHO8eY/4cfDypox6fIfNl1pUDo0jAl6cYMecH2MWwLjgDHoa28Cpn131q5PX6Jy/B3IcwhXybMMb+AIfv0EbrVfgfdmi8nCNfvg8084eOFj8tUGG3NfYdIQt3cQt/8wwcRZnGrfHuf3948ZmyW2eflT/ImzhAuz2LhF37mLYAuShRnwAoKxUxi/RwveZSvG5plt3/ySaPE63uAoJgkpDdbxRl7C5inpwk84PYcoDU/i1AYwjrPLt9i/jxtrC5v8Nc/a9CUOnPoIp3eA9M/r4Dh4I8cwjkvSuIkxThfYPXhYgXfYi7GdV9QinPsam8dUpi5gs4S08StFtE5l/DTWQNqYw2Yp5SOv4PQ+o0fEDoA3cW2B3bhP+PsViiSmdvJDinije+baeIPqy+9TRC3ihRmMF+DX38AEtR3M7+9HuribBJZi7V/Wb3yBU/KoHnsXazOi299jjCF44RxFa4XozjRu55o2dhInOKAFP6Gf/+BuAufNf0gWZ8ijFsH4GYxXJlm6Qb6xCqXOhwsPu34PU+mjcvQtnB69Bz/O93+4jwpuPyBevEbeWqE6eZ4iDWnf+hZTKlMePkp8+7vuTaI8NEYweR5Truzv///H/Pbb4EL3DA6bxHd+IG0ud69o6b0GQf0EydI13Eov3shxors/4o2+jv/smOJuI7At7tYZvEJ79jPi+39Te+0DiuYyNosJJt7EVPtJFn/GFgXB+GnF3R3u1hkc/XaFrPPlztAowcQZ3P5hbNKmPXeZ0lAd/7kpxd097qMzeH2VaP4qtsgIXnwbx68R3fqmC1yZeg/j67Vsu7qecCxsPd45gzvXsPb8VQibkMYYv9L9wOH2DQH6teSecTevwZYibBIt/YIpcvznX8Wp9Svszu+5enQ+TYEdHQtP8w3305biCv61FVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XEHch0SKbRqgl+f2AAAAAElFTkSuQmCC";
-          this.imageEditor.fileName = this.selectedPlan.FileName;
-          this.imageEditor.displayImageEditor = true;
+          let procParams = [
+            apiParam("user_exec", this.userID, apiPType.Int),
+            apiParam("plan_id", plan.ID, apiPType.Int)
+          ];
+          // console.log("pr_qc_get_planes-procParams", procParams);
+          callProc("pr_qc_get_plan_file_name", procParams)
+            .then(result => {
+              result = JSON.parse(result);
+              //! todo error תמונות מצורפות- מציג תמונת שגיאת טעינת קובץ
+              if (result.Table.length > 0) {
+                this.imageEditor.dataUrl = result.Table[0].fileName;
+                // "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAYAAABxyNlsAAAD+UlEQVR4Xu3Y3U5cVRiH8WftPXv2nmEopUEwBVOZALFii0ar/bCNMWn86JEnnnjSy/AOvAAvoDfgmTGa2mgNmqhQW4uWNqaAmRiDUtphYPb3Xs0MTTCGNkD6HvHO8eY/4cfDypox6fIfNl1pUDo0jAl6cYMecH2MWwLjgDHoa28Cpn131q5PX6Jy/B3IcwhXybMMb+AIfv0EbrVfgfdmi8nCNfvg8084eOFj8tUGG3NfYdIQt3cQt/8wwcRZnGrfHuf3948ZmyW2eflT/ImzhAuz2LhF37mLYAuShRnwAoKxUxi/RwveZSvG5plt3/ySaPE63uAoJgkpDdbxRl7C5inpwk84PYcoDU/i1AYwjrPLt9i/jxtrC5v8Nc/a9CUOnPoIp3eA9M/r4Dh4I8cwjkvSuIkxThfYPXhYgXfYi7GdV9QinPsam8dUpi5gs4S08StFtE5l/DTWQNqYw2Yp5SOv4PQ+o0fEDoA3cW2B3bhP+PsViiSmdvJDinije+baeIPqy+9TRC3ihRmMF+DX38AEtR3M7+9HuribBJZi7V/Wb3yBU/KoHnsXazOi299jjCF44RxFa4XozjRu55o2dhInOKAFP6Gf/+BuAufNf0gWZ8ijFsH4GYxXJlm6Qb6xCqXOhwsPu34PU+mjcvQtnB69Bz/O93+4jwpuPyBevEbeWqE6eZ4iDWnf+hZTKlMePkp8+7vuTaI8NEYweR5Truzv///H/Pbb4EL3DA6bxHd+IG0ud69o6b0GQf0EydI13Eov3shxors/4o2+jv/smOJuI7At7tYZvEJ79jPi+39Te+0DiuYyNosJJt7EVPtJFn/GFgXB+GnF3R3u1hkc/XaFrPPlztAowcQZ3P5hbNKmPXeZ0lAd/7kpxd097qMzeH2VaP4qtsgIXnwbx68R3fqmC1yZeg/j67Vsu7qecCxsPd45gzvXsPb8VQibkMYYv9L9wOH2DQH6teSecTevwZYibBIt/YIpcvznX8Wp9Svszu+5enQ+TYEdHQtP8w3305biCv61FVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XEHch0SKbRqgl+f2AAAAAElFTkSuQmCC";
+                this.imageEditor.fileName = this.selectedPlan.FileName;
+                this.imageEditor.displayImageEditor = true;
+              }
+            })
+            .catch(error => {
+              console.log("pr_qc_get_plan_file_name-error", error);
+              this.$toast.add({
+                severity: "error",
+                summary: "שגיאה - פנה לתמיכה",
+                detail: error,
+                life: 10000,
+                closable: true
+              });
+            });
         });
       }
     },
@@ -751,10 +949,11 @@ export default {
             f.ControlSource = null;
         }
       });
+      this.getDdlDataLinkedToProject();
     },
     saveImage(imageUrl) {
       let parentType, parentID, createdBy, srcFileName, base64String;
-      parentType = 254;
+      parentType = fileTypes.e_qualityControl;
       parentID = this.getField(this.fields_enum.e_qc_id).ControlSource;
       createdBy = this.userID;
       srcFileName = this.imageEditor.fileName;
@@ -804,12 +1003,12 @@ export default {
       });
     },
     setPermission() {
-      // let enabledFields;
-      // if (this.qcMode === this.qcModes_enum.e_new) enabledFields = true;
-      // else enabledFields = false;
-      // this.fields.forEach(field => {
-      //   field.Enabled = enabledFields;
-      // });
+      let enabledFields;
+      if (this.qcMode === this.qcModes_enum.e_new) enabledFields = true;
+      else enabledFields = false;
+      this.fields.forEach(field => {
+        field.Enabled = enabledFields;
+      });
     },
     reporting() {
       this.displayReporting = true;
@@ -823,11 +1022,33 @@ export default {
     },
     backToParent() {
       this.$emit("close");
+    },
+    closeReportingAndAddPoto(qualityControl) {
+      if (qualityControl !== undefined) {
+        this.closeReporting(qualityControl);
+      } else {
+        this.displayReporting = false;
+      }
+
+      if (this.qualityControl !== undefined && this.isDesktop) {
+        //כאשר במסך גדול ונשלחו נתונים בפרופס מעבירים את בחירת הקובץ והצגת העורך לאבא
+        this.$emit("closeReportingAndAddPoto", qualityControl);
+      } else {
+        this.clickFile();
+      }
     }
   },
   computed: {
     detailsFields() {
-      return this.fields.filter(field => field.num < 12);
+      if (this.qcModes_enum.e_close === this.qcMode) {
+        return this.fields.filter(
+          field => field.num < this.fields_enum.e_qc_id
+        );
+      } else {
+        return this.fields.filter(
+          field => field.num < this.fields_enum.e_closed_name
+        );
+      }
     },
 
     // projects() {
@@ -867,6 +1088,9 @@ export default {
           .ControlSource
       };
     },
+    attFielsImg() {
+      return this.attached_files.map(i => i.fileName);
+    },
     ...mapState({
       userID: state => +state.api.userID,
       isDataLoaded: state => state.qc.isDataLoaded
@@ -874,7 +1098,6 @@ export default {
     ...mapGetters({
       getAllStatuses: "qc/getStatuses",
       getZone1: "qc/getZone1",
-      getZone5: "qc/getZone5",
       getZone2: "qc/getZone2",
       getZone3: "qc/getZone3",
       getChapters: "qc/getChapters",
@@ -882,13 +1105,25 @@ export default {
       getImpairment: "qc/getImpairment",
       getHardwareLevel: "qc/getHardwareLevel",
       getAllUsers: "qc/getAllUsers",
-      getNotDone: "qc/getNotDone"
+      getNotDone: "qc/getNotDone",
+      getProjectsUser: "qc/getProjectsUser"
     })
+  },
+  watch: {
+    qualityControl() {
+      this.getQcData();
+    }
+  },
+  unmounted() {
+    this.$store.commit("main/setSpinner", {
+      id: spinnerInstances.e_QualityControl_loadDdl,
+      flag: false
+    });
   }
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .error {
   color: red;
   font-size: 11px;
@@ -896,6 +1131,8 @@ export default {
 .single_form {
   margin-bottom: 20px;
 }
+
+/* זה הגדרות של דסקטופ שאת רשמת אבל אני מוסיף הגדרות נוספות מתחת */
 @media screen and (min-width: 896px) {
   .description {
     width: 97% !important;
@@ -906,6 +1143,52 @@ export default {
   }
   .description div {
     width: 91.5% !important;
+  }
+}
+.quality-control-dekstop {
+  width: 80%;
+  margin: 0 auto;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  .qc-container {
+    h5 {
+      margin: 0;
+      padding: 5px;
+      span {
+        font-weight: 700;
+      }
+    }
+    .qc-preview {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      width: 100%;
+    }
+    .qc-info {
+      margin-top: 35px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      .info-first {
+        .info-location {
+          margin-top: 25px;
+        }
+      }
+      .info-second-and-btns {
+        .info-second {
+        }
+        .btns {
+        }
+      }
+    }
+    .qc-files {
+      .the-files {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        // height: 300px;
+        img {
+        }
+      }
+    }
   }
 }
 </style>
