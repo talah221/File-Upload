@@ -1,30 +1,9 @@
 <template>
-  <button @click="zoom">zoom</button>
   <img :src="imgSrc" />
-  <!-- <div>
-    <button @click="imgSrc ="$refs.editor.saveImage()">הצג</button>
-    {{ mode }}
-    <Dropdown
-      :id="modes.id"
-      v-model="mode"
-      :options="modes"
-      optionLabel="lbl"
-      optionValue="id"
-      @change="$refs.editor.set(mode)"
-    ></Dropdown>
-  </div> -->
-  <div class="editorComponent">
-    <div class="editor-styling">
-      <div class="stroke-width-value">{{ strokeWidth }}</div>
-      <div class="textWidth">
-        <Slider
-          v-model="strokeWidth"
-          :min="1"
-          :max="30"
-          @change="changeStrokeWidth"
-          orientation="vertical"
-        />
-      </div>
+
+  <div class="editor-container">
+    <div class="editorComponent">
+      <div class="editor-styling"></div>
       <div class="colors">
         <div
           v-for="color in colors"
@@ -35,8 +14,8 @@
         ></div>
       </div>
     </div>
-    <div class="editor-container">
-      <div class="editor">
+    <div class="editor">
+      <div class="toolbarEditor">
         <div
           class="tool current-color"
           :style="{ 'background-color': activeColor }"
@@ -290,7 +269,11 @@
             ></path></svg
           ><!-- <i class="far fa-check-circle fa-lg"></i> -->
         </div>
-        <div class="tool crop" @click="setMode('crop')" v-if="mode != 'crop'">
+        <div
+          class="tool crop"
+          @click="setMode('crop')"
+          v-if="mode != 'crop' && false"
+        >
           <svg
             class="svg-inline--fa fa-crop-alt fa-w-16 fa-lg"
             aria-hidden="true"
@@ -389,9 +372,20 @@
       />
     </div>
   </div>
+  <div class="stroke-width-value">{{ strokeWidth }}</div>
+  <div class="textWidth">
+    <Slider
+      v-model="strokeWidth"
+      :min="1"
+      :max="30"
+      @change="changeStrokeWidth"
+      style="width: 50%;"
+    />
+  </div>
 </template>
 
 <script>
+//todo לחצן ביטול בבקרה חדשה לא עובד
 import Editor from "vue-image-markup";
 import Slider from "primevue/slider";
 // import Dropdown from "primevue/dropdown";
@@ -433,110 +427,11 @@ export default {
   mounted() {
     this.changeStrokeWidth();
     this.$refs.editor.drawImageInEditor(this.dataUrl);
-    // let img = new Image();
-    // img.src = this.dataUrl;
-    // img.onload = (event) => {
-    //   let from_element = document
-    //     .querySelector(".tool.save-image")
-    //     .getBoundingClientRect();
-    //   // debugger;
-    //   let html = document.querySelector("html").getBoundingClientRect();
-    //   let canvas_height = Math.abs(html.height - from_element.top - 100);
-    //   let canvas_width = Math.abs(
-    //     html.width - (html.width - from_element.right) - html.width * 0.05
-    //   );
-    //   let img_height = event.target.height;
-    //   let img_width = event.target.width;
-    //   let rotate = 0;
-
-    //   if (
-    //     (img_height > img_width && canvas_height > canvas_width) ||
-    //     (img_height < img_width && canvas_height < canvas_width)
-    //   ) {
-    //     rotate = 0;
-    //   } else {
-    //     let x;
-    //     x = img_width;
-    //     img_width = img_height;
-    //     img_height = x;
-    //     rotate = 270;
-    //   }
-
-    //   let img_difference = img_width / img_height;
-    //   let canvas_difference = canvas_width / canvas_height;
-
-    //   if (img_difference > canvas_difference) {
-    //     this.height = (canvas_width / img_width) * img_height;
-    //     this.width = canvas_width;
-    //   } else {
-    //     this.height = canvas_height;
-    //     this.width = (canvas_height / img_height) * img_width;
-    //   }
-    //   this.$refs.editor.setSizes(this.height, this.width);
-    //   // this.$refs.editor.setZoom(this.width / img_width);
-    //   this.$refs.editor.setBackgroundImage(this.dataUrl, {
-    //     scaleX: 1 / 1,
-    //     scaleY: 1 / 1,
-    //     angle: rotate * -1,
-    //     left: (event.target.height * rotate * (100 / 270)) / 100,
-    //   });
-    // };
   },
   watch: {
     mode: function() {}
   },
   methods: {
-    // drawImageInEditor(urlImg) {
-    //   let img = new Image();
-    //   img.src = urlImg;
-    //   //התאמת גודל התמונה למסך
-    //   img.onload = event => {
-    //     let from_element = document
-    //       .querySelector(".tool.save-image")
-    //       .getBoundingClientRect();
-
-    //     let html = document.querySelector("html").getBoundingClientRect();
-    //     let canvas_height = html.height - from_element.top - 100;
-    //     let canvas_width = html.width - (html.width - from_element.right) - 100;
-    //     let img_height = event.target.height;
-    //     let img_width = event.target.width;
-    //     let rotate = 0;
-
-    //     if (
-    //       (img_height > img_width && canvas_height > canvas_width) ||
-    //       (img_height < img_width && canvas_height < canvas_width)
-    //     ) {
-    //       rotate = 0;
-    //     } else {
-    //       let x;
-    //       x = img_width;
-    //       img_width = img_height;
-    //       img_height = x;
-    //       rotate = 270;
-    //     }
-
-    //     let img_difference = img_width / img_height;
-    //     let canvas_difference = canvas_width / canvas_height;
-
-    //     if (img_difference > canvas_difference) {
-    //       this.height = (canvas_width / img_width) * img_height;
-    //       this.width = canvas_width;
-    //     } else {
-    //       this.height = canvas_height;
-    //       this.width = (canvas_height / img_height) * img_width;
-    //     }
-    //     this.$refs.editor.setSizes(this.height, this.width);
-    //     this.$refs.editor.setZoom(this.width / img_width);
-    //     this.$refs.editor.setBackgroundImage(this.dataUrl, {
-    //       scaleX: 1 / 1,
-    //       scaleY: 1 / 1,
-    //       angle: rotate * -1,
-    //       left: (event.target.height * rotate * (100 / 270)) / 100
-    //     });
-    //   };
-    //   this.$refs.editor.setBackgroundImage(this.dataUrl);
-    // },
-
     changeColor(color) {
       this.activeColor = color;
       this.$refs.editor.changeColor(color);
@@ -602,20 +497,6 @@ export default {
 
 <style lang="scss">
 .editorComponent {
-  display: grid;
-  grid-template-columns: 20% 75%;
-  .editor-styling {
-  }
-  .editor-container {
-    .editor {
-      display: grid;
-      grid-template-columns: repeat(8, minmax(32px, 1fr));
-    }
-  }
-}
-
-.tool,
-.editor {
   display: flex;
 }
 svg {
@@ -633,14 +514,20 @@ svg {
   cursor: pointer;
 }
 .editor-container {
-  flex-direction: column;
+  flex-direction: row;
+  display: flex;
 }
 .editor {
+  display: flex;
+  width: 90%;
+  flex-direction: column;
+}
+.toolbarEditor {
+  direction: ltr;
+  overflow: scroll;
+  flex-direction: row;
+  display: flex;
   justify-content: space-between;
-  align-items: center;
-  flex-direction: row-reverse;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
 }
 .current-color {
   border-radius: 5px;
@@ -650,15 +537,15 @@ svg {
 .colors {
   display: flex;
   flex-direction: column;
-  margin: 40px 25px 0 25px;
+  margin: 40px 5px 0 5px;
   align-items: center;
   justify-content: center;
 }
 .color-container {
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  margin: 5px 0;
+  width: 15px;
+  height: 15px;
+  margin: 3px 0;
 }
 
 svg:not(:root).svg-inline--fa {
@@ -696,6 +583,27 @@ svg:not(:root).svg-inline--fa {
 }
 .stroke-width-value {
   text-align: center;
-  margin-bottom: 10px;
+  // margin-bottom: 10px;
+}
+/* width */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #a4b416;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  width: 0px;
+  background: rgb(188, 194, 188);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(49, 51, 51);
 }
 </style>

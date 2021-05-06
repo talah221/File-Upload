@@ -91,7 +91,7 @@ export default {
   },
   watch: {
     showMenu(sidebar, value) {
-      if (!value) {
+      if (value) {
         document.body.classList.remove("p-overflow-hidden");
       } else {
         const mask = document.querySelector(".p-sidebar-mask-leave");

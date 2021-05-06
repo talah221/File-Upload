@@ -1,23 +1,15 @@
 <template>
   <div class="p-d-flex p-ai-center p-jc-end" style="width: 97%">
-    <Button class="p-m-2" label="הצג בקרות" @click="showQc" />
+    <Button class="p-m-2 btn-filter" label="הצג בקרות" @click="showQc" />
     <Button
-      class="p-m-2"
+      class="p-m-2 btn-filter"
       icon="pi pi-filter-slash"
       label="נקה"
       @click="clearFilters()"
     />
   </div>
-  <div class="chipFilters">
-    <Chip
-      v-for="f of filterToShow"
-      :key="f.num"
-      :label="f.caption + ': ' + f.value + ' '"
-      removable
-      @remove="clearFilters(f.Name)"
-    />
-  </div>
-  <div class="p-d-flex p-ai-center p-jc-center p-mb-4 p-mt-4">
+
+  <div class="p-d-flex p-ai-center p-jc-center p-mb-4 p-mt-2">
     <SelectButton
       v-model="showControls.ControlSource"
       :options="showControls.RowSource"
@@ -110,7 +102,6 @@ import Button from "primevue/button";
 import { apiPType } from "../services/APointAPI";
 import MultiSelect from "primevue/multiselect";
 import AutoComplete from "primevue/autocomplete";
-import Chip from "primevue/chip";
 import { mapState, mapGetters } from "vuex";
 import { spinnerInstances } from "../scripts/enums.js";
 
@@ -123,13 +114,12 @@ export default {
     SelectButton,
     Button,
     MultiSelect,
-    AutoComplete,
-    Chip
+    AutoComplete
   },
   props: {
-    filters: { type: Object }
+    removeFilter: { type: Number }
   },
-  emits: ["showData", "updateFilters", "clearFilters"],
+  emits: ["showData", "updateFilters", "clearFilters", "filterRemoved"],
   data() {
     return {
       showControls: {
@@ -179,25 +169,6 @@ export default {
           type: apiPType.NVarChar,
           FuncOnUpdate: field => this.setFilters(field)
         },
-        // {
-        //   num: 3,
-        //   apointType: "selectButton",
-        //   check: false,
-        //   required: false,
-        //   Caption: "הצג בקרות",
-        // optionLabel: "lbl",
-        // optionValue: "val",
-        // showClear: false,
-        // ControlSource: null,
-        // RowSource: [
-        //   { val: 7, lbl: "7 ימים אחרונים" },
-        //   { val: 0, lbl: "מהיום" }
-        // ],
-        //   Enabled: true,
-        //   Locked: false,
-        //   Name: "showControls",
-        //   FuncOnUpdate: () => this.changeDates()
-        // },
         {
           num: 4,
           apointType: "text",
@@ -278,8 +249,8 @@ export default {
             this.searchSuggestions(field, event);
           },
           FuncOnUpdate: (field, event) => {
-            if (event.target !== undefined)
-              field.ControlSource = event.target.value;
+            // if (event.target !== undefined)
+            //   field.ControlSource = event.target.value;
             this.setFilters(field, event);
           },
           type: apiPType.NVarChar
@@ -300,8 +271,8 @@ export default {
             this.searchSuggestions(field, event);
           },
           FuncOnUpdate: (field, event) => {
-            if (event.target !== undefined)
-              field.ControlSource = event.target.value;
+            // if (event.target !== undefined)
+            //   field.ControlSource = event.target.value;
             this.setFilters(field, event);
           },
           type: apiPType.NVarChar
@@ -322,8 +293,8 @@ export default {
             this.searchSuggestions(field, event);
           },
           FuncOnUpdate: (field, event) => {
-            if (event.target !== undefined)
-              field.ControlSource = event.target.value;
+            // if (event.target !== undefined)
+            //   field.ControlSource = event.target.value;
             this.setFilters(field, event);
           },
           type: apiPType.NVarChar
@@ -346,8 +317,8 @@ export default {
             this.searchSuggestions(field, event);
           },
           FuncOnUpdate: (field, event) => {
-            if (event.target !== undefined)
-              field.ControlSource = event.target.value;
+            // if (event.target !== undefined)
+            //   field.ControlSource = event.target.value;
             this.setFilters(field, event);
           },
           type: apiPType.NVarChar
@@ -370,8 +341,8 @@ export default {
             this.searchSuggestions(field, event);
           },
           FuncOnUpdate: (field, event) => {
-            if (event.target !== undefined)
-              field.ControlSource = event.target.value;
+            // if (event.target !== undefined)
+            //   field.ControlSource = event.target.value;
             this.setFilters(field, event);
           },
           type: apiPType.NVarChar
@@ -553,22 +524,16 @@ export default {
         this.showAllBtnIcon = "pi pi-chevron-down";
       }
     },
-    clearFilters(fieldName) {
-      // console.log("clearFilters", fieldName);
-      if (fieldName === undefined) {
-        this.fields.forEach(f => {
-          f.ControlSource = null;
-        });
-      } else {
-        this.fields.find(f => f.Name === fieldName).ControlSource = null;
-      }
-      this.$emit("clearFilters", fieldName);
+    clearFilters() {
+      this.fields.forEach(f => {
+        f.ControlSource = null;
+      });
+      this.$emit("clearFilters");
     },
     changeDates() {
       const fromDate = new Date();
       const ToDate = new Date();
       this.getField(this.fields_enum.e_toDate).ControlSource = ToDate;
-      this.setFilters(this.getField(this.fields_enum.e_toDate));
 
       fromDate.setDate(
         fromDate.getDate() + this.showControls.ControlSource * -1
@@ -578,6 +543,7 @@ export default {
         fromDate
       );
       this.setFilters(this.getField(this.fields_enum.e_fromDate));
+      this.setFilters(this.getField(this.fields_enum.e_toDate));
 
       this.showControls.ControlSource = null;
     },
@@ -760,30 +726,6 @@ export default {
     }
   },
   computed: {
-    //todo להעביר את תצוגת הצ'יפים למסך הראשי
-    filterToShow() {
-      return this.fields
-        .filter(f => this.filters[f.Name] !== undefined)
-        .map(f => {
-          return {
-            num: f.num,
-            Name: f.Name,
-            caption: f.Caption,
-            value:
-              f.apointType === "multiSelect"
-                ? f.RowSource.filter(field => {
-                    return f.ControlSource.indexOf(field[f.optionValue]) >= 0;
-                  })
-                    .map(fieldMap => fieldMap[f.optionLabel])
-                    .toString()
-                : f.apointType === "text" &&
-                  f.Format === "Long Date" &&
-                  Date.parse(f.ControlSource) === Date.parse(f.ControlSource)
-                ? Intl.DateTimeFormat("en-GB").format(f.ControlSource)
-                : f.ControlSource
-          };
-        });
-    },
     ...mapState({
       userID: state => +state.api.userID,
       isDataLoaded: state => state.qc.isDataLoaded
@@ -805,6 +747,12 @@ export default {
   watch: {
     "$route.params.filter"() {
       this.setBasicFilter();
+    },
+    removeFilter(newValue) {
+      if (newValue) {
+        this.getField(newValue).ControlSource = null;
+        this.$emit("filterRemoved");
+      }
     }
   },
   unmounted() {
@@ -826,5 +774,8 @@ export default {
 }
 .ltrDir {
   direction: ltr;
+}
+.btn-filter {
+  height: 30px;
 }
 </style>

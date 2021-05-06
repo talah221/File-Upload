@@ -247,7 +247,10 @@ export default {
             });
             let updatedQC = {
               quality_control_id: this.qualityControl.quality_control_id,
-              status_id: this.getField(this.fields_enum.e_status).ControlSource,
+              status_id:
+                blnCloseQc === true
+                  ? qcStatuses.e_close
+                  : this.getField(this.fields_enum.e_status).ControlSource,
               responsible_id: this.getField(this.fields_enum.e_responsible)
                 .ControlSource
             };

@@ -1,8 +1,19 @@
 <template>
-  <div v-for="report of QCreports" :key="report.quality_control_reporting_id">
-    {{ report.action_performed }}
-    {{ report.format_create_date }}
-    {{ report.user_full_name }}
+  <div class="p-m-2">
+    <label for="reports">מה בוצע:</label>
+    <div id="reports" class="qcReports ">
+      <div
+        v-for="report of QCreports"
+        :key="report.quality_control_reporting_id"
+        class="single_report p-m-2"
+      >
+        <div style="display: flex; justify-content: space-between">
+          <div>{{ report.user_full_name }}</div>
+          <div>{{ report.format_create_date }}</div>
+        </div>
+        <div class="p-text-bold">{{ report.action_performed }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -16,4 +27,13 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.single_report {
+  margin-bottom: 10px;
+}
+.qcReports {
+  background-color: white;
+  opacity: 0.6;
+  border-radius: 3px;
+}
+</style>

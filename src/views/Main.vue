@@ -1,7 +1,7 @@
 <template>
   <c-header class="c-header"></c-header>
   <c-mobile-menu />
-  <div class="router-view">
+  <div class="router-view" style="overflow: scroll;">
     <router-view />
   </div>
   <Toast position="bottom-right" :baseZIndex="2000" />

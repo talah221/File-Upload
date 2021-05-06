@@ -7,6 +7,7 @@ module.exports = {
       return args;
     });
   },
+
   css: {
     loaderOptions: {
       scss: {
@@ -16,6 +17,7 @@ module.exports = {
       }
     }
   },
+
   configureWebpack: {
     devtool: "source-map"
   },

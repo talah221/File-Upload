@@ -8,7 +8,12 @@
         icon="pi pi-file-pdf"
         class="p-button-info p-button-outlined"
       ></Button>
-      <Button label="הוסף תמונה" @click="addPoto" icon="pi pi-camera" class="p-button-info p-button-outlined"></Button>
+      <Button
+        label="הוסף תמונה"
+        @click="addPoto"
+        icon="pi pi-camera"
+        class="p-button-info p-button-outlined"
+      ></Button>
     </div>
     <div class="second-buttons-section">
       <Button label="שמור וסגור" @click="saveClose" icon="pi pi-check"></Button>
