@@ -109,61 +109,91 @@
                 :offIcon="sortUp.offIcon"
                 @change="sortUp.FuncOnUpdate()"
               ></ToggleButton>
+              <label :for="groupBy.Name">{{ groupBy.Caption }}</label>
+              <a-point-dropdown
+                :id="groupBy.Name"
+                :field="groupBy"
+                :model-value="groupBy.ControlSource"
+                @update:model-value="updateField(groupBy, $event)"
+              ></a-point-dropdown>
             </div>
-            <div
-              v-for="qc of qualityControls"
-              :key="qc.quality_control_id"
-              class="qc"
-            >
-              <div class="qc-not-desktop" v-if="!isDesktop">
-                <div class="title" @click="openQC(qc)">
-                  ב&nbsp;{{ qc.quality_control_id }} -
-                  {{ qc.formattedCreate_date }}
-                </div>
-                <div class="content">
-                  <div @click="openQC(qc)">
-                    <div>
-                      {{ qc.project_zone1_name }} -
-                      {{ qc.project_zone2_name }} -
-                      {{ qc.project_zone3_name }}
+            <div v-if="!isDesktop">
+              <div v-for="group of arrActiveGroup" :key="group.name" class="qc">
+                <span @click="group.show = !group.show">
+                  <i
+                    :class="
+                      group.show ? 'pi pi-angle-down' : 'pi pi-angle-left'
+                    "
+                  ></i>
+                  {{ group.name }} ( {{ filetrByGroup(group.name).length }} )
+                </span>
+                <transition
+                  name="slide-fade-group"
+                  v-for="qc of filetrByGroup(group.name)"
+                  :key="qc.quality_control_id"
+                >
+                  <div v-show="group.show">
+                    <div class="qc-not-desktop" v-if="!isDesktop">
+                      <div class="title" @click="openQC(qc)">
+                        ב&nbsp;{{ qc.quality_control_id }} -
+                        {{ qc.formattedCreate_date }}
+                      </div>
+                      <div class="content">
+                        <div @click="openQC(qc)">
+                          <div>
+                            {{ qc.project_zone1_name }} -
+                            {{ qc.project_zone2_name }} -
+                            {{ qc.project_zone3_name }}
+                          </div>
+                          <div class="p-text-bold">{{ qc.chapter_name }}</div>
+                          <div>{{ qc.responsible_name }}</div>
+                        </div>
+                        <div class="buttonsDiv">
+                          <Button
+                            icon="pi pi-folder-open"
+                            class="folder-btn"
+                            @click="addAttFiles(qc)"
+                          ></Button>
+                          <Button
+                            label="דווח"
+                            class="p-button-sm report-btn"
+                            @click="reporting(qc)"
+                            :disabled="qc.status_id === qcStatuses.e_close"
+                            :style="
+                              qc.status_id === qcStatuses.e_close
+                                ? 'background: #a5a5a5;'
+                                : ''
+                            "
+                          />
+                        </div>
+                      </div>
+                      <div class="description" @click="openQC(qc)">
+                        <!-- <span class="p-text-bold">תיאור:</span> -->
+                        {{ qc.quality_control_desc }}
+                        <!-- {{ reportTest(qc.quality_control_id) }} -->
+                      </div>
                     </div>
-                    <div class="p-text-bold">{{ qc.chapter_name }}</div>
-                    <div>{{ qc.responsible_name }}</div>
                   </div>
-                  <div class="buttonsDiv">
-                    <Button
-                      icon="pi pi-folder-open"
-                      class="folder-btn"
-                      @click="addAttFiles(qc)"
-                    ></Button>
-                    <Button
-                      label="דווח"
-                      class="p-button-sm report-btn"
-                      @click="reporting(qc)"
-                      :disabled="qc.status_id === qcStatuses.e_close"
-                      :style="
-                        qc.status_id === qcStatuses.e_close
-                          ? 'background: #a5a5a5;'
-                          : ''
-                      "
-                    />
-                  </div>
-                </div>
-                <div class="description" @click="openQC(qc)">
-                  <!-- <span class="p-text-bold">תיאור:</span> -->
-                  {{ qc.quality_control_desc }}
-                  <!-- {{ reportTest(qc.quality_control_id) }} -->
-                </div>
+                </transition>
               </div>
-
-              <section class="qc-desktop" @click="openQC(qc)" v-if="isDesktop">
-                <div class="qc-id">{{ qc.quality_control_id }}</div>
-                <div class="qc-create-date">{{ qc.formattedCreate_date }}</div>
-                <div class="qc-status">{{ qc.status_name }}</div>
-                <div class="qc-chapter">{{ qc.chapter_name }}</div>
-                <div class="qc-impairment">{{ qc.impairment_desc }}</div>
-                <div class="qc-level">{{ qc.level_desc }}</div>
-              </section>
+            </div>
+            <div v-if="isDesktop">
+              <div
+                v-for="qc of qualityControls"
+                :key="qc.quality_control_id"
+                class="qc"
+              >
+                <section class="qc-desktop" @click="openQC(qc)">
+                  <div class="qc-id">{{ qc.quality_control_id }}</div>
+                  <div class="qc-create-date">
+                    {{ qc.formattedCreate_date }}
+                  </div>
+                  <div class="qc-status">{{ qc.status_name }}</div>
+                  <div class="qc-chapter">{{ qc.chapter_name }}</div>
+                  <div class="qc-impairment">{{ qc.impairment_desc }}</div>
+                  <div class="qc-level">{{ qc.level_desc }}</div>
+                </section>
+              </div>
             </div>
           </div>
           <Dialog v-model:visible="displayReporting" modal>
@@ -299,6 +329,25 @@ export default {
         FuncOnUpdate: () => {
           this.sortBy();
         }
+      },
+      groupBy: {
+        num: 1,
+        apointType: "dropdown",
+        check: false,
+        required: true,
+        Caption: "קבץ לפי:",
+        optionLabel: "desc",
+        optionValue: "column_name",
+        showClear: false,
+        ControlSource: null,
+        RowSource: [
+          { column_name: "chapter_name", desc: "פרקים", array: [] },
+          { column_name: "status_name", desc: "סטטוס", array: [] }
+        ],
+        Enabled: true,
+        Name: "groupBy",
+        FuncOnUpdate: () => {},
+        DefaultValue: "chapter_name"
       }
     };
   },
@@ -359,6 +408,11 @@ export default {
 
       this.qualityControls = qualityControlsToShow;
     },
+    filetrByGroup(filterStr) {
+      return this.qualityControls.filter(
+        e => e[this.groupBy.ControlSource] === filterStr
+      );
+    },
     showFilters() {
       this.displayFilters = true;
       this.$store.commit("main/setAppHeader", "סינון בקרות");
@@ -384,6 +438,14 @@ export default {
             this.qualityControlsReports = result.Table1;
             this.displayFilters = false;
             this.sortBy();
+            //grouping
+            this.groupBy.RowSource.forEach(group => {
+              group.array = this.qualityControls
+                .map(item => item[group.column_name])
+                .filter((value, index, self) => self.indexOf(value) === index)
+                .sort()
+                .map(item => ({ name: item, show: false }));
+            });
           } else {
             this.$toast.add({
               severity: "error",
@@ -599,6 +661,11 @@ export default {
     }
   },
   computed: {
+    arrActiveGroup() {
+      return this.groupBy.RowSource.find(
+        e => e.column_name === this.groupBy.ControlSource
+      )?.array;
+    },
     filterToShow() {
       return this.chipFilters.map(f => {
         return {
@@ -778,6 +845,19 @@ export default {
 .slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateY(-100vh);
+  opacity: 0;
+}
+.slide-fade-group-enter-active {
+  transition: all 0.3s ease;
+}
+
+.slide-fade-group-leave-active {
+  transition: all 0.3s cubic-bezier(0.5, 1, 1, 0.5);
+}
+
+.slide-fade-group-enter-from,
+.slide-fade-group-leave-to {
+  transform: translateY(-100%);
   opacity: 0;
 }
 </style>

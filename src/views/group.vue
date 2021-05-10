@@ -130,7 +130,7 @@ export default {
 
 .slide-fade-enter-from,
 .slide-fade-leave-to {
-  transform: translateY(10px);
+  transform: translateY(-100%);
   opacity: 0;
 }
 </style>
