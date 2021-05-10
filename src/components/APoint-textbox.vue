@@ -21,8 +21,7 @@
     :value="modelValue"
     v-model="value"
     :showIcon="field.showIcon"
-    :class="field.required && field.check ? 'p-invalid' : ''"
-    class="calandar"
+    :class="field.required && field.check ? 'p-invalid !important' : ''"
   />
   <InputNumber
     v-if="number"
@@ -108,8 +107,4 @@ export default {
 // 17.	Tag
 </script>
 
-<style>
-.calendar {
-  border: 1px solid #ced4da;
-}
-</style>
+<style></style>

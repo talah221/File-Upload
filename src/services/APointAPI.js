@@ -2,9 +2,9 @@ import store from "../store/index";
 
 // Version 1.01
 
-//export const API_HOST = "https://api.apoint.co.il";
+export const API_HOST = "https://api.apoint.co.il";
 // export const API_HOST = "https://localhost:44396"; //DEV - Localhost
-export const API_HOST = "https://apidev.apoint.co.il"; //DEV - Live
+// export const API_HOST = "https://apidev.apoint.co.il"; //DEV - Live
 const FETCH_DEFAULT_TIMEOUT = 10 * 1000; //10 seconds
 const PROC_DEFAULT_TIMEOUT = 10 * 1000; //10 seconds
 const FETCH_DEFAULT_HEADERS = {
@@ -237,8 +237,8 @@ export function callProc(
         // console.log(raw);
         throw {
           errorCode: res.APIResponseCode,
-          errorDescription: res.APIResponseDescription
-          // responseText: res.APIResponseText,
+          errorDescription: res.APIResponseDescription,
+          responseText: res.APIResponseText
         };
       }
     })

@@ -1,16 +1,14 @@
 <template>
   <!-- {{ displaySpinner }} -->
+
   <div class="block" v-show="displaySpinner">
-    <ProgressSpinner v-if="displaySpinner" class="spinner" />
+    <ProgressSpinner v-if="displaySpinner" class="vueSpinner" />
   </div>
   <div
     class="layout-rtl "
     :class="{ mainApp: isLoggedIn === true && isDesktop }"
   >
-    <BlockUI :blocked="displaySpinner && 1 === 0" :fullScreen="true"> </BlockUI>
-    <!-- <BlockUI :blocked="true" :fullScreen="true"> </BlockUI> -->
     <Main v-if="isLoggedIn" />
-
     <Login
       v-else
       :allowAutoLogin="true"
@@ -29,13 +27,12 @@ import Login from "./components/Login";
 import Main from "./views/Main";
 import screen from "@/scripts/screen.js";
 import ProgressSpinner from "primevue/progressspinner";
-import BlockUI from "primevue/blockui";
+
 export default {
   components: {
     Login,
     Main,
-    ProgressSpinner,
-    BlockUI
+    ProgressSpinner
   },
   data() {
     return {
@@ -47,7 +44,9 @@ export default {
   },
   mounted() {
     // console.log("locale", this.$primevue);
-
+    window.onbeforeunload = function() {
+      return "Your work will be lost.";
+    };
     this.$cookie.config({
       expire: "30d",
       path: "/",
@@ -74,6 +73,7 @@ export default {
     //   if (cookieCompGuid) this.$store.commit("api/setCompGuid", cookieCompGuid);
     // }
   },
+
   computed: {
     ...mapGetters("api", ["isLoggedIn"]),
     ...mapState({
@@ -86,11 +86,11 @@ export default {
 };
 </script>
 <style>
-.spinner {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 40vh;
+.vueSpinner {
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: 40vh !important;
 }
 .block {
   width: 100vw;
@@ -100,6 +100,9 @@ export default {
 }
 .mainApp {
   margin-right: 20rem;
+}
+.qc-button {
+  height: 52px;
 }
 @media screen and (min-width: 896px) {
   .single_form .field {
@@ -174,9 +177,8 @@ export default {
   background-color: #f2f2f2;
   padding: 0.25rem 0.5rem;
   border-radius: 3px;
-  margin-right: auto;
-  margin-left: auto;
   margin-bottom: 3px;
+  margin-right: 3px;
   max-width: 47vw;
 }
 
@@ -205,5 +207,13 @@ export default {
 }
 .p-button.p-button-icon-only {
   width: 45px;
+}
+.p-disabled .p-dropdown-clear-icon,
+.p-disabled .p-dropdown-trigger,
+.p-disabled.p-datepicker-trigger {
+  display: none;
+}
+.buttonIcon {
+  font-size: 1.5rem;
 }
 </style>

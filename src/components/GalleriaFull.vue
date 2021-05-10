@@ -2,7 +2,7 @@
   <Galleria
     :value="images"
     v-model:activeIndex="activeIndex"
-    :responsiveOptions="responsiveOptions"
+    :responsiveOptions="responsiveOptions2"
     :numVisible="7"
     containerStyle="max-width: 850px"
     :circular="true"
@@ -15,20 +15,20 @@
       <img
         :src="slotProps.item.itemImageSrc"
         :alt="slotProps.item.alt"
-        style="width: 100%; display: block;"
+        style="width: 75%; display: block;"
       />
     </template>
     <template #thumbnail="slotProps">
       <img
         :src="slotProps.item.thumbnailImageSrc"
         :alt="slotProps.item.alt"
-        style="display: block;"
+        style="display: block; width: 25%;"
       />
     </template>
   </Galleria>
 
   <div v-if="images" class="p-grid" style="max-width: 400px;">
-    <div v-for="(image, index) of images" class="p-col-3" :key="index">
+    <div v-for="(image, index) of images" class="p-col-6" :key="index">
       <img
         :src="image.thumbnailImageSrc"
         :alt="image.alt"
@@ -113,4 +113,7 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+body {
+}
+</style>

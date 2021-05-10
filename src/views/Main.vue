@@ -5,12 +5,9 @@
     <router-view />
   </div>
   <Toast position="bottom-right" :baseZIndex="2000" />
-
-  <!-- <About /> -->
 </template>
 
 <script>
-// import About from "./About";
 import CMobileMenu from "../components/c-mobile-menu";
 import CHeader from "../components/c-header";
 
@@ -24,6 +21,7 @@ export default {
 
     // About
   },
+  methods: {},
   mounted() {
     this.$store.dispatch("qc/loadDdlData");
   },

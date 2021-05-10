@@ -1,95 +1,102 @@
 <template>
-  <div class="p-d-flex p-ai-center p-jc-end" style="width: 97%">
-    <Button class="p-m-2 btn-filter" label="הצג בקרות" @click="showQc" />
-    <Button
-      class="p-m-2 btn-filter"
-      icon="pi pi-filter-slash"
-      label="נקה"
-      @click="clearFilters()"
-    />
-  </div>
-
-  <div class="p-d-flex p-ai-center p-jc-center p-mb-4 p-mt-2">
-    <SelectButton
-      v-model="showControls.ControlSource"
-      :options="showControls.RowSource"
-      :optionLabel="showControls.optionLabel"
-      :optionValue="showControls.optionValue"
-      class="ltrDir"
-      @click="changeDates()"
-    />
-  </div>
-  <div class="single_form">
-    <div
-      class="field p-d-flex p-ai-center"
-      v-for="(field, i) of fields"
-      :key="i"
-    >
-      <label :for="field.Name" v-if="field.show != false">
-        {{ field.Caption }}
-      </label>
-      <div
-        class="p-d-flex p-flex-column p-mb-2 p-mt-2"
-        ref=""
-        :id="field.Name"
-        v-if="field.show != false"
-      >
-        <a-point-textbox
-          :field="field"
-          :modelValue="field.ControlSource"
-          @update:model-value="updateField(field, $event)"
-          v-if="field.apointType == 'text'"
-        ></a-point-textbox>
-        <a-point-checkbox
-          v-else-if="field.apointType == 'checkbox'"
-          :field="field"
-          :modelValue="field.ControlSource"
-          @update:model-value="updateField(field, $event)"
-        ></a-point-checkbox>
-
-        <a-point-dropdown
-          v-else-if="field.apointType == 'dropdown'"
-          :field="field"
-          :modelValue="field.ControlSource"
-          @update:model-value="updateField(field, $event)"
-        ></a-point-dropdown>
-
-        <MultiSelect
-          v-else-if="field.apointType == 'multiSelect'"
-          v-model="field.ControlSource"
-          :options="field.RowSource"
-          :optionLabel="field.optionLabel"
-          :optionValue="field.optionValue"
-          display="chip"
-          :filter="
-            field.RowSource !== null &&
-              field.RowSource !== undefined &&
-              field.RowSource.length > 10
-          "
-          @change="field.FuncOnUpdate(field)"
-        />
-
-        <AutoComplete
-          v-else-if="field.apointType === 'autoComplete'"
-          v-model="field.ControlSource"
-          :suggestions="field.suggestions"
-          @complete="field.FuncOnComplete(field, $event)"
-          @blur="field.FuncOnUpdate(field, $event)"
-          @item-select="field.FuncOnUpdate(field, $event)"
-        />
-        <span class="error p-mt-1 p-mr-2" v-if="field.check">
-          * שדה חובה
-        </span>
-      </div>
+  <div>
+    <div class="p-d-flex p-ai-center p-jc-end btn-filters" style="width: 97%">
+      <Button
+        class="p-m-2 btn-filter p-button-info"
+        label="הצג בקרות"
+        @click="showQc"
+      />
+      <Button
+        class="p-m-2"
+        icon="pi pi-filter-slash"
+        label="נקה"
+        @click="clearFilters()"
+      />
     </div>
   </div>
-  <div class=" p-d-flex p-flex-column p-ai-center">
-    <Button
-      class="p-mt-4 p-button-link"
-      :icon="showAllBtnIcon"
-      :label="showAllBtnLbl"
-      @click="showAllFilters"
-    />
+  <div>
+    <div class="p-d-flex p-ai-center p-jc-center p-mb-4 p-mt-2">
+      <SelectButton
+        v-model="showControls.ControlSource"
+        :options="showControls.RowSource"
+        :optionLabel="showControls.optionLabel"
+        :optionValue="showControls.optionValue"
+        class="ltrDir"
+        @click="changeDates()"
+      />
+    </div>
+    <div class="single_form">
+      <div
+        class="field p-d-flex p-ai-center"
+        v-for="(field, i) of fields"
+        :key="i"
+      >
+        <label :for="field.Name" v-if="field.show != false">
+          {{ field.Caption }}
+        </label>
+        <div
+          class="p-d-flex p-flex-column p-mb-2 p-mt-2"
+          ref=""
+          :id="field.Name"
+          v-if="field.show != false"
+        >
+          <a-point-textbox
+            :field="field"
+            :modelValue="field.ControlSource"
+            @update:model-value="updateField(field, $event)"
+            v-if="field.apointType == 'text'"
+          ></a-point-textbox>
+          <a-point-checkbox
+            v-else-if="field.apointType == 'checkbox'"
+            :field="field"
+            :modelValue="field.ControlSource"
+            @update:model-value="updateField(field, $event)"
+          ></a-point-checkbox>
+
+          <a-point-dropdown
+            v-else-if="field.apointType == 'dropdown'"
+            :field="field"
+            :modelValue="field.ControlSource"
+            @update:model-value="updateField(field, $event)"
+          ></a-point-dropdown>
+
+          <MultiSelect
+            v-else-if="field.apointType == 'multiSelect'"
+            v-model="field.ControlSource"
+            :options="field.RowSource"
+            :optionLabel="field.optionLabel"
+            :optionValue="field.optionValue"
+            display="chip"
+            :filter="
+              field.RowSource !== null &&
+                field.RowSource !== undefined &&
+                field.RowSource.length > 10
+            "
+            @change="field.FuncOnUpdate(field)"
+          />
+
+          <AutoComplete
+            v-else-if="field.apointType === 'autoComplete'"
+            v-model="field.ControlSource"
+            :suggestions="field.suggestions"
+            @complete="field.FuncOnComplete(field, $event)"
+            @blur="field.FuncOnUpdate(field, $event)"
+            @item-select="field.FuncOnUpdate(field, $event)"
+          />
+          <span class="error p-mt-1 p-mr-2" v-if="field.check">
+            * שדה חובה
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class=" p-d-flex p-flex-column p-ai-center">
+      <Button
+        class="p-mt-4 p-button-link"
+        :icon="showAllBtnIcon"
+        :label="showAllBtnLbl"
+        @click="showAllFilters"
+      />
+    </div>
   </div>
 </template>
 
@@ -103,7 +110,7 @@ import { apiPType } from "../services/APointAPI";
 import MultiSelect from "primevue/multiselect";
 import AutoComplete from "primevue/autocomplete";
 import { mapState, mapGetters } from "vuex";
-import { spinnerInstances } from "../scripts/enums.js";
+// import { spinnerInstances } from "../scripts/enums.js";
 
 export default {
   name: "QualityControlsFilters",
@@ -181,6 +188,7 @@ export default {
           ControlSource: null,
           Enabled: true,
           Name: "btwn_open_start",
+          showIcon: true,
           type: apiPType.SmallDateTime,
           FuncOnUpdate: field => this.setFilters(field)
         },
@@ -196,6 +204,7 @@ export default {
           ControlSource: null,
           Enabled: true,
           Name: "btwn_open_end",
+          showIcon: true,
           type: apiPType.SmallDateTime,
           FuncOnUpdate: field => this.setFilters(field)
         },
@@ -233,21 +242,40 @@ export default {
           type: apiPType.NVarChar,
           FuncOnUpdate: field => this.setFilters(field)
         },
+        // {
+        //   num: 17,
+        //   apointType: "autoComplete",
+        //   check: false,
+        //   required: false,
+        //   Caption: "סוג חלל 1",
+        //   ControlSource: null,
+        //   RowSource: [],
+        //   Enabled: true,
+        //   Name: "zoneType1",
+        //   allRowSource: [],
+        // suggestions: [],
+        // FuncOnComplete: (field, event) => {
+        //   this.searchSuggestions(field, event);
+        // },
+        //   FuncOnUpdate: (field, event) => {
+        //     // if (event.target !== undefined)
+        //     //   field.ControlSource = event.target.value;
+        //     this.setFilters(field, event);
+        //   },
+        //   type: apiPType.NVarChar
+        // },
         {
           num: 17,
-          apointType: "autoComplete",
+          apointType: "dropdown",
           check: false,
           required: false,
           Caption: "סוג חלל 1",
+          showClear: true,
           ControlSource: null,
           RowSource: [],
           Enabled: true,
           Name: "zoneType1",
           allRowSource: [],
-          suggestions: [],
-          FuncOnComplete: (field, event) => {
-            this.searchSuggestions(field, event);
-          },
           FuncOnUpdate: (field, event) => {
             // if (event.target !== undefined)
             //   field.ControlSource = event.target.value;
@@ -257,19 +285,16 @@ export default {
         },
         {
           num: 8,
-          apointType: "autoComplete",
+          apointType: "dropdown",
           check: false,
           required: false,
           Caption: "חלל 1",
+          showClear: true,
           ControlSource: null,
           RowSource: [],
           Enabled: true,
           Name: "zone_1_id",
           allRowSource: [],
-          suggestions: [],
-          FuncOnComplete: (field, event) => {
-            this.searchSuggestions(field, event);
-          },
           FuncOnUpdate: (field, event) => {
             // if (event.target !== undefined)
             //   field.ControlSource = event.target.value;
@@ -279,19 +304,16 @@ export default {
         },
         {
           num: 18,
-          apointType: "autoComplete",
+          apointType: "dropdown",
           check: false,
           required: false,
           Caption: "סוג חלל 2",
+          showClear: true,
           ControlSource: null,
           RowSource: [],
           Enabled: true,
           Name: "zoneType2",
           allRowSource: [],
-          suggestions: [],
-          FuncOnComplete: (field, event) => {
-            this.searchSuggestions(field, event);
-          },
           FuncOnUpdate: (field, event) => {
             // if (event.target !== undefined)
             //   field.ControlSource = event.target.value;
@@ -301,7 +323,7 @@ export default {
         },
         {
           num: 9,
-          apointType: "autoComplete",
+          apointType: "dropdown",
           check: false,
           required: false,
           Caption: "חלל 2",
@@ -312,10 +334,6 @@ export default {
           Enabled: true,
           Name: "zone_2_id",
           allRowSource: [],
-          suggestions: [],
-          FuncOnComplete: (field, event) => {
-            this.searchSuggestions(field, event);
-          },
           FuncOnUpdate: (field, event) => {
             // if (event.target !== undefined)
             //   field.ControlSource = event.target.value;
@@ -325,7 +343,7 @@ export default {
         },
         {
           num: 10,
-          apointType: "autoComplete",
+          apointType: "dropdown",
           check: false,
           required: false,
           Caption: "חלל 3",
@@ -336,10 +354,6 @@ export default {
           Enabled: true,
           Name: "zone_3_id",
           allRowSource: [],
-          suggestions: [],
-          FuncOnComplete: (field, event) => {
-            this.searchSuggestions(field, event);
-          },
           FuncOnUpdate: (field, event) => {
             // if (event.target !== undefined)
             //   field.ControlSource = event.target.value;
@@ -467,7 +481,7 @@ export default {
       showAllBtn: false,
       showAllBtnLbl: "הצג מסננים נוספים",
       showAllBtnIcon: "pi pi-chevron-down",
-      displaySpinner: false,
+      // displaySpinner: false,
       fields_enum: {
         e_projectId: 1,
         e_status: 2,
@@ -549,10 +563,10 @@ export default {
     },
 
     getDdlData() {
-      this.$store.commit("main/setSpinner", {
-        id: spinnerInstances.e_QualityControlsFilters_loadDdl,
-        flag: true
-      });
+      // this.$store.commit("main/setSpinner", {
+      //   id: spinnerInstances.e_QualityControlsFilters_loadDdl,
+      //   flag: true
+      // });
       let loadData = () => {
         this.getField(
           this.fields_enum.e_projectId
@@ -602,10 +616,10 @@ export default {
         if (this.isDataLoaded === false && i < 30000) return;
         clearInterval(interval);
         loadData();
-        this.$store.commit("main/setSpinner", {
-          id: spinnerInstances.e_QualityControlsFilters_loadDdl,
-          flag: false
-        });
+        // this.$store.commit("main/setSpinner", {
+        //   id: spinnerInstances.e_QualityControlsFilters_loadDdl,
+        //   flag: false
+        // });
       }, 1);
     },
     getField(num) {
@@ -692,15 +706,15 @@ export default {
         })
         .sort();
     },
-    searchSuggestions(field, event) {
-      if (!event.query.trim().length) {
-        field.suggestions = field.RowSource;
-      } else {
-        field.suggestions = field.RowSource.filter(elemnt => {
-          return elemnt.toLowerCase().includes(event.query.toLowerCase());
-        });
-      }
-    },
+    // searchSuggestions(field, event) {
+    //   if (!event.query.trim().length) {
+    //     field.suggestions = field.RowSource;
+    //   } else {
+    //     field.suggestions = field.RowSource.filter(elemnt => {
+    //       return elemnt.toLowerCase().includes(event.query.toLowerCase());
+    //     });
+    //   }
+    // },
 
     setBasicFilter() {
       let param = this.$route.params.filter;
@@ -756,10 +770,10 @@ export default {
     }
   },
   unmounted() {
-    this.$store.commit("main/setSpinner", {
-      id: spinnerInstances.e_QualityControlsFilters_loadDdl,
-      flag: false
-    });
+    // this.$store.commit("main/setSpinner", {
+    //   id: spinnerInstances.e_QualityControlsFilters_loadDdl,
+    //   flag: false
+    // });
   }
 };
 </script>
@@ -776,6 +790,10 @@ export default {
   direction: ltr;
 }
 .btn-filter {
-  height: 30px;
+  /* height: 30px; */
+}
+.btn-filters {
+  /* position: fixed;
+  z-index: 1; */
 }
 </style>

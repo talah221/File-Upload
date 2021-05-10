@@ -4,7 +4,7 @@
     v-show="false"
     @change="uploadImage"
     ref="evClickFile"
-    accept="image/*"
+    accept=".JPEG,.JPG,.PNG ,.GIF"
   />
   <Dialog v-model:visible="displaySelectPlan" modal>
     <template #header>
@@ -37,7 +37,7 @@
 
   <galleria-full
     v-if="displayAttFiles"
-    :images="attached_files"
+    :images="images"
     :displayFullScreen="true"
     @closeGalleria="displayAttFiles = false"
   ></galleria-full>
@@ -46,15 +46,16 @@
     v-if="imageEditor.displayImageEditor"
     @saveImage="saveImage"
     :dataUrl="imageEditor.dataUrl"
-    @cancel="displayReporting = false"
+    @cancel="cancelImage"
   ></ImageEditor>
   <div class="container" v-if="!isDesktop || qcMode === qcModes_enum.e_new">
     <div v-if="!imageEditor.displayImageEditor">
       <Button
-        v-if="qcMode !== qcModes_enum.e_new"
+        v-if="qcMode === qcModes_enum.e_new"
         @click="backToParent"
-        icon="pi pi-angle-left"
+        icon="pi pi-angle-right"
       ></Button>
+
       <div class="single_form">
         <div
           class="field p-d-flex p-ai-center p-m-2"
@@ -91,7 +92,7 @@
               autoResize
               :disabled="!field.Enabled || field.Locked"
               :rows="1"
-              style="border: 1px solid #ced4da;"
+              :class="field.required && field.check ? 'p-invalid' : ''"
             ></Textarea>
             <!-- style="resize: none" -->
             <span class="error p-mt-1 p-mr-2" v-if="field.check">
@@ -111,7 +112,9 @@
         />
       </div>
       <div v-else-if="qcMode === qcModes_enum.e_open">
-        <galleria-full :images="attached_files"></galleria-full>
+        <q-creports class="p-mb-2" :QCreports="qcReports"></q-creports>
+
+        <galleria-full :images="images"></galleria-full>
 
         <QualityControlOpen
           @plans="selectPlan"
@@ -125,16 +128,21 @@
         <div class="single_form_buttons">
           <Button
             :disabled="apartmentId === 0"
-            label="תוכניות"
+            label="צפה בתכניות"
             @click="selectPlan"
             icon="pi pi-file-pdf"
+            class="p-button-info p-button-outlined qc-button"
           ></Button>
           <Button
             icon="pi pi-folder-open"
             @click="attFiles"
-            class="qc-buttons"
+            class="folder-btn qc-button "
           ></Button>
-          <Button label="פתח בקרה מחדש" @click="openCloseQC"></Button>
+          <Button
+            label="פתח בקרה מחדש"
+            @click="openCloseQC"
+            class="qc-button"
+          ></Button>
         </div>
       </div>
     </div>
@@ -197,7 +205,8 @@
               אחראי לביצוע: <span>{{ qualityControl.responsible_name }}</span>
             </h5>
             <h5>
-              יעד לביצוע: <span>{{ qualityControl.formattedPlaned_date }}</span>
+              יעד לביצוע:
+              <span>{{ qualityControl.formattedPlaned_date }}</span>
             </h5>
           </div>
           <div class="btns">
@@ -223,7 +232,7 @@
       <div class="qc-files">
         <h5>קבצים מצורפים:</h5>
         <div class="the-files">
-          <galleria-full :images="attached_files"></galleria-full>
+          <galleria-full :images="images"></galleria-full>
         </div>
       </div>
     </div>
@@ -287,7 +296,7 @@ export default {
           Caption: "פרויקט:",
           optionLabel: "ProjectName",
           optionValue: "ProjectId",
-          showClear: false,
+          showClear: true,
           ControlSource: null,
           RowSource: [],
           Enabled: true,
@@ -302,13 +311,25 @@ export default {
         },
         {
           num: 2,
+          apointType: "text",
+          check: false,
+          required: false,
+          Caption: "פותח הבקרה:",
+          Format: "",
+          ControlSource: null,
+          Enabled: true,
+          Locked: false,
+          Name: "creater_name"
+        },
+        {
+          num: 3,
           apointType: "dropdown",
           check: false,
           required: true,
           Caption: "סטטוס:",
           optionLabel: "status_name",
           optionValue: "status_id",
-          showClear: false,
+          showClear: true,
           Format: "",
           ControlSource: null,
           RowSource: [],
@@ -318,7 +339,7 @@ export default {
           AllRowSource: null
         },
         {
-          num: 3,
+          num: 4,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -338,7 +359,7 @@ export default {
           }
         },
         {
-          num: 4,
+          num: 5,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -358,7 +379,7 @@ export default {
           }
         },
         {
-          num: 5,
+          num: 6,
           apointType: "dropdown",
           check: false,
           required: false,
@@ -374,7 +395,7 @@ export default {
           AllRowSource: null
         },
         {
-          num: 6,
+          num: 7,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -389,7 +410,7 @@ export default {
           Name: "chapter"
         },
         {
-          num: 7,
+          num: 8,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -404,7 +425,7 @@ export default {
           Name: "responsibles"
         },
         {
-          num: 8,
+          num: 9,
           apointType: "text",
           check: false,
           required: true,
@@ -420,7 +441,7 @@ export default {
           showIcon: true
         },
         {
-          num: 9,
+          num: 10,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -435,7 +456,7 @@ export default {
           Name: "impairment"
         },
         {
-          num: 10,
+          num: 11,
           apointType: "dropdown",
           check: false,
           required: true,
@@ -450,7 +471,7 @@ export default {
           Name: "severityLevel"
         },
         {
-          num: 11,
+          num: 12,
           apointType: "textarea",
           check: false,
           required: true,
@@ -462,7 +483,7 @@ export default {
           Name: "description"
         },
         {
-          num: 12,
+          num: 13,
           apointType: "text",
           check: false,
           required: false,
@@ -474,7 +495,7 @@ export default {
           Name: "closed_name"
         },
         {
-          num: 13,
+          num: 14,
           apointType: "text",
           check: false,
           required: false,
@@ -485,8 +506,9 @@ export default {
           Locked: false,
           Name: "formattedCreate_date"
         },
+
         {
-          num: 14,
+          num: 15,
           apointType: "text",
           check: false,
           required: false,
@@ -500,19 +522,20 @@ export default {
       ],
       fields_enum: {
         e_projectId: 1,
-        e_status: 2,
-        e_zone1: 3,
-        e_zone2: 4,
-        e_zone3: 5,
-        e_chapter: 6,
-        e_responsibles: 7,
-        e_planedDate: 8,
-        e_impairment: 9,
-        e_severityLevel: 10,
-        e_description: 11,
-        e_closed_name: 12,
-        e_closed_date: 13,
-        e_qc_id: 14
+        e_creater_name: 2,
+        e_status: 3,
+        e_zone1: 4,
+        e_zone2: 5,
+        e_zone3: 6,
+        e_chapter: 7,
+        e_responsibles: 8,
+        e_planedDate: 9,
+        e_impairment: 10,
+        e_severityLevel: 11,
+        e_description: 12,
+        e_closed_name: 13,
+        e_closed_date: 14,
+        e_qc_id: 15
       },
       qcMode: null,
       qcModes_enum: {
@@ -534,7 +557,7 @@ export default {
     };
   },
   created() {
-    this.isDesktop = window.innerWidth > 896;
+    this.isDesktop = false; //todo change  window.innerWidth > 896;
   },
   mounted() {
     this.getDdlData();
@@ -627,6 +650,9 @@ export default {
 
             case this.fields_enum.e_closed_date:
               field.ControlSource = this.qualityControl.formattedCreate_date;
+              break;
+            case this.fields_enum.e_creater_name:
+              field.ControlSource = this.qualityControl.creater_name;
               break;
           }
         });
@@ -1045,7 +1071,9 @@ export default {
       this.displayReporting = false;
     },
     backToParent() {
-      this.$emit("close");
+      this.$router.push({
+        name: "Home"
+      });
     },
     closeReportingAndAddPoto(qualityControl) {
       if (qualityControl !== undefined) {
@@ -1110,18 +1138,30 @@ export default {
           });
           console.log("pr_qc_get_attached_files-error", error);
         });
+    },
+    cancelImage() {
+      if (this.qcMode === this.qcModes_enum.e_new)
+        this.imageEditor.displayImageEditor = false;
+      else this.displayReporting = false;
     }
   },
   computed: {
     detailsFields() {
-      if (this.qcModes_enum.e_close === this.qcMode) {
-        return this.fields.filter(
-          field => field.num < this.fields_enum.e_qc_id
-        );
-      } else {
-        return this.fields.filter(
-          field => field.num < this.fields_enum.e_closed_name
-        );
+      switch (this.qcMode) {
+        case this.qcModes_enum.e_close:
+          return this.fields.filter(
+            field => field.num < this.fields_enum.e_qc_id
+          );
+        case this.qcModes_enum.e_open:
+          return this.fields.filter(
+            field => field.num < this.fields_enum.e_closed_name
+          );
+        default:
+          return this.fields.filter(
+            field =>
+              field.num < this.fields_enum.e_closed_name &&
+              field.num !== this.fields_enum.e_creater_name
+          );
       }
     },
 
@@ -1158,6 +1198,15 @@ export default {
         quality_control_desc: this.getField(this.fields_enum.e_description)
           .ControlSource
       };
+    },
+    images() {
+      return this.attached_files.map(img => ({
+        ID: img.ID,
+        itemImageSrc: img.fileName,
+        thumbnailImageSrc: img.fileName,
+        alt: img.SrcFile,
+        title: img.SrcFile
+      }));
     },
     ...mapState({
       userID: state => +state.api.userID,
@@ -1199,12 +1248,15 @@ export default {
 .single_form {
   margin-bottom: 20px;
 }
-.qc-buttons {
-  height: 52px;
-}
+
 .single_form_buttons {
   display: flex;
   justify-content: space-around;
+}
+.folder-btn {
+  padding: 3px;
+  background: $color--folder;
+  color: white;
 }
 /* זה הגדרות של דסקטופ שאת רשמת אבל אני מוסיף הגדרות נוספות מתחת */
 @media screen and (min-width: 896px) {

@@ -1,5 +1,16 @@
 <template>
-  <div class="chipFilters">
+  <!-- {{ chipFilters }} -->
+  <div
+    v-show="
+      displayQualityControl &&
+        !displayFilters &&
+        !imageEditor.displayImageEditor
+    "
+  >
+    <Button @click="backToParent" icon="pi pi-angle-right"></Button>
+  </div>
+
+  <div class="chipFilters" v-show="!imageEditor.displayImageEditor">
     <Chip
       v-for="f of filterToShow"
       :key="f.num"
@@ -14,7 +25,7 @@
       v-show="false"
       @change="uploadImage"
       ref="evClickFile"
-      accept="image/*"
+      accept=".JPEG,.JPG,.PNG ,.GIF"
     />
 
     <ImageEditor
@@ -35,28 +46,24 @@
     </div>
     <galleria-full
       v-if="displayAttFiles"
-      :images="attached_files"
+      :images="images"
       :displayFullScreen="true"
       @closeGalleria="displayAttFiles = false"
     ></galleria-full>
 
-    <!-- <Dialog v-model:visible="displayAttFiles" modal>
-      <template #header>
-        <h3 style="margin: auto">
-          קבצים מצורפים
-        </h3>
-      </template>
-      <div v-for="attFile of attached_files" :key="attFile.id">
-        <img :src="attFile.fileName" :alt="attFile.SrcFile" />
-      </div>
-    </Dialog> -->
     <div
       v-if="
         (!displayQualityControl || isDesktop) && !imageEditor.displayImageEditor
       "
     >
       <div v-show="!displayFilters">
-        <div class="p-d-flex p-ai-center p-jc-end" style="width: 97%; ">
+        <div class="p-d-flex p-ai-center p-jc-between" style="width: 97%; ">
+          <Button
+            label="בקרה חדשה"
+            @click="openNewQC"
+            icon="pi pi-plus-circle"
+            style="height: 30px;"
+          />
           <Button
             label="סינונים"
             @click="showFilters"
@@ -66,11 +73,17 @@
         </div>
         <div class="controls">
           <div v-if="isDesktop" class="qc-table-headers">
-            <h5 @click="sortBy('id')" class="table-header">מס' בקרה</h5>
-            <h5 @click="sortBy('date')" class="table-header">תאריך פתיחה</h5>
-            <h5 @click="sortBy('status_name')" class="table-header">סטטוס</h5>
-            <h5 @click="sortBy('chapter_name')" class="table-header">פרק</h5>
-            <h5 @click="sortBy('impairment_desc')" class="table-header">
+            <h5 @click="sortBy('id', true)" class="table-header">מס' בקרה</h5>
+            <h5 @click="sortBy('date', true)" class="table-header">
+              תאריך פתיחה
+            </h5>
+            <h5 @click="sortBy('status_name', true)" class="table-header">
+              סטטוס
+            </h5>
+            <h5 @click="sortBy('chapter_name', true)" class="table-header">
+              פרק
+            </h5>
+            <h5 @click="sortBy('impairment_desc', true)" class="table-header">
               סוג ליקוי
             </h5>
             <h5 @click="sortBy('level_desc')" class="table-header">
@@ -78,6 +91,25 @@
             </h5>
           </div>
           <div class="qc-list">
+            <div class="" v-if="!isDesktop">
+              <label :for="sortByList.Name">{{ sortByList.Caption }}</label>
+              <a-point-dropdown
+                :id="sortByList.Name"
+                :field="sortByList"
+                :model-value="sortByList.ControlSource"
+                @update:model-value="updateField(sortByList, $event)"
+              ></a-point-dropdown>
+
+              <ToggleButton
+                class="p-button-plain"
+                v-model="sortUp.ControlSource"
+                :onLabel="sortUp.onLabel"
+                :offLabel="sortUp.offLabel"
+                :onIcon="sortUp.onIcon"
+                :offIcon="sortUp.offIcon"
+                @change="sortUp.FuncOnUpdate()"
+              ></ToggleButton>
+            </div>
             <div
               v-for="qc of qualityControls"
               :key="qc.quality_control_id"
@@ -109,6 +141,11 @@
                       class="p-button-sm report-btn"
                       @click="reporting(qc)"
                       :disabled="qc.status_id === qcStatuses.e_close"
+                      :style="
+                        qc.status_id === qcStatuses.e_close
+                          ? 'background: #a5a5a5;'
+                          : ''
+                      "
                     />
                   </div>
                 </div>
@@ -118,6 +155,7 @@
                   <!-- {{ reportTest(qc.quality_control_id) }} -->
                 </div>
               </div>
+
               <section class="qc-desktop" @click="openQC(qc)" v-if="isDesktop">
                 <div class="qc-id">{{ qc.quality_control_id }}</div>
                 <div class="qc-create-date">{{ qc.formattedCreate_date }}</div>
@@ -148,21 +186,23 @@
       </div>
     </div>
   </div>
-  <div
-    v-if="
-      displayQualityControl &&
-        !displayFilters &&
-        !imageEditor.displayImageEditor
-    "
-  >
-    <QualityControl
-      @close="closeQC"
-      :qualityControl="qualityControl"
-      :qcReports="getReports(qualityControl.quality_control_id)"
-      @closeReportingAndAddPoto="addPoto"
-      @updateStatus="updateStatus"
-    ></QualityControl>
-  </div>
+  <transition name="slide-fade">
+    <div
+      v-if="
+        displayQualityControl &&
+          !displayFilters &&
+          !imageEditor.displayImageEditor
+      "
+    >
+      <QualityControl
+        @close="closeQC"
+        :qualityControl="qualityControl"
+        :qcReports="getReports(qualityControl.quality_control_id)"
+        @closeReportingAndAddPoto="addPoto"
+        @updateStatus="updateStatus"
+      ></QualityControl>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -180,10 +220,11 @@ import Dialog from "primevue/dialog";
 import QCReporting from "@/components/QCReporting.vue";
 import QualityControl from "./QualityControl.vue";
 import ImageEditor from "@/components/ImageEditor.vue";
-import { qcStatuses, fileTypes } from "../scripts/enums.js";
+import { qcStatuses, fileTypes, spinnerInstances } from "../scripts/enums.js";
 import Chip from "primevue/chip";
 import GalleriaFull from "@/components/GalleriaFull.vue";
-
+import APointDropdown from "@/components/APoint-dropdown.vue";
+import ToggleButton from "primevue/togglebutton";
 export default {
   name: "QualityControls",
   components: {
@@ -194,16 +235,12 @@ export default {
     QualityControl,
     ImageEditor,
     Chip,
-    GalleriaFull
+    GalleriaFull,
+    APointDropdown,
+    ToggleButton
   },
   data() {
     return {
-      isIdSortUp: false,
-      isDateSortUp: false,
-      isStatusSortUp: false,
-      isChapterSortUp: false,
-      isImpairmentSortUp: false,
-      isLevelSortUp: false,
       qualityControls: [],
       displayFilters: false,
       displayReporting: false,
@@ -219,70 +256,107 @@ export default {
       attached_files: [],
       chipFilters: [],
       removeFilter: null,
-      qualityControlsReports: []
+      qualityControlsReports: [],
+
+      sortByList: {
+        num: 1,
+        apointType: "dropdown",
+        check: false,
+        required: true,
+        Caption: "מיין לפי:",
+        optionLabel: "desc",
+        optionValue: "field",
+        showClear: false,
+        ControlSource: null,
+        RowSource: [
+          { field: "id", desc: "תאריך פתיחה" },
+          { field: "project_zone1_name", desc: "חללים" },
+          { field: "chapter_name", desc: "פרק" },
+          { field: "responsible_name", desc: "אחראי לביצוע" },
+          { field: "status_name", desc: "סטטוס" }
+        ],
+        Enabled: true,
+        Name: "sortBy",
+        FuncOnUpdate: () => {
+          this.sortBy();
+        },
+        DefaultValue: "id"
+      },
+      sortUp: {
+        num: 2,
+        apointType: "toggleButton",
+        check: false,
+        required: true,
+        Caption: "",
+        onIcon: "pi pi-sort-amount-down-alt",
+        offIcon: "pi pi-sort-amount-up",
+        onLabel: "",
+        offLabel: "",
+        iconPos: null,
+        ControlSource: null,
+        Enabled: true,
+        Name: "sortBy",
+        FuncOnUpdate: () => {
+          this.sortBy();
+        }
+      }
     };
   },
   mounted() {
     console.log("qcStatuses", qcStatuses);
   },
   created() {
-    this.isDesktop = window.innerWidth > 896;
+    this.isDesktop = window.innerWidth > 896; //false; //todo change
   },
   methods: {
-    sortBy(sort) {
+    updateField(field, value) {
+      field.ControlSource = value;
+      if (field.FuncOnUpdate !== undefined) eval(field.FuncOnUpdate(value));
+    },
+    getField(num) {
+      return this.fields.find(f => f.num === num);
+    },
+    sortBy(sortName, changeSortUp) {
+      let sort, sortUp;
+      if (sortName) {
+        sort = sortName;
+        this.sortByList.ControlSource = sortName;
+      } else sort = this.sortByList.ControlSource;
+
+      sortUp = this.sortUp.ControlSource;
+      if (changeSortUp) {
+        this.sortUp.ControlSource = !sortUp;
+        sortUp = !sortUp;
+      }
       let qualityControlsToShow = JSON.parse(
         JSON.stringify(this.qualityControls)
       );
+      if (!sort) return;
       switch (sort) {
         case "date":
           qualityControlsToShow = qualityControlsToShow.sort((a, b) => {
-            return this.isDateSortUp
+            return sortUp
               ? new Date(a.create_date) - new Date(b.create_date)
               : new Date(b.create_date) - new Date(a.create_date);
           });
-          this.isDateSortUp = !this.isDateSortUp;
           break;
         case "id":
           qualityControlsToShow = qualityControlsToShow.sort((a, b) => {
-            return this.isIdSortUp
-              ? b.quality_control_id - a.quality_control_id
-              : a.quality_control_id - b.quality_control_id;
+            return sortUp
+              ? a.quality_control_id - b.quality_control_id
+              : b.quality_control_id - a.quality_control_id;
           });
-          this.isIdSortUp = !this.isIdSortUp;
           break;
-        case "status_name":
+        default:
+          //for strung sort
           qualityControlsToShow = qualityControlsToShow.sort((a, b) => {
-            return this.isStatusSortUp
+            return sortUp
               ? a[sort].localeCompare(b[sort])
               : b[sort].localeCompare(a[sort]);
           });
-          this.isStatusSortUp = !this.isStatusSortUp;
-          break;
-        case "chapter_name":
-          qualityControlsToShow = qualityControlsToShow.sort((a, b) => {
-            return this.isChapterSortUp
-              ? a[sort].localeCompare(b[sort])
-              : b[sort].localeCompare(a[sort]);
-          });
-          this.isChapterSortUp = !this.isChapterSortUp;
-          break;
-        case "impairment_desc":
-          qualityControlsToShow = qualityControlsToShow.sort((a, b) => {
-            return this.isImpairmentSortUp
-              ? b[sort].localeCompare(a[sort])
-              : a[sort].localeCompare(b[sort]);
-          });
-          this.isImpairmentSortUp = !this.isImpairmentSortUp;
-          break;
-        case "level_desc":
-          qualityControlsToShow = qualityControlsToShow.sort((a, b) => {
-            return this.isLevelSortUp
-              ? b[sort].localeCompare(a[sort])
-              : a[sort].localeCompare(b[sort]);
-          });
-          this.isLevelSortUp = !this.isLevelSortUp;
           break;
       }
+
       this.qualityControls = qualityControlsToShow;
     },
     showFilters() {
@@ -309,6 +383,7 @@ export default {
             this.qualityControls = result.Table;
             this.qualityControlsReports = result.Table1;
             this.displayFilters = false;
+            this.sortBy();
           } else {
             this.$toast.add({
               severity: "error",
@@ -367,7 +442,7 @@ export default {
     },
     closeReporting(qualityControl, fromAddPoto) {
       //?הנתונים לא מתרעננים בתצוגה
-      console.log("closeReporting", qualityControl);
+      // console.log("closeReporting", qualityControl);
       let qc = this.qualityControls.find(
         qc => qc.quality_control_id === qualityControl.quality_control_id
       );
@@ -379,6 +454,11 @@ export default {
       qc.responsible_name = this.getResponsibles().find(
         r => r.user_id == qualityControl.responsible_id
       ).user_full_name;
+
+      if (qualityControl.qcReport) {
+        this.qualityControlsReports.push(qualityControl.qcReport);
+      }
+
       if (!fromAddPoto) this.qualityControl = null;
       this.displayReporting = false;
     },
@@ -454,6 +534,10 @@ export default {
         });
     },
     addAttFiles(qc) {
+      this.$store.commit("main/setSpinner", {
+        id: spinnerInstances.e_QualityControls_loadAttFiles,
+        flag: true
+      });
       let procParams = [
         apiParam("user_exec", this.userID, apiPType.Int),
         apiParam("quality_control_id", qc.quality_control_id, apiPType.Int)
@@ -483,6 +567,12 @@ export default {
             closable: true
           });
           console.log("pr_qc_get_attached_files-error", error);
+        })
+        .then(() => {
+          this.$store.commit("main/setSpinner", {
+            id: spinnerInstances.e_QualityControls_loadAttFiles,
+            flag: false
+          });
         });
     },
     closeQC() {
@@ -498,6 +588,14 @@ export default {
       this.qualityControls.find(
         qc => qc.quality_control_id === qc_id
       ).status_id = status;
+    },
+    openNewQC() {
+      this.$router.push({
+        name: "QualityControl"
+      });
+    },
+    backToParent() {
+      this.displayQualityControl = false;
     }
   },
   computed: {
@@ -509,11 +607,13 @@ export default {
           caption: f.Caption,
           value:
             f.apointType === "multiSelect"
-              ? f.RowSource.filter(field => {
-                  return f.ControlSource.indexOf(field[f.optionValue]) >= 0;
-                })
-                  .map(fieldMap => fieldMap[f.optionLabel])
-                  .toString()
+              ? f.ControlSource?.length > 1
+                ? "(" + f.ControlSource.length.toString() + ")"
+                : f.RowSource.filter(field => {
+                    return f.ControlSource.indexOf(field[f.optionValue]) >= 0;
+                  })
+                    .map(fieldMap => fieldMap[f.optionLabel])
+                    .toString()
               : f.apointType === "text" &&
                 f.Format === "Long Date" &&
                 Date.parse(f.ControlSource) === Date.parse(f.ControlSource)
@@ -525,7 +625,15 @@ export default {
     qcStatuses() {
       return qcStatuses;
     },
-
+    images() {
+      return this.attached_files.map(img => ({
+        ID: img.ID,
+        itemImageSrc: img.fileName,
+        thumbnailImageSrc: img.fileName,
+        alt: img.SrcFile,
+        title: img.SrcFile
+      }));
+    },
     ...mapState({ userID: state => +state.api.userID }),
     ...mapGetters({
       getAllStatuses: "qc/getStatuses",
@@ -536,6 +644,12 @@ export default {
     qualityControls: function() {
       console.log("QC", this.qualityControls[0]);
     }
+  },
+  unmounted() {
+    this.$store.commit("main/setSpinner", {
+      id: spinnerInstances.e_QualityControls_loadAttFiles,
+      flag: false
+    });
   }
 };
 </script>
@@ -652,5 +766,18 @@ export default {
   padding: 3px;
   background: $color--folder;
   color: white;
+}
+.slide-fade-enter-active {
+  transition: all 0.6s ease;
+}
+
+.slide-fade-leave-active {
+  transition: all 1s cubic-bezier(0.5, 1, 1, 0.5);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-100vh);
+  opacity: 0;
 }
 </style>

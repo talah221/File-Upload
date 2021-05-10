@@ -29,7 +29,13 @@ export default {
 
 <style scoped>
 .single_report {
-  margin-bottom: 10px;
+  border-bottom: 1px #dee2e6 solid;
+
+  /* margin-bottom: 10px; */
+  /* border-bottom-width: 1px; */
+  /* border-bottom: black; */
+  /* border-bottom-style: dotted; */
+  /* border-bottom-width: 1px; */
 }
 .qcReports {
   background-color: white;

@@ -3,7 +3,7 @@
     <div class="first-buttons-section">
       <Button
         :disabled="apartmentId === 0"
-        label="תוכניות"
+        label="הוסף תכניות"
         @click="plans"
         icon="pi pi-file-pdf"
         class="p-button-info p-button-outlined"

@@ -43,7 +43,7 @@
     </a>
 
     <div class="sidebar-body">
-      <h3>תפריט</h3>
+      <h3>תפריט בקרות</h3>
       <div class="header-logo" v-if="showLogo">
         <router-link to="/">
           <img src="@/assets/img/logo-small.png" alt="Logo" />

@@ -43,6 +43,7 @@ import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import CheckBox from "primevue/checkbox";
+// import { encrypt, apiGetSessionToken } from "../services/APointAPI";
 import { encrypt, decrypt, apiGetSessionToken } from "../services/APointAPI";
 import { spinnerInstances } from "../scripts/enums.js";
 
@@ -82,25 +83,30 @@ export default {
     return {
       userName: "",
       password: "",
-      rememberMe: false //this.$cookie.getCookie("main-user-remember")
+      rememberMe: true //this.$cookie.getCookie("main-user-remember")
     };
   },
   methods: {
     autoLogin() {
+      //!בוצעו שינויים בפונקציה זו על מנת לעבוד עם האפליקציה הישנה
       this.$store.commit("main/setSpinner", {
         id: spinnerInstances.e_testLogin,
         flag: true
       });
-      this.rememberMe = this.$cookie.getCookie("main-user-remember") === "true";
-      // console.log("main-user-remember", this.rememberMe, this.compGUID);
-      // console.log("compGUID", this.compGUID);
+      this.rememberMe = true; //this.$cookie.getCookie("main-user-remember") === "true";
       if (this.rememberMe && this.compGUID) {
-        let userObject = decrypt(
-          this.$cookie.getCookie("main-user-object"),
-          this.compGUID
-        );
+        let userObject = this.$cookie.getCookie("qcAppCookie");
+        if (!userObject) {
+          userObject = decrypt(
+            this.$cookie.getCookie("main-user-object"),
+            this.compGUID
+          );
+        }
+        // let userObject = decrypt(
+        //   this.$cookie.getCookie("main-user-object"),
+        //   this.compGUID
+        // );
         this.userName = userObject.userName;
-        // console.log("userObject", userObject);
         //! TODO error: test auto login feature
         if (this.allowAutoLogin) {
           this.password = userObject.pswd;
@@ -132,11 +138,6 @@ export default {
         this.userName,
         this.password
       );
-      // let userID = await apiGetSessionToken(
-      //   this.compGUID,
-      //   this.userName,
-      //   this.password
-      // );
 
       return userID !== 0;
     },

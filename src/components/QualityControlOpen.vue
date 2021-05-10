@@ -2,11 +2,17 @@
   <div class="single_form_buttons">
     <Button
       :disabled="apartmentId === 0"
-      label="תוכניות"
+      label="הוסף תכניות"
       @click="plans"
       icon="pi pi-file-pdf"
+      class="p-button-info p-button-outlined"
     ></Button>
-    <Button label="דיווח" @click="reporting" icon="pi pi-arrow-circle-up" />
+    <Button
+      label="דיווח"
+      @click="reporting"
+      icon="pi pi-arrow-circle-up"
+      class="report-btn"
+    />
   </div>
 </template>
 
@@ -42,5 +48,11 @@ export default {
 .single_form_buttons {
   display: flex;
   justify-content: space-around;
+}
+</style>
+<style scoped lang="scss">
+.report-btn {
+  background: $color--primary;
+  color: white;
 }
 </style>

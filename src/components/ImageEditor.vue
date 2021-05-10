@@ -6,6 +6,10 @@
       <div class="editor-styling"></div>
       <div class="colors">
         <div
+          class="tool current-color"
+          :style="{ 'background-color': activeColor }"
+        ></div>
+        <div
           v-for="color in colors"
           :key="color"
           class="color-container"
@@ -16,10 +20,6 @@
     </div>
     <div class="editor">
       <div class="toolbarEditor">
-        <div
-          class="tool current-color"
-          :style="{ 'background-color': activeColor }"
-        ></div>
         <div
           class="tool undo"
           @click="undo"
@@ -134,6 +134,7 @@
           class="tool zoom-and-move"
           @click="setMode('zoom')"
           :class="mode === 'zoom' ? 'active-tool' : ''"
+          v-if="!isDesktop"
         >
           <!-- <p>{{mode}}</p> -->
           <svg
@@ -291,7 +292,7 @@
             ></path></svg
           ><!-- <i class="fas fa-crop-alt fa-lg"></i> -->
         </div>
-        <div class="tool upload-image">
+        <div class="tool upload-image" v-show="false">
           <label for="chooseImage"
             ><svg
               class="svg-inline--fa fa-file-upload fa-w-12 fa-lg"
@@ -318,7 +319,11 @@
             ref="uploadImage"
           />
         </div>
-        <div class="tool save-image" @click="saveImage">
+        <div
+          class="tool save-image"
+          @click="saveImage"
+          style=" color: #2280b7;"
+        >
           <svg
             class="svg-inline--fa fa-save fa-w-14 fa-lg"
             aria-hidden="true"
@@ -421,8 +426,12 @@ export default {
         "#000"
       ],
       activeColor: "#001",
-      strokeWidth: 2
+      strokeWidth: 2,
+      isDesktop: true
     };
+  },
+  created() {
+    this.isDesktop = window.innerWidth > 896;
   },
   mounted() {
     this.changeStrokeWidth();
@@ -531,8 +540,10 @@ svg {
 }
 .current-color {
   border-radius: 5px;
-  width: 38px;
-  height: 32px;
+  width: 15px;
+  height: 15px;
+  margin-bottom: 20px;
+  border: 2px solid #c5eccf;
 }
 .colors {
   display: flex;
@@ -577,6 +588,7 @@ svg:not(:root).svg-inline--fa {
 .textWidth {
   display: flex;
   justify-content: center;
+  height: 10px;
 }
 .p-slider-vertical .p-slider-handle {
   left: auto;

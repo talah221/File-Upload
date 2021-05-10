@@ -6,13 +6,14 @@ const mainStore = {
   namespaced: true,
   state: {
     isDev() {
-      return window.location.host.substring(0, 9) === "localhost"
+      return window.location.host.substring(0, 9) === "localhost" ||
+        window.location.host.substring(0, 22) === "ramaderet.apoint.co.il"
         ? true
         : false;
     },
     baseHost() {
       if (this.isDev()) return "https://ramaderet.apoint.co.il/";
-      else return "";
+      else return "https://apoint.ram-aderet.co.il/";
     },
     menu: [
       "הדירה שלי ",
@@ -30,7 +31,8 @@ const mainStore = {
       [spinnerInstances.e_testLogin]: false,
       [spinnerInstances.e_QCReporting_loadDdl]: false,
       [spinnerInstances.e_QualityControlsFilters_loadDdl]: false,
-      [spinnerInstances.e_QualityControl_loadDdl]: false
+      [spinnerInstances.e_QualityControl_loadDdl]: false,
+      [spinnerInstances.e_QualityControls_loadAttFiles]: false
     }
   },
   mutations: {

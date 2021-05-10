@@ -85,8 +85,7 @@ import Textarea from "primevue/textarea";
 import { callProc, apiParam, apiPType } from "../services/APointAPI";
 import { mapState, mapGetters } from "vuex";
 import ConfirmPopup from "primevue/confirmpopup";
-import { qcStatuses } from "../scripts/enums.js";
-import { spinnerInstances } from "../scripts/enums.js";
+import { spinnerInstances, qcStatuses } from "../scripts/enums.js";
 
 export default {
   name: "QCReporting",
@@ -166,11 +165,13 @@ export default {
       ).RowSource = this.getStatuses().filter(
         status =>
           status.status_id !== qcStatuses.e_draft &&
+          status.status_id !== qcStatuses.e_open &&
+          status.status_id !== qcStatuses.e_reminder &&
           status.status_id !== qcStatuses.e_close
       );
       this.getField(
         this.fields_enum.e_responsible
-      ).RowSource = this.getResponsibles();
+      ).RowSource = this.getResponsibles(this.qualityControl.project_id);
     };
     let i = 0;
     let interval = setInterval(() => {
@@ -185,9 +186,16 @@ export default {
       });
     }, 1);
 
-    this.getField(
-      this.fields_enum.e_status
-    ).ControlSource = this.qualityControl.status_id;
+    let status;
+    if (
+      this.qualityControl.status_id == qcStatuses.e_open ||
+      this.qualityControl.status_id === qcStatuses.e_reminder
+    )
+      status = qcStatuses.e_in_progress;
+    else status = this.qualityControl.status_id;
+
+    this.getField(this.fields_enum.e_status).ControlSource = status;
+
     this.getField(
       this.fields_enum.e_responsible
     ).ControlSource = this.qualityControl.responsible_id;
@@ -238,6 +246,7 @@ export default {
         .then(result => {
           result = JSON.parse(result);
           if (result.procReturnValue === 0) {
+            console.log("new-reporting", result.Table1);
             this.$toast.add({
               severity: "success",
               summary: "הדיווח נשמר בהצלחה",
@@ -252,7 +261,8 @@ export default {
                   ? qcStatuses.e_close
                   : this.getField(this.fields_enum.e_status).ControlSource,
               responsible_id: this.getField(this.fields_enum.e_responsible)
-                .ControlSource
+                .ControlSource,
+              qcReport: result.Table1[0]
             };
             if (blnAddPoto) {
               this.$emit("addPoto", updatedQC);
