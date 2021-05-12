@@ -66,10 +66,9 @@ export default {
   z-index: 50;
   background: white;
   .toggle-menu {
-    top: 0;
-    right: 0;
     position: absolute;
-
+    top: 25px;
+    right: 15px;
     display: block;
 
     svg {

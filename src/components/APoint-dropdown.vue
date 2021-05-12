@@ -13,6 +13,7 @@
         field.RowSource !== undefined &&
         field.RowSource.length > 10
     "
+    :placeholder="field.placeholder"
   />
 </template>
 

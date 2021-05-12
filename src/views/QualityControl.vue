@@ -21,13 +21,13 @@
 
   <Dialog v-model:visible="displayReporting" modal>
     <template #header>
-      <h3 style="margin: auto">
+      <h4 style="margin: auto">
         דיווח טיפול בבקרה מס' {{ qualityControl.quality_control_id }}
-      </h3>
+      </h4>
     </template>
     <div>
       <QCReporting
-        :qualityControl="qcObject"
+        :qualityControl="qualityControl"
         @closeReporting="closeReporting"
         @addPoto="closeReportingAndAddPoto"
       />
@@ -120,6 +120,7 @@
           @plans="selectPlan"
           @reporting="reporting"
           :apartmentId="apartmentId"
+          :allow_edit="qualityControl.allow_edit_open_qc"
         />
       </div>
       <div v-else-if="qcMode === qcModes_enum.e_close">
@@ -142,6 +143,7 @@
             label="פתח בקרה מחדש"
             @click="openCloseQC"
             class="qc-button"
+            :disabled="!qualityControl.allow_to_open_closed_qc"
           ></Button>
         </div>
       </div>
@@ -208,6 +210,10 @@
               יעד לביצוע:
               <span>{{ qualityControl.formattedPlaned_date }}</span>
             </h5>
+            <h5>
+              קבלן:
+              <span>{{ qualityControl.contractor_name }}</span>
+            </h5>
           </div>
           <div class="btns">
             <QualityControlOpen
@@ -215,6 +221,7 @@
               @plans="selectPlan"
               @reporting="reporting"
               :apartmentId="apartmentId"
+              :allow_edit="qualityControl.allow_edit_open_qc"
             />
             <!-- //todo להוסיף נתונים של בקרה סגורה ב descktop -->
           </div>
@@ -284,7 +291,12 @@ export default {
       require: false
     }
   },
-  emits: ["close", "closeReportingAndAddPoto", "updateStatus"],
+  emits: [
+    "close",
+    "closeReportingAndAddPoto",
+    "updateStatus",
+    "updateQCReporting"
+  ],
   data() {
     return {
       fields: [
@@ -301,12 +313,13 @@ export default {
           RowSource: [],
           Enabled: true,
           Name: "projectId",
-          FuncOnUpdate: () => {
+          FuncOnUpdate: value => {
             this.getField(this.fields_enum.e_zone1).ControlSource = null;
             this.getField(this.fields_enum.e_zone2).ControlSource = null;
             this.getField(this.fields_enum.e_zone3).ControlSource = null;
             this.getField(this.fields_enum.e_responsibles).ControlSource = null;
             this.getDdlDataLinkedToProject();
+            this.$store.commit("qc/setSelectedProjectId", value);
           }
         },
         {
@@ -415,8 +428,8 @@ export default {
           check: false,
           required: true,
           Caption: "אחראי לביצוע:",
-          optionLabel: "user_full_name",
-          optionValue: "user_id",
+          optionLabel: "user_rank_name",
+          optionValue: "rank_id",
           showClear: true,
           Format: "",
           ControlSource: null,
@@ -484,6 +497,21 @@ export default {
         },
         {
           num: 13,
+          apointType: "dropdown",
+          check: false,
+          required: false,
+          Caption: "קבלן:",
+          optionLabel: "contractor_name",
+          optionValue: "ID",
+          showClear: true,
+          Format: "",
+          ControlSource: null,
+          RowSource: [],
+          Enabled: true,
+          Name: "contractor_id"
+        },
+        {
+          num: 14,
           apointType: "text",
           check: false,
           required: false,
@@ -495,7 +523,7 @@ export default {
           Name: "closed_name"
         },
         {
-          num: 14,
+          num: 15,
           apointType: "text",
           check: false,
           required: false,
@@ -508,7 +536,7 @@ export default {
         },
 
         {
-          num: 15,
+          num: 16,
           apointType: "text",
           check: false,
           required: false,
@@ -533,9 +561,10 @@ export default {
         e_impairment: 10,
         e_severityLevel: 11,
         e_description: 12,
-        e_closed_name: 13,
-        e_closed_date: 14,
-        e_qc_id: 15
+        e_contractor_id: 13,
+        e_closed_name: 14,
+        e_closed_date: 15,
+        e_qc_id: 16
       },
       qcMode: null,
       qcModes_enum: {
@@ -557,7 +586,7 @@ export default {
     };
   },
   created() {
-    this.isDesktop = false; //todo change  window.innerWidth > 896;
+    this.isDesktop = false; //todo change window.innerWidth > 896; //
   },
   mounted() {
     this.getDdlData();
@@ -572,16 +601,22 @@ export default {
         this.qcMode = this.qcModes_enum.e_new;
         header = "בקרה חדשה";
         this.getField(this.fields_enum.e_qc_id).ControlSource = null;
-        //הצגת בחירת פרויקט רק אם למשתמש יש הרשאה על יותר מפרויקט אחד
-        if (
-          this.getField(this.fields_enum.e_projectId).RowSource.length === 1
-        ) {
+        if (this.$store.state.qc.selectedProjectId) {
           this.getField(
             this.fields_enum.e_projectId
-          ).ControlSource = this.getField(
-            this.fields_enum.e_projectId
-          ).RowSource[0].ProjectId;
+          ).ControlSource = this.$store.state.qc.selectedProjectId;
+          this.getField(this.fields_enum.e_projectId).FuncOnUpdate();
         }
+        //הצגת בחירת פרויקט רק אם למשתמש יש הרשאה על יותר מפרויקט אחד
+        // if (
+        //   this.getField(this.fields_enum.e_projectId).RowSource.length === 1
+        // ) {
+        //   this.getField(
+        //     this.fields_enum.e_projectId
+        //   ).ControlSource = this.getField(
+        //     this.fields_enum.e_projectId
+        //   ).RowSource[0].ProjectId;
+        // }
       } else {
         //בקרה פתוחה/סגורה
         header = "בקרה מס' " + this.qualityControl.quality_control_id;
@@ -654,6 +689,9 @@ export default {
             case this.fields_enum.e_creater_name:
               field.ControlSource = this.qualityControl.creater_name;
               break;
+            case this.fields_enum.e_contractor_id:
+              field.ControlSource = this.qualityControl.contractor_id;
+              break;
           }
         });
         this.getAttachedFiles();
@@ -676,7 +714,7 @@ export default {
     },
     updateField(field, value) {
       field.ControlSource = value;
-      if (field.FuncOnUpdate !== undefined) eval(field.FuncOnUpdate());
+      if (field.FuncOnUpdate !== undefined) eval(field.FuncOnUpdate(value));
     },
     checkData() {
       let flag = false;
@@ -731,12 +769,13 @@ export default {
     },
     getDdlDataLinkedToProject() {
       let projectId = this.getField(this.fields_enum.e_projectId).ControlSource;
-      let zone1, zone2, zone3, responsible;
+      let zone1, zone2, zone3, responsible, contractor;
 
       zone1 = this.getField(this.fields_enum.e_zone1);
       zone2 = this.getField(this.fields_enum.e_zone2);
       zone3 = this.getField(this.fields_enum.e_zone3);
       responsible = this.getField(this.fields_enum.e_responsibles);
+      contractor = this.getField(this.fields_enum.e_contractor_id);
 
       if (projectId !== null) {
         zone1.RowSource = this.getZone1(projectId);
@@ -744,6 +783,7 @@ export default {
         zone3.AllRowSource = this.getZone3(projectId);
         this.filterZone2();
         responsible.RowSource = this.getResponsibles(projectId);
+        contractor.RowSource = this.getContractors(projectId);
       } else {
         zone1.RowSource = null;
         zone2.AllRowSource = null;
@@ -751,6 +791,7 @@ export default {
         this.filterZone2();
 
         responsible.RowSource = null;
+        contractor.RowSource = null;
       }
     },
     saveClose() {
@@ -833,6 +874,11 @@ export default {
         apiParam(
           "hardware_level_id",
           this.getField(this.fields_enum.e_severityLevel).ControlSource,
+          apiPType.Int
+        ),
+        apiParam(
+          "contractor_id ",
+          this.getField(this.fields_enum.e_contractor_id).ControlSource,
           apiPType.Int
         )
       ];
@@ -1059,6 +1105,8 @@ export default {
         qualityControl.status_id;
       this.getField(this.fields_enum.e_responsibles).ControlSource =
         qualityControl.responsible_id;
+      this.getField(this.fields_enum.e_contractor_id).ControlSource =
+        qualityControl.contractor_id;
 
       let qcMode;
       if (qualityControl.status_id === qcStatuses.e_close)
@@ -1069,6 +1117,7 @@ export default {
         this.setPermission();
       }
       this.displayReporting = false;
+      this.$emit("updateQCReporting", qualityControl);
     },
     backToParent() {
       this.$router.push({
@@ -1178,27 +1227,28 @@ export default {
       if (currentZone === undefined) return 0;
       return Nz(currentZone.apartment_id);
     },
-    qcObject() {
-      return {
-        quality_control_id: this.getField(this.fields_enum.e_qc_id)
-          .ControlSource,
-        project_id: this.getField(this.fields_enum.e_projectId).ControlSource,
-        status_id: this.getField(this.fields_enum.e_status).ControlSource,
-        zone_1_id: this.getField(this.fields_enum.e_zone1).ControlSource,
-        zone_2_id: this.getField(this.fields_enum.e_zone2).ControlSource,
-        zone_3_id: this.getField(this.fields_enum.e_zone3).ControlSource,
-        chapter_id: this.getField(this.fields_enum.e_chapter).ControlSource,
-        responsible_id: this.getField(this.fields_enum.e_responsibles)
-          .ControlSource,
-        planed_date: this.getField(this.fields_enum.e_planedDate).ControlSource,
-        impairment_id: this.getField(this.fields_enum.e_impairment)
-          .ControlSource,
-        hardware_level_id: this.getField(this.fields_enum.e_severityLevel)
-          .ControlSource,
-        quality_control_desc: this.getField(this.fields_enum.e_description)
-          .ControlSource
-      };
-    },
+    //היה בשימוש בשביל להעביר נתונים לדיווח בקרה והוחלף לפרופס כי לא היה צורך בחישוב זה
+    // qcObject() {
+    //   return {
+    //     quality_control_id: this.getField(this.fields_enum.e_qc_id)
+    //       .ControlSource,
+    //     project_id: this.getField(this.fields_enum.e_projectId).ControlSource,
+    //     status_id: this.getField(this.fields_enum.e_status).ControlSource,
+    //     zone_1_id: this.getField(this.fields_enum.e_zone1).ControlSource,
+    //     zone_2_id: this.getField(this.fields_enum.e_zone2).ControlSource,
+    //     zone_3_id: this.getField(this.fields_enum.e_zone3).ControlSource,
+    //     chapter_id: this.getField(this.fields_enum.e_chapter).ControlSource,
+    //     responsible_id: this.getField(this.fields_enum.e_responsibles)
+    //       .ControlSource,
+    //     planed_date: this.getField(this.fields_enum.e_planedDate).ControlSource,
+    //     impairment_id: this.getField(this.fields_enum.e_impairment)
+    //       .ControlSource,
+    //     hardware_level_id: this.getField(this.fields_enum.e_severityLevel)
+    //       .ControlSource,
+    //     quality_control_desc: this.getField(this.fields_enum.e_description)
+    //       .ControlSource
+    //   };
+    // },
     images() {
       return this.attached_files.map(img => ({
         ID: img.ID,
@@ -1223,7 +1273,8 @@ export default {
       getHardwareLevel: "qc/getHardwareLevel",
       getAllUsers: "qc/getAllUsers",
       getNotDone: "qc/getNotDone",
-      getProjectsUser: "qc/getProjectsUser"
+      getProjectsUser: "qc/getProjectsUser",
+      getContractors: "qc/getContractors"
     })
   },
   watch: {

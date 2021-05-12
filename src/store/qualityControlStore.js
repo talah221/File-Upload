@@ -15,11 +15,20 @@ export const qualityControl = {
     allUsers: [],
     notDone: [],
     projectsUser: [],
+    contractors: [],
     timeOut: 3600000,
     timeOutId: null,
-    isDataLoaded: false
+    isDataLoaded: false,
+    selectedProjectId: null
   },
-  mutations: {},
+  mutations: {
+    setSelectedProjectId(state, payload) {
+      if (payload?.length === 1) state.selectedProjectId = payload[0];
+      else if (payload && typeof payload === "number")
+        state.selectedProjectId = payload;
+      else state.selectedProjectId = null;
+    }
+  },
   actions: {
     loadDdlData({ state, dispatch }) {
       if (state.timeOut !== null) {
@@ -69,16 +78,13 @@ export const qualityControl = {
           if (result.Table10.length > 0) {
             state.projectsUser = result.Table10;
           }
+          if (result.Table11.length > 0) {
+            state.contractors = result.Table11;
+          }
         })
         .catch(error => {
           console.log("pr_qc_ddl_data-error-store", error);
-          this.$toast.add({
-            severity: "error",
-            summary: "שגיאה - פנה לתמיכה",
-            detail: error,
-            life: 10000,
-            closable: true
-          });
+          throw error;
         })
         .then(() => {
           state.isDataLoaded = true;
@@ -111,41 +117,92 @@ export const qualityControl = {
       return state.chapters;
     },
     getResponsibles: state => projectId => {
-      let distinctUsers = state.responsibles;
+      //? האם למיין את התפקידים ולפי מה
+      let responsibles = state.responsibles;
       if (projectId > 0) {
-        distinctUsers = distinctUsers.filter(
-          user => user.project_id === projectId
+        responsibles = responsibles.filter(
+          rank => rank.project_id === projectId
         );
+        // .sort(function(a, b) {
+        //   if (
+        //     a.user_rank_name.toLocaleLowerCase() <
+        //     b.user_rank_name.toLocaleLowerCase()
+        //   ) {
+        //     return -1;
+        //   }
+        //   if (
+        //     a.user_rank_name.toLocaleLowerCase() >
+        //     b.user_rank_name.toLocaleLowerCase()
+        //   ) {
+        //     return 1;
+        //   }
+        //   return 0;
+        // });
+      } else {
+        responsibles = responsibles
+          .map(rank => rank.rank_id)
+          .filter((value, index, self) => {
+            return self.indexOf(value) === index && value !== "";
+          })
+          .map(rankId => ({
+            rank_id: rankId,
+            user_rank_name: state.responsibles.find(r => {
+              // console.log(plan, p);
+              return r.rank_id === rankId;
+            }).rank_name
+          }));
+        // .sort(function(a, b) {
+        //   if (
+        //     a.rank_name.toLocaleLowerCase() < b.rank_name.toLocaleLowerCase()
+        //   ) {
+        //     return -1;
+        //   }
+        //   if (
+        //     a.rank_name.toLocaleLowerCase() > b.rank_name.toLocaleLowerCase()
+        //   ) {
+        //     return 1;
+        //   }
+        //   return 0;
+        // });
+        //? מה להציג למשתמש בעת סינון בקרות כאשר לא נבחר פרויקט - תפקידים בלבד?
       }
-      distinctUsers = distinctUsers
-        .map(user => user.user_id)
-        .filter((value, index, self) => {
-          return self.indexOf(value) === index && value !== "";
-        });
+      return responsibles;
 
-      return distinctUsers
-        .map(user => ({
-          user_id: user,
-          user_full_name: state.responsibles.find(u => {
-            // console.log(plan, p);
-            return u.user_id === user;
-          }).user_full_name
-        }))
-        .sort(function(a, b) {
-          if (
-            a.user_full_name.toLocaleLowerCase() <
-            b.user_full_name.toLocaleLowerCase()
-          ) {
-            return -1;
-          }
-          if (
-            a.user_full_name.toLocaleLowerCase() >
-            b.user_full_name.toLocaleLowerCase()
-          ) {
-            return 1;
-          }
-          return 0;
-        });
+      // let distinctUsers = state.responsibles;
+      // if (projectId > 0) {
+      //   distinctUsers = distinctUsers.filter(
+      //     user => user.project_id === projectId
+      //   );
+      // }
+      // distinctUsers = distinctUsers
+      //   .map(user => user.user_id)
+      //   .filter((value, index, self) => {
+      //     return self.indexOf(value) === index && value !== "";
+      //   });
+
+      // return distinctUsers
+      //   .map(user => ({
+      //     user_id: user,
+      //     user_full_name: state.responsibles.find(u => {
+      //       // console.log(plan, p);
+      //       return u.user_id === user;
+      //     }).user_full_name
+      //   }))
+      //   .sort(function(a, b) {
+      //     if (
+      //       a.user_full_name.toLocaleLowerCase() <
+      //       b.user_full_name.toLocaleLowerCase()
+      //     ) {
+      //       return -1;
+      //     }
+      //     if (
+      //       a.user_full_name.toLocaleLowerCase() >
+      //       b.user_full_name.toLocaleLowerCase()
+      //     ) {
+      //       return 1;
+      //     }
+      //     return 0;
+      //   });
     },
     getImpairment: state => () => {
       return state.impairment;
@@ -161,6 +218,11 @@ export const qualityControl = {
     },
     getProjectsUser: state => () => {
       return state.projectsUser;
+    },
+    getContractors: state => projectId => {
+      if (projectId > 0)
+        return state.contractors.filter(c => c.project_id === projectId);
+      return state.contractors;
     }
   }
 };

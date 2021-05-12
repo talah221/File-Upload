@@ -7,7 +7,6 @@ import Options from "../views/Options.vue";
 import AttendanceReporting from "../views/AttendanceReporting.vue";
 import QualityControl from "../views/QualityControl.vue";
 import QualityControls from "../views/QualityControls.vue";
-import group from "../views/group.vue";
 // import Dashboard from "../views/Dashboard.vue";
 
 const routes = [
@@ -45,11 +44,6 @@ const routes = [
     path: "/QualityControls/:filter",
     name: "QualityControls",
     component: QualityControls
-  },
-  {
-    path: "/group",
-    name: "group",
-    component: group
   }
 ];
 // ,

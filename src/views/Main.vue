@@ -40,6 +40,7 @@ export default {
   box-shadow: 0px 1px 20px 0px rgb(103 103 103 / 75%);
 }
 .router-view {
-  padding-top: 100px;
+  padding-top: 80px;
+  height: 100vh;
 }
 </style>

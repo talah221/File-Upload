@@ -390,7 +390,6 @@
 </template>
 
 <script>
-//todo לחצן ביטול בבקרה חדשה לא עובד
 import Editor from "vue-image-markup";
 import Slider from "primevue/slider";
 // import Dropdown from "primevue/dropdown";

@@ -97,6 +97,7 @@ export default {
   height: 100vh;
   background-color: #f4f4f4;
   z-index: 9000;
+  position: fixed;
 }
 .mainApp {
   margin-right: 20rem;
@@ -166,7 +167,7 @@ export default {
 }
 
 .p-dialog-content {
-  height: 350px;
+  min-height: 350px;
 }
 .chipFilters {
   display: flex;
@@ -213,7 +214,7 @@ export default {
 .p-disabled.p-datepicker-trigger {
   display: none;
 }
-.buttonIcon {
+.buttonIcon .pi {
   font-size: 1.5rem;
 }
 </style>

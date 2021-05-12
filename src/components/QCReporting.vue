@@ -69,6 +69,7 @@
         label="סגור בקרה"
         @click="closeQC"
         icon="pi pi-check-circle"
+        :disabled="!qualityControl.allow_close_qc"
       />
     </div>
   </div>
@@ -130,27 +131,42 @@ export default {
           Locked: false,
           Name: "action_performed"
         },
-
         {
           num: 3,
           apointType: "dropdown",
           check: false,
           required: true,
           Caption: "עובר לטיפול:",
-          optionLabel: "user_full_name",
-          optionValue: "user_id",
+          optionLabel: "user_rank_name",
+          optionValue: "rank_id",
           showClear: true,
           Format: "",
           ControlSource: null,
           RowSource: [],
           Enabled: true,
           Name: "responsible"
+        },
+        {
+          num: 4,
+          apointType: "dropdown",
+          check: false,
+          required: true,
+          Caption: "קבלן:",
+          optionLabel: "contractor_name",
+          optionValue: "ID",
+          showClear: true,
+          Format: "",
+          ControlSource: null,
+          RowSource: [],
+          Enabled: true,
+          Name: "contractor_id"
         }
       ],
       fields_enum: {
         e_status: 1,
         e_action_performed: 2,
-        e_responsible: 3
+        e_responsible: 3,
+        e_contractor: 4
       }
     };
   },
@@ -172,6 +188,9 @@ export default {
       this.getField(
         this.fields_enum.e_responsible
       ).RowSource = this.getResponsibles(this.qualityControl.project_id);
+      this.getField(
+        this.fields_enum.e_contractor
+      ).RowSource = this.getContractors(this.qualityControl.project_id);
     };
     let i = 0;
     let interval = setInterval(() => {
@@ -199,6 +218,9 @@ export default {
     this.getField(
       this.fields_enum.e_responsible
     ).ControlSource = this.qualityControl.responsible_id;
+    this.getField(
+      this.fields_enum.e_contractor
+    ).ControlSource = this.qualityControl.contractor_id;
   },
   methods: {
     getField(num) {
@@ -240,6 +262,11 @@ export default {
           "action_performed",
           this.getField(this.fields_enum.e_action_performed).ControlSource,
           apiPType.NVarChar
+        ),
+        apiParam(
+          "contractor_id",
+          this.getField(this.fields_enum.e_contractor).ControlSource,
+          apiPType.Int
         )
       ];
       callProc("pr_qc_reporting_ins", procParams)
@@ -255,13 +282,17 @@ export default {
               closable: true
             });
             let updatedQC = {
-              quality_control_id: this.qualityControl.quality_control_id,
-              status_id:
-                blnCloseQc === true
-                  ? qcStatuses.e_close
-                  : this.getField(this.fields_enum.e_status).ControlSource,
-              responsible_id: this.getField(this.fields_enum.e_responsible)
-                .ControlSource,
+              // quality_control_id: this.qualityControl.quality_control_id,
+              // status_id:
+              //   blnCloseQc === true
+              //     ? qcStatuses.e_close
+              //     : this.getField(this.fields_enum.e_status).ControlSource,
+              // responsible_id: this.getField(this.fields_enum.e_responsible)
+              // .ControlSource,
+              quality_control_id: result.Table1[0].quality_control_id,
+              status_id: result.Table1[0].new_status_id,
+              responsible_id: result.Table1[0].new_responsible_id,
+              contractor_id: result.Table1[0].new_contractor_id,
               qcReport: result.Table1[0]
             };
             if (blnAddPoto) {
@@ -301,21 +332,6 @@ export default {
       this.saveData(true);
     },
     addPoto(event) {
-      // let dataChanged = false;
-      // if (
-      //   this.getField(this.fields_enum.e_status).ControlSource !==
-      //   this.qualityControl.status_id
-      // )
-      //   dataChanged = true;
-      // else if (
-      //   this.getField(this.fields_enum.e_responsible).ControlSource !==
-      //   this.qualityControl.responsible_id
-      // )
-      //   dataChanged = true;
-      // else if (
-      //   this.getField(this.fields_enum.e_responsible).ControlSource !== null
-      // )
-      //   dataChanged = true;
       if (this.checkData() === true)
         this.$confirm.require({
           target: event.currentTarget,
@@ -338,7 +354,8 @@ export default {
     }),
     ...mapGetters({
       getStatuses: "qc/getStatuses",
-      getResponsibles: "qc/getResponsibles"
+      getResponsibles: "qc/getResponsibles",
+      getContractors: "qc/getContractors"
     })
   },
   unmounted() {

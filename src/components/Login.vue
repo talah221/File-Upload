@@ -106,13 +106,20 @@ export default {
         //   this.$cookie.getCookie("main-user-object"),
         //   this.compGUID
         // );
-        this.userName = userObject.userName;
-        //! TODO error: test auto login feature
-        if (this.allowAutoLogin) {
-          this.password = userObject.pswd;
-          if (this.password !== "") {
-            console.log("auto login");
-            this.login();
+        if (userObject) {
+          this.userName = userObject.userName;
+          //! TODO error: test auto login feature
+          if (this.allowAutoLogin) {
+            this.password = userObject.pswd;
+            if (this.password !== "") {
+              console.log("auto login");
+              this.login();
+            } else {
+              this.$store.commit("main/setSpinner", {
+                id: spinnerInstances.e_testLogin,
+                flag: false
+              });
+            }
           } else {
             this.$store.commit("main/setSpinner", {
               id: spinnerInstances.e_testLogin,

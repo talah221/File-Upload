@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="top-button">
     <div class="p-d-flex p-ai-center p-jc-end btn-filters" style="width: 97%">
       <Button
         class="p-m-2 btn-filter p-button-info"
@@ -14,7 +14,7 @@
       />
     </div>
   </div>
-  <div>
+  <div class="content-filters">
     <div class="p-d-flex p-ai-center p-jc-center p-mb-4 p-mt-2">
       <SelectButton
         v-model="showControls.ControlSource"
@@ -124,7 +124,8 @@ export default {
     AutoComplete
   },
   props: {
-    removeFilter: { type: Number }
+    removeFilter: { type: Number },
+    projects: { type: Array }
   },
   emits: ["showData", "updateFilters", "clearFilters", "filterRemoved"],
   data() {
@@ -139,26 +140,26 @@ export default {
         ]
       },
       fields: [
-        {
-          num: 1,
-          apointType: "multiSelect",
-          check: false,
-          required: false,
-          Caption: "שם פרוייקט",
-          optionLabel: "ProjectName",
-          optionValue: "ProjectId",
-          showClear: true,
-          ControlSource: null,
-          RowSource: [],
-          Enabled: true,
-          Locked: false,
-          Name: "project_id",
-          FuncOnUpdate: field => {
-            this.filterZonesAndZoneTypes();
-            this.setFilters(field);
-          },
-          type: apiPType.NVarChar
-        },
+        // {
+        //   num: 1,
+        //   apointType: "multiSelect",
+        //   check: false,
+        //   required: false,
+        //   Caption: "שם פרוייקט",
+        //   optionLabel: "ProjectName",
+        //   optionValue: "ProjectId",
+        //   showClear: true,
+        //   ControlSource: null,
+        //   RowSource: [],
+        //   Enabled: true,
+        //   Locked: false,
+        //   Name: "project_id",
+        //   FuncOnUpdate: field => {
+        //     this.filterZonesAndZoneTypes();
+        //     this.setFilters(field);
+        //   },
+        //   type: apiPType.NVarChar
+        // },
         {
           num: 2,
           apointType: "multiSelect",
@@ -463,8 +464,8 @@ export default {
           check: false,
           required: false,
           Caption: "אחראי לביצוע",
-          optionLabel: "user_full_name",
-          optionValue: "user_id",
+          optionLabel: "user_rank_name",
+          optionValue: "rank_id",
           showClear: true,
           Format: "",
           ControlSource: null,
@@ -475,6 +476,19 @@ export default {
           isHide: true,
           type: apiPType.NVarChar,
           FuncOnUpdate: field => this.setFilters(field)
+        },
+        {
+          num: 19,
+          apointType: "checkbox",
+          required: false,
+          Caption: "בקרות לטיפול שלי",
+          ControlSource: false,
+          Enabled: true,
+          Name: "myResponsibility",
+          show: false,
+          isHide: true,
+          type: apiPType.Bit,
+          FuncOnUpdate: field => this.setFilters(field)
         }
       ],
       filter: {},
@@ -483,7 +497,7 @@ export default {
       showAllBtnIcon: "pi pi-chevron-down",
       // displaySpinner: false,
       fields_enum: {
-        e_projectId: 1,
+        // e_projectId: 1,
         e_status: 2,
         e_showControls: 3,
         e_fromDate: 4,
@@ -500,7 +514,8 @@ export default {
         e_userClosed: 15,
         e_responsible: 16,
         e_zoneType1: 17,
-        e_zoneType2: 18
+        e_zoneType2: 18,
+        e_myResponsibility: 19
       }
     };
   },
@@ -568,9 +583,9 @@ export default {
       //   flag: true
       // });
       let loadData = () => {
-        this.getField(
-          this.fields_enum.e_projectId
-        ).RowSource = this.getProjectsUser();
+        // this.getField(
+        //   this.fields_enum.e_projectId
+        // ).RowSource = this.getProjectsUser();
         this.getField(this.fields_enum.e_status).RowSource = this.getStatuses();
         this.getField(this.fields_enum.e_zone1).allRowSource = this.getZone1();
         this.getField(
@@ -627,7 +642,7 @@ export default {
     },
     filterZonesAndZoneTypes() {
       let projectIds;
-      projectIds = this.getField(this.fields_enum.e_projectId).ControlSource;
+      projectIds = this.projects;
       //הבאת כל הנתונים
       this.getField(this.fields_enum.e_zone1).RowSource = this.getField(
         this.fields_enum.e_zone1
@@ -721,10 +736,12 @@ export default {
       this.clearFilters();
       switch (param) {
         case "myResponsibility":
+          //? todo לשנות לסינון לפי בקרות של המשתמש
+          //? האם להוסיף סינון נוסף של צ'קבוקס של "בקרות לטיפול שלי" ?
           this.getField(
-            this.fields_enum.e_responsible
-          ).ControlSource = JSON.parse("[" + this.userID + "]");
-          this.setFilters(this.getField(this.fields_enum.e_responsible));
+            this.fields_enum.e_myResponsibility
+          ).ControlSource = true;
+          this.setFilters(this.getField(this.fields_enum.e_myResponsibility));
           break;
         case "ICreated":
           this.getField(this.fields_enum.e_createBy).ControlSource = JSON.parse(
@@ -754,8 +771,7 @@ export default {
       getImpairment: "qc/getImpairment",
       getHardwareLevel: "qc/getHardwareLevel",
       getAllUsers: "qc/getAllUsers",
-      getNotDone: "qc/getNotDone",
-      getProjectsUser: "qc/getProjectsUser"
+      getNotDone: "qc/getNotDone"
     })
   },
   watch: {
@@ -767,6 +783,9 @@ export default {
         this.getField(newValue).ControlSource = null;
         this.$emit("filterRemoved");
       }
+    },
+    projects() {
+      this.filterZonesAndZoneTypes();
     }
   },
   unmounted() {
@@ -795,5 +814,16 @@ export default {
 .btn-filters {
   /* position: fixed;
   z-index: 1; */
+}
+.top-button {
+  position: fixed;
+  z-index: 10;
+  background-color: wheat;
+  width: 100vw;
+}
+.content-filters {
+  position: absolute;
+  top: 150px;
+  overflow: scroll;
 }
 </style>

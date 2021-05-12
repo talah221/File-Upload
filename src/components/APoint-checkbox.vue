@@ -17,18 +17,28 @@ export default {
     Checkbox
   },
   props: {
-    field: {},
-    modelValue: String
+    field: { type: Object },
+    modelValue: Boolean
   },
   emits: ["update:modelValue"],
-  computed: {
-    value() {
-      return this.modelValue;
-    }
+  data() {
+    return {
+      value: null
+    };
   },
+  mounted() {
+    this.value = this.modelValue;
+  },
+
   methods: {
     emitInputs() {
       this.$emit("update:modelValue", this.value);
+    }
+  },
+
+  watch: {
+    modelValue(newValue) {
+      this.value = newValue;
     }
   }
 };

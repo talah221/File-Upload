@@ -1,20 +1,46 @@
 <template>
-  <!-- {{ chipFilters }} -->
   <div
     v-show="
-      displayQualityControl &&
+      !isDesktop &&
+        displayQualityControl &&
         !displayFilters &&
         !imageEditor.displayImageEditor
     "
   >
     <Button @click="backToParent" icon="pi pi-angle-right"></Button>
   </div>
-
-  <div class="chipFilters" v-show="!imageEditor.displayImageEditor">
+  <div
+    class="ProjectFilter"
+    v-show="
+      !isDesktop &&
+        !displayFilters &&
+        !imageEditor.displayImageEditor &&
+        !displayQualityControl
+    "
+  >
+    <MultiSelect
+      id="ddlProjects"
+      v-model="projects.ControlSource"
+      :options="projects.RowSource"
+      :optionLabel="projects.optionLabel"
+      :optionValue="projects.optionValue"
+      :filter="
+        projects.RowSource !== null &&
+          projects.RowSource !== undefined &&
+          projects.RowSource.length > 10
+      "
+      :placeholder="projects.placeholder"
+      @change="projects.FuncOnUpdate()"
+    />
+  </div>
+  <div
+    class="chipFilters"
+    v-show="!imageEditor.displayImageEditor && !displayQualityControl"
+  >
     <Chip
       v-for="f of filterToShow"
       :key="f.num"
-      :label="f.caption + ': ' + f.value + ' '"
+      :label="f.caption + (f.value !== '' ? ': ' + f.value : '') + ' '"
       removable
       @remove="clearFilters(f.num)"
     />
@@ -42,6 +68,7 @@
         @updateFilters="updateFilters"
         @clearFilters="clearFilters"
         @filterRemoved="removeFilter = null"
+        :projects="projects.ControlSource"
       />
     </div>
     <galleria-full
@@ -119,13 +146,16 @@
             </div>
             <div v-if="!isDesktop">
               <div v-for="group of arrActiveGroup" :key="group.name" class="qc">
-                <span @click="group.show = !group.show">
+                <span
+                  @click="group.show = !group.show"
+                  style="font-size:1.5rem"
+                >
                   <i
                     :class="
                       group.show ? 'pi pi-angle-down' : 'pi pi-angle-left'
                     "
                   ></i>
-                  {{ group.name }} ( {{ filetrByGroup(group.name).length }} )
+                  {{ group.name }} ({{ filetrByGroup(group.name).length }})
                 </span>
                 <transition
                   name="slide-fade-group"
@@ -147,24 +177,37 @@
                           </div>
                           <div class="p-text-bold">{{ qc.chapter_name }}</div>
                           <div>{{ qc.responsible_name }}</div>
+                          <div>{{ qc.contractor_name }}</div>
                         </div>
                         <div class="buttonsDiv">
                           <Button
-                            icon="pi pi-folder-open"
-                            class="folder-btn"
+                            icon="pi pi-images"
+                            class="folder-btn buttonIcon"
                             @click="addAttFiles(qc)"
                           ></Button>
                           <Button
-                            label="דווח"
+                            label="הוסף דיווח"
                             class="p-button-sm report-btn"
                             @click="reporting(qc)"
-                            :disabled="qc.status_id === qcStatuses.e_close"
+                            :disabled="
+                              qc.status_id === qcStatuses.e_close ||
+                                !qc.allow_edit_open_qc
+                            "
                             :style="
                               qc.status_id === qcStatuses.e_close
                                 ? 'background: #a5a5a5;'
                                 : ''
                             "
                           />
+                          <Button
+                            icon="pi pi-camera"
+                            class="buttonIcon"
+                            @click="addExternalPoto(qc)"
+                            :disabled="
+                              qc.status_id === qcStatuses.e_close ||
+                                !qc.allow_edit_open_qc
+                            "
+                          ></Button>
                         </div>
                       </div>
                       <div class="description" @click="openQC(qc)">
@@ -198,9 +241,9 @@
           </div>
           <Dialog v-model:visible="displayReporting" modal>
             <template #header>
-              <h3 style="margin: auto">
+              <h4 style="margin: auto">
                 דיווח טיפול בבקרה מס' {{ qualityControl.quality_control_id }}
-              </h3>
+              </h4>
             </template>
             <div>
               <QCReporting
@@ -230,6 +273,7 @@
         :qcReports="getReports(qualityControl.quality_control_id)"
         @closeReportingAndAddPoto="addPoto"
         @updateStatus="updateStatus"
+        @updateQCReporting="updateQCReporting"
       ></QualityControl>
     </div>
   </transition>
@@ -255,6 +299,8 @@ import Chip from "primevue/chip";
 import GalleriaFull from "@/components/GalleriaFull.vue";
 import APointDropdown from "@/components/APoint-dropdown.vue";
 import ToggleButton from "primevue/togglebutton";
+import MultiSelect from "primevue/multiselect";
+
 export default {
   name: "QualityControls",
   components: {
@@ -267,7 +313,8 @@ export default {
     Chip,
     GalleriaFull,
     APointDropdown,
-    ToggleButton
+    ToggleButton,
+    MultiSelect
   },
   data() {
     return {
@@ -331,7 +378,7 @@ export default {
         }
       },
       groupBy: {
-        num: 1,
+        num: 3,
         apointType: "dropdown",
         check: false,
         required: true,
@@ -348,14 +395,59 @@ export default {
         Name: "groupBy",
         FuncOnUpdate: () => {},
         DefaultValue: "chapter_name"
+      },
+      projects: {
+        num: 4,
+        apointType: "multiSelect",
+        check: false,
+        required: false,
+        Caption: "שם פרוייקט",
+        optionLabel: "ProjectName",
+        optionValue: "ProjectId",
+        showClear: true,
+        ControlSource: null,
+        RowSource: [],
+        Enabled: true,
+        Locked: false,
+        Name: "project_id",
+        type: apiPType.NVarChar,
+        placeholder: "בחר פרויקט",
+        FuncOnUpdate: () => {
+          this.filterQualityControl();
+          this.$store.commit(
+            "qc/setSelectedProjectId",
+            this.projects.ControlSource
+          );
+        }
       }
     };
   },
   mounted() {
-    console.log("qcStatuses", qcStatuses);
+    let loadData = () => {
+      this.projects.RowSource = this.getProjectsUser();
+      if (this.$store.state.qc.selectedProjectId) {
+        this.projects.ControlSource = JSON.parse(
+          "[" + this.$store.state.qc.selectedProjectId + "]"
+        );
+        this.projects.FuncOnUpdate();
+      } else if (this.projects.RowSource.length === 1) {
+        this.projects.ControlSource = JSON.parse(
+          "[" + this.projects.RowSource[0].ProjectId + "]"
+        );
+        this.projects.FuncOnUpdate();
+      }
+    };
+    let i = 0;
+    let interval = setInterval(() => {
+      i++;
+      // console.log("interval", i);
+      if (this.isDataLoaded === false && i < 30000) return;
+      clearInterval(interval);
+      loadData();
+    }, 1);
   },
   created() {
-    this.isDesktop = window.innerWidth > 896; //false; //todo change
+    this.isDesktop = false; //todo change window.innerWidth > 896; //false; //todo change
   },
   methods: {
     updateField(field, value) {
@@ -419,6 +511,15 @@ export default {
     },
     filterQualityControl() {
       let procParams = [apiParam("user_exec", this.userID, apiPType.Int)];
+      if (this.projects.ControlSource?.length > 0) {
+        procParams.push(
+          apiParam(
+            this.projects.Name,
+            this.projects.ControlSource.toString(),
+            this.projects.type
+          )
+        );
+      }
       this.chipFilters.forEach(filter => {
         procParams.push(
           apiParam(
@@ -444,7 +545,7 @@ export default {
                 .map(item => item[group.column_name])
                 .filter((value, index, self) => self.indexOf(value) === index)
                 .sort()
-                .map(item => ({ name: item, show: false }));
+                .map(item => ({ name: item, show: true }));
             });
           } else {
             this.$toast.add({
@@ -485,7 +586,9 @@ export default {
     updateFilters(field) {
       if (
         Nz(field.ControlSource, "") === "" ||
-        (field.apointType === "multiSelect" && field.ControlSource.length === 0)
+        (field.apointType === "multiSelect" &&
+          field.ControlSource.length === 0) ||
+        (field.apointType === "checkbox" && !field.ControlSource)
       ) {
         let index = this.chipFilters.findIndex(f => f.num === field.num);
         if (index >= 0) this.chipFilters.splice(index, 1);
@@ -505,6 +608,12 @@ export default {
     closeReporting(qualityControl, fromAddPoto) {
       //?הנתונים לא מתרעננים בתצוגה
       // console.log("closeReporting", qualityControl);
+
+      this.updateQCReporting(qualityControl);
+      if (!fromAddPoto) this.qualityControl = null;
+      this.displayReporting = false;
+    },
+    updateQCReporting(qualityControl) {
       let qc = this.qualityControls.find(
         qc => qc.quality_control_id === qualityControl.quality_control_id
       );
@@ -513,16 +622,17 @@ export default {
         s => s.status_id === qualityControl.status_id
       ).status_name;
       qc.responsible_id = qualityControl.responsible_id;
-      qc.responsible_name = this.getResponsibles().find(
-        r => r.user_id == qualityControl.responsible_id
-      ).user_full_name;
+      qc.responsible_name = this.getResponsibles(qc.project_id).find(
+        r => r.rank_id == qualityControl.responsible_id
+      ).user_rank_name;
+      qc.contractor_id = qualityControl.contractor_id;
+      qc.contractor_name = this.getContractors(qc.project_id).find(
+        c => c.ID === qualityControl.contractor_id
+      ).contractor_name;
 
       if (qualityControl.qcReport) {
         this.qualityControlsReports.push(qualityControl.qcReport);
       }
-
-      if (!fromAddPoto) this.qualityControl = null;
-      this.displayReporting = false;
     },
     openQC(qc) {
       this.qualityControl = qc;
@@ -537,6 +647,10 @@ export default {
       } else {
         this.displayReporting = false;
       }
+      this.clickFile();
+    },
+    addExternalPoto(qc) {
+      this.qualityControl = qc;
       this.clickFile();
     },
     uploadImage(e) {
@@ -685,6 +799,8 @@ export default {
                 f.Format === "Long Date" &&
                 Date.parse(f.ControlSource) === Date.parse(f.ControlSource)
               ? Intl.DateTimeFormat("en-GB").format(f.ControlSource)
+              : f.apointType === "checkbox"
+              ? ""
               : f.ControlSource
         };
       });
@@ -701,15 +817,20 @@ export default {
         title: img.SrcFile
       }));
     },
-    ...mapState({ userID: state => +state.api.userID }),
+    ...mapState({
+      userID: state => +state.api.userID,
+      isDataLoaded: state => state.qc.isDataLoaded
+    }),
     ...mapGetters({
       getAllStatuses: "qc/getStatuses",
-      getResponsibles: "qc/getResponsibles"
+      getResponsibles: "qc/getResponsibles",
+      getProjectsUser: "qc/getProjectsUser",
+      getContractors: "qc/getContractors"
     })
   },
   watch: {
     qualityControls: function() {
-      console.log("QC", this.qualityControls[0]);
+      // console.log("QC", this.qualityControls[0]);
     }
   },
   unmounted() {
@@ -728,8 +849,7 @@ export default {
     display: flex;
     width: 100%;
   }
-  .qc {
-  }
+
   .controls {
     border-radius: 15px;
     .qc-table-headers {
@@ -859,5 +979,17 @@ export default {
 .slide-fade-group-leave-to {
   transform: translateY(-100%);
   opacity: 0;
+}
+.ProjectFilter {
+  margin: auto;
+  max-width: 950px;
+  width: 97%;
+  display: flex;
+
+  flex-wrap: wrap;
+}
+.ProjectFilter #ddlProjects {
+  width: 100%;
+  text-align: center;
 }
 </style>

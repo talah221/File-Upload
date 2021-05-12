@@ -1,7 +1,7 @@
 <template>
   <div class="single_form_buttons">
     <Button
-      :disabled="apartmentId === 0"
+      :disabled="apartmentId === 0 && !allow_edit"
       label="הוסף תכניות"
       @click="plans"
       icon="pi pi-file-pdf"
@@ -12,6 +12,7 @@
       @click="reporting"
       icon="pi pi-arrow-circle-up"
       class="report-btn"
+      :disabled="!allow_edit"
     />
   </div>
 </template>
@@ -24,12 +25,11 @@ export default {
     Button
   },
   props: {
-    quality_control_id: {
-      type: Number,
-      require: true
-    },
     apartmentId: {
       type: Number
+    },
+    allow_edit: {
+      type: Boolean
     }
   },
   emits: ["plans", "reporting"],

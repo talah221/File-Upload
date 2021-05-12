@@ -8,7 +8,7 @@
         class="single_report p-m-2"
       >
         <div style="display: flex; justify-content: space-between">
-          <div>{{ report.user_full_name }}</div>
+          <div>{{ report.user_rank_name }}</div>
           <div>{{ report.format_create_date }}</div>
         </div>
         <div class="p-text-bold">{{ report.action_performed }}</div>

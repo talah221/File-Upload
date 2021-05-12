@@ -33,7 +33,7 @@ import "./registerServiceWorker";
 
 router.beforeEach(function(to, from, next) {
   //window.scrollTo(0, 0); //גלילה של החלון להתחלה
-  console.log("router.beforeEach", to, from);
+  // console.log("router.beforeEach", to, from);
   store.commit("main/setAppHeader", "");
 
   next();
