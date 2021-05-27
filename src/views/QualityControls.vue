@@ -1,282 +1,334 @@
 <template>
-  <div
-    v-show="
-      !isDesktop &&
-        displayQualityControl &&
-        !displayFilters &&
-        !imageEditor.displayImageEditor
-    "
-  >
-    <Button @click="backToParent" icon="pi pi-angle-right"></Button>
-  </div>
-  <div
-    class="ProjectFilter"
-    v-show="
-      !isDesktop &&
-        !displayFilters &&
-        !imageEditor.displayImageEditor &&
-        !displayQualityControl
-    "
-  >
-    <MultiSelect
-      id="ddlProjects"
-      v-model="projects.ControlSource"
-      :options="projects.RowSource"
-      :optionLabel="projects.optionLabel"
-      :optionValue="projects.optionValue"
-      :filter="
-        projects.RowSource !== null &&
-          projects.RowSource !== undefined &&
-          projects.RowSource.length > 10
-      "
-      :placeholder="projects.placeholder"
-      @change="projects.FuncOnUpdate()"
-    />
-  </div>
-  <div
-    class="chipFilters"
-    v-show="!imageEditor.displayImageEditor && !displayQualityControl"
-  >
-    <Chip
-      v-for="f of filterToShow"
-      :key="f.num"
-      :label="f.caption + (f.value !== '' ? ': ' + f.value : '') + ' '"
-      removable
-      @remove="clearFilters(f.num)"
-    />
-  </div>
-  <div>
-    <input
-      type="file"
-      v-show="false"
-      @change="uploadImage"
-      ref="evClickFile"
-      accept=".JPEG,.JPG,.PNG ,.GIF"
-    />
-
-    <ImageEditor
-      v-if="imageEditor.displayImageEditor"
-      @saveImage="saveImage"
-      :dataUrl="imageEditor.dataUrl"
-      @cancel="imageEditor.displayImageEditor = false"
-    ></ImageEditor>
-
-    <div v-show="displayFilters">
-      <QualityControlsFilters
-        :removeFilter="removeFilter"
-        @showData="setFilters"
-        @updateFilters="updateFilters"
-        @clearFilters="clearFilters"
-        @filterRemoved="removeFilter = null"
-        :projects="projects.ControlSource"
-      />
-    </div>
-    <galleria-full
-      v-if="displayAttFiles"
-      :images="images"
-      :displayFullScreen="true"
-      @closeGalleria="displayAttFiles = false"
-    ></galleria-full>
-
+  <div v-if="!isDesktop">
     <div
-      v-if="
-        (!displayQualityControl || isDesktop) && !imageEditor.displayImageEditor
+      class="ProjectFilter"
+      v-show="
+        !displayFilters &&
+          !imageEditor.displayImageEditor &&
+          !displayQualityControl
       "
     >
-      <div v-show="!displayFilters">
-        <div class="p-d-flex p-ai-center p-jc-between" style="width: 97%; ">
-          <Button
-            label="בקרה חדשה"
-            @click="openNewQC"
-            icon="pi pi-plus-circle"
-            style="height: 30px;"
-          />
-          <Button
-            label="סינונים"
-            @click="showFilters"
-            icon="pi pi-filter"
-            style="height: 30px;"
-          />
-        </div>
-        <div class="controls">
-          <div v-if="isDesktop" class="qc-table-headers">
-            <h5 @click="sortBy('id', true)" class="table-header">מס' בקרה</h5>
-            <h5 @click="sortBy('date', true)" class="table-header">
-              תאריך פתיחה
-            </h5>
-            <h5 @click="sortBy('status_name', true)" class="table-header">
-              סטטוס
-            </h5>
-            <h5 @click="sortBy('chapter_name', true)" class="table-header">
-              פרק
-            </h5>
-            <h5 @click="sortBy('impairment_desc', true)" class="table-header">
-              סוג ליקוי
-            </h5>
-            <h5 @click="sortBy('level_desc')" class="table-header">
-              רמת חומרה
-            </h5>
-          </div>
-          <div class="qc-list">
-            <div class="" v-if="!isDesktop">
-              <label :for="sortByList.Name">{{ sortByList.Caption }}</label>
-              <a-point-dropdown
-                :id="sortByList.Name"
-                :field="sortByList"
-                :model-value="sortByList.ControlSource"
-                @update:model-value="updateField(sortByList, $event)"
-              ></a-point-dropdown>
-
-              <ToggleButton
-                class="p-button-plain"
-                v-model="sortUp.ControlSource"
-                :onLabel="sortUp.onLabel"
-                :offLabel="sortUp.offLabel"
-                :onIcon="sortUp.onIcon"
-                :offIcon="sortUp.offIcon"
-                @change="sortUp.FuncOnUpdate()"
-              ></ToggleButton>
-              <label :for="groupBy.Name">{{ groupBy.Caption }}</label>
-              <a-point-dropdown
-                :id="groupBy.Name"
-                :field="groupBy"
-                :model-value="groupBy.ControlSource"
-                @update:model-value="updateField(groupBy, $event)"
-              ></a-point-dropdown>
-            </div>
-            <div v-if="!isDesktop">
-              <div v-for="group of arrActiveGroup" :key="group.name" class="qc">
-                <span
-                  @click="group.show = !group.show"
-                  style="font-size:1.5rem"
-                >
-                  <i
-                    :class="
-                      group.show ? 'pi pi-angle-down' : 'pi pi-angle-left'
-                    "
-                  ></i>
-                  {{ group.name }} ({{ filetrByGroup(group.name).length }})
-                </span>
-                <transition
-                  name="slide-fade-group"
-                  v-for="qc of filetrByGroup(group.name)"
-                  :key="qc.quality_control_id"
-                >
-                  <div v-show="group.show">
-                    <div class="qc-not-desktop" v-if="!isDesktop">
-                      <div class="title" @click="openQC(qc)">
-                        ב&nbsp;{{ qc.quality_control_id }} -
-                        {{ qc.formattedCreate_date }}
-                      </div>
-                      <div class="content">
-                        <div @click="openQC(qc)">
-                          <div>
-                            {{ qc.project_zone1_name }} -
-                            {{ qc.project_zone2_name }} -
-                            {{ qc.project_zone3_name }}
-                          </div>
-                          <div class="p-text-bold">{{ qc.chapter_name }}</div>
-                          <div>{{ qc.responsible_name }}</div>
-                          <div>{{ qc.contractor_name }}</div>
-                        </div>
-                        <div class="buttonsDiv">
-                          <Button
-                            icon="pi pi-images"
-                            class="folder-btn buttonIcon"
-                            @click="addAttFiles(qc)"
-                          ></Button>
-                          <Button
-                            label="הוסף דיווח"
-                            class="p-button-sm report-btn"
-                            @click="reporting(qc)"
-                            :disabled="
-                              qc.status_id === qcStatuses.e_close ||
-                                !qc.allow_edit_open_qc
-                            "
-                            :style="
-                              qc.status_id === qcStatuses.e_close
-                                ? 'background: #a5a5a5;'
-                                : ''
-                            "
-                          />
-                          <Button
-                            icon="pi pi-camera"
-                            class="buttonIcon"
-                            @click="addExternalPoto(qc)"
-                            :disabled="
-                              qc.status_id === qcStatuses.e_close ||
-                                !qc.allow_edit_open_qc
-                            "
-                          ></Button>
-                        </div>
-                      </div>
-                      <div class="description" @click="openQC(qc)">
-                        <!-- <span class="p-text-bold">תיאור:</span> -->
-                        {{ qc.quality_control_desc }}
-                        <!-- {{ reportTest(qc.quality_control_id) }} -->
-                      </div>
-                    </div>
-                  </div>
-                </transition>
-              </div>
-            </div>
-            <div v-if="isDesktop">
-              <div
-                v-for="qc of qualityControls"
-                :key="qc.quality_control_id"
-                class="qc"
-              >
-                <section class="qc-desktop" @click="openQC(qc)">
-                  <div class="qc-id">{{ qc.quality_control_id }}</div>
-                  <div class="qc-create-date">
-                    {{ qc.formattedCreate_date }}
-                  </div>
-                  <div class="qc-status">{{ qc.status_name }}</div>
-                  <div class="qc-chapter">{{ qc.chapter_name }}</div>
-                  <div class="qc-impairment">{{ qc.impairment_desc }}</div>
-                  <div class="qc-level">{{ qc.level_desc }}</div>
-                </section>
-              </div>
-            </div>
-          </div>
-          <Dialog v-model:visible="displayReporting" modal>
-            <template #header>
-              <h4 style="margin: auto">
-                דיווח טיפול בבקרה מס' {{ qualityControl.quality_control_id }}
-              </h4>
-            </template>
-            <div>
-              <QCReporting
-                :qualityControl="qualityControl"
-                @closeReporting="closeReporting"
-                @addPoto="addPoto"
-              />
-            </div>
-
-            <template #footer> </template>
-          </Dialog>
-        </div>
-      </div>
+      <MultiSelect
+        id="ddlProjects"
+        v-model="projects.ControlSource"
+        :options="projects.RowSource"
+        :optionLabel="projects.optionLabel"
+        :optionValue="projects.optionValue"
+        :filter="
+          projects.RowSource !== null &&
+            projects.RowSource !== undefined &&
+            projects.RowSource.length > 10
+        "
+        :placeholder="projects.placeholder"
+        @change="projects.FuncOnUpdate()"
+      >
+      </MultiSelect>
     </div>
-  </div>
-  <transition name="slide-fade">
     <div
-      v-if="
-        displayQualityControl &&
+      v-show="
+        !isDesktop &&
+          displayQualityControl &&
           !displayFilters &&
           !imageEditor.displayImageEditor
       "
     >
-      <QualityControl
-        @close="closeQC"
-        :qualityControl="qualityControl"
-        :qcReports="getReports(qualityControl.quality_control_id)"
-        @closeReportingAndAddPoto="addPoto"
-        @updateStatus="updateStatus"
-        @updateQCReporting="updateQCReporting"
-      ></QualityControl>
+      <Button @click="backToParent" icon="pi pi-angle-right"></Button>
     </div>
-  </transition>
+    <div class="top-grid">
+      <div
+        :class="['chipFilters', displayFilters ? '' : 'm-10']"
+        v-show="!imageEditor.displayImageEditor && !displayQualityControl"
+      >
+        <Chip
+          v-for="f of filterToShow"
+          :key="f.num"
+          :label="f.caption + (f.value !== '' ? ': ' + f.value : '') + ' '"
+          removable
+          @remove="clearFilters(f.num)"
+        />
+      </div>
+    </div>
+    <div>
+      <input
+        type="file"
+        v-show="false"
+        @change="uploadImage"
+        ref="evClickFile"
+        accept=".JPEG,.JPG,.PNG ,.GIF"
+      />
+      <ImageEditor
+        v-if="imageEditor.displayImageEditor"
+        @saveImage="saveImage"
+        :dataUrl="imageEditor.dataUrl"
+        @cancel="imageEditor.displayImageEditor = false"
+      ></ImageEditor>
+      <div v-show="displayFilters">
+        <QualityControlsFilters
+          :removeFilter="removeFilter"
+          @showData="setFilters"
+          @updateFilters="updateFilters"
+          @clearFilters="clearFilters"
+          @filterRemoved="removeFilter = null"
+          :projects="projects.ControlSource"
+        />
+      </div>
+      <galleria-full
+        v-if="displayAttFiles"
+        :images="images"
+        :displayFullScreen="true"
+        @closeGalleria="displayAttFiles = false"
+      ></galleria-full>
+      <div
+        v-if="
+          (!displayQualityControl || isDesktop) &&
+            !imageEditor.displayImageEditor
+        "
+      >
+        <div class="content-qcs">
+          <div v-show="!displayFilters">
+            <div class="header-content">
+              <div class="header-btn">
+                <Button
+                  label="בקרה חדשה"
+                  @click="openNewQC"
+                  icon="pi pi-plus-circle"
+                />
+                <Button
+                  label="מיין"
+                  @click="selected_header_option = header_option_enum.e_sort"
+                  icon="pi pi-sort-alt"
+                  :class="
+                    selected_header_option === header_option_enum.e_sort
+                      ? 'selected-option'
+                      : ''
+                  "
+                />
+                <Button
+                  label="קבץ"
+                  @click="selected_header_option = header_option_enum.e_group"
+                  icon="pi pi-sitemap"
+                  :class="
+                    selected_header_option === header_option_enum.e_group
+                      ? 'selected-option'
+                      : ''
+                  "
+                />
+                <Button label="סנן" @click="showFilters" icon="pi pi-filter" />
+              </div>
+              <div class="header-select" v-show="selected_header_option">
+                <div
+                  v-show="selected_header_option === header_option_enum.e_sort"
+                >
+                  <label :for="sortByList.Name">{{ sortByList.Caption }}</label>
+                  <a-point-dropdown
+                    :id="sortByList.Name"
+                    :field="sortByList"
+                    :model-value="sortByList.ControlSource"
+                    @update:model-value="updateField(sortByList, $event)"
+                    class="header-select-ddl"
+                  ></a-point-dropdown>
+                  <ToggleButton
+                    class="p-button-plain buttonIcon toggleButton"
+                    v-model="sortUp.ControlSource"
+                    :onLabel="sortUp.onLabel"
+                    :offLabel="sortUp.offLabel"
+                    :onIcon="sortUp.onIcon"
+                    :offIcon="sortUp.offIcon"
+                    @change="sortUp.FuncOnUpdate()"
+                  ></ToggleButton>
+                </div>
+                <div
+                  v-show="selected_header_option === header_option_enum.e_group"
+                >
+                  <label :for="groupBy.Name">{{ groupBy.Caption }}</label>
+                  <a-point-dropdown
+                    class="header-select-ddl"
+                    :id="groupBy.Name"
+                    :field="groupBy"
+                    :model-value="groupBy.ControlSource"
+                    @update:model-value="updateField(groupBy, $event)"
+                  ></a-point-dropdown>
+                </div>
+                <Button
+                  icon="pi pi-times"
+                  class="cancelBtn"
+                  @click="selected_header_option = null"
+                ></Button>
+              </div>
+            </div>
+            <div class="controls">
+              <div v-if="isDesktop" class="qc-table-headers">
+                <h5 @click="sortBy('id', true)" class="table-header">
+                  מס' בקרה
+                </h5>
+                <h5 @click="sortBy('date', true)" class="table-header">
+                  תאריך פתיחה
+                </h5>
+                <h5 @click="sortBy('status_name', true)" class="table-header">
+                  סטטוס
+                </h5>
+                <h5 @click="sortBy('chapter_name', true)" class="table-header">
+                  פרק
+                </h5>
+                <h5
+                  @click="sortBy('impairment_desc', true)"
+                  class="table-header"
+                >
+                  סוג ליקוי
+                </h5>
+                <h5 @click="sortBy('level_desc')" class="table-header">
+                  רמת חומרה
+                </h5>
+              </div>
+              <div class="qc-list">
+                <div v-if="!isDesktop">
+                  <div
+                    v-for="group of arrActiveGroup"
+                    :key="group.name"
+                    class="qc"
+                  >
+                    <span
+                      @click="group.show = !group.show"
+                      style="font-size: 1.5rem"
+                    >
+                      <i
+                        :class="
+                          group.show ? 'pi pi-angle-down' : 'pi pi-angle-left'
+                        "
+                      ></i>
+                      {{ group.name }} ({{ filetrByGroup(group.name).length }})
+                    </span>
+                    <transition
+                      name="slide-fade-group"
+                      v-for="qc of filetrByGroup(group.name)"
+                      :key="qc.quality_control_id"
+                    >
+                      <div v-show="group.show">
+                        <div
+                          class="qc-not-desktop"
+                          v-if="!isDesktop"
+                          :style="'border-right-color:' + qc.status_color"
+                        >
+                          <div class="qc-details">
+                            <div class="" @click="openQC(qc)">
+                              {{ qc.quality_control_desc }}
+                            </div>
+                            <div @click="openQC(qc)">
+                              {{ qc.status_name }}
+                            </div>
+                            <div @click="openQC(qc)">{{ qc.chapter_name }}</div>
+                            <div @click="openQC(qc)">
+                              {{ qc.responsible_name }}
+                            </div>
+                            <div @click="openQC(qc)">
+                              {{ qc.contractor_name }}
+                            </div>
+                            <div @click="openQC(qc)">
+                              ב&nbsp;{{ qc.quality_control_id }} -{{
+                                qc.project_zone1_name
+                              }}
+                              - {{ qc.project_zone2_name }} -
+                              {{ qc.project_zone3_name }}
+                            </div>
+                            <div @click="openQC(qc)">
+                              {{ qc.formattedCreate_date }}
+                            </div>
+                            <div>
+                              <Button
+                                icon="pi pi-camera"
+                                class="buttonIcon"
+                                @click="addExternalPoto(qc)"
+                                :disabled="
+                                  qc.status_id === qcStatuses.e_close ||
+                                    !qc.allow_edit_open_qc
+                                "
+                              ></Button>
+                              <Button
+                                icon="pi pi-images"
+                                class="buttonIcon"
+                                @click="addAttFiles(qc.quality_control_id)"
+                              ></Button>
+                              <Button
+                                label="הוסף דיווח"
+                                class="p-button-sm report-btn"
+                                @click="reporting(qc)"
+                                :disabled="
+                                  qc.status_id === qcStatuses.e_close ||
+                                    !qc.allow_edit_open_qc
+                                "
+                                :style="
+                                  qc.status_id === qcStatuses.e_close
+                                    ? 'background: #a5a5a5;'
+                                    : ''
+                                "
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </transition>
+                  </div>
+                </div>
+                <div v-if="isDesktop">
+                  <div
+                    v-for="qc of qualityControls"
+                    :key="qc.quality_control_id"
+                    class="qc"
+                  >
+                    <section class="qc-desktop" @click="openQC(qc)">
+                      <div class="qc-id">{{ qc.quality_control_id }}</div>
+                      <div class="qc-create-date">
+                        {{ qc.formattedCreate_date }}
+                      </div>
+                      <div class="qc-status">{{ qc.status_name }}</div>
+                      <div class="qc-chapter">{{ qc.chapter_name }}</div>
+                      <div class="qc-impairment">{{ qc.impairment_desc }}</div>
+                      <div class="qc-level">{{ qc.level_desc }}</div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+              <Dialog v-model:visible="displayReporting" modal>
+                <template #header>
+                  <h4 style="margin: auto">
+                    דיווח טיפול בבקרה מס'
+                    {{ qualityControl.quality_control_id }}
+                  </h4>
+                </template>
+                <div>
+                  <QCReporting
+                    :qualityControl="qualityControl"
+                    @closeReporting="closeReporting"
+                    @addPoto="addPoto"
+                  />
+                </div>
+                <template #footer> </template>
+              </Dialog>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <transition name="slide-fade">
+      <div
+        v-if="
+          displayQualityControl &&
+            !displayFilters &&
+            !imageEditor.displayImageEditor
+        "
+      >
+        <QualityControl
+          @close="closeQC"
+          :qualityControl="qualityControl"
+          :qcReports="getReports(qualityControl.quality_control_id)"
+          @closeReportingAndAddPoto="addPoto"
+          @updateQCReporting="updateQCReporting"
+          :qcImages="getQcImagesById(qualityControl.quality_control_id)"
+        ></QualityControl>
+      </div>
+    </transition>
+  </div>
+  <quality-controls-desktop v-if="isDesktop" />
 </template>
 
 <script>
@@ -294,12 +346,14 @@ import Dialog from "primevue/dialog";
 import QCReporting from "@/components/QCReporting.vue";
 import QualityControl from "./QualityControl.vue";
 import ImageEditor from "@/components/ImageEditor.vue";
-import { qcStatuses, fileTypes, spinnerInstances } from "../scripts/enums.js";
+import { qcStatuses, fileTypes } from "../scripts/enums.js";
 import Chip from "primevue/chip";
 import GalleriaFull from "@/components/GalleriaFull.vue";
 import APointDropdown from "@/components/APoint-dropdown.vue";
 import ToggleButton from "primevue/togglebutton";
 import MultiSelect from "primevue/multiselect";
+import QualityControlsDesktop from "../components/QualityControlsDesktop/QualityControlsDesktop.container.vue";
+// import QualityControlsDesktop from "../components/QualityControlsDesktop/QualityControlsDesktop.container.vue";
 
 export default {
   name: "QualityControls",
@@ -314,7 +368,8 @@ export default {
     GalleriaFull,
     APointDropdown,
     ToggleButton,
-    MultiSelect
+    MultiSelect,
+    QualityControlsDesktop
   },
   data() {
     return {
@@ -331,6 +386,7 @@ export default {
       },
       displayAttFiles: false,
       attached_files: [],
+      qc_attached_files: [],
       chipFilters: [],
       removeFilter: null,
       qualityControlsReports: [],
@@ -340,7 +396,7 @@ export default {
         apointType: "dropdown",
         check: false,
         required: true,
-        Caption: "מיין לפי:",
+        Caption: "לפי:",
         optionLabel: "desc",
         optionValue: "field",
         showClear: false,
@@ -382,7 +438,7 @@ export default {
         apointType: "dropdown",
         check: false,
         required: true,
-        Caption: "קבץ לפי:",
+        Caption: "לפי:",
         optionLabel: "desc",
         optionValue: "column_name",
         showClear: false,
@@ -419,7 +475,12 @@ export default {
             this.projects.ControlSource
           );
         }
-      }
+      },
+      header_option_enum: {
+        e_sort: 1,
+        e_group: 2
+      },
+      selected_header_option: null
     };
   },
   mounted() {
@@ -440,16 +501,23 @@ export default {
     let i = 0;
     let interval = setInterval(() => {
       i++;
-      // console.log("interval", i);
       if (this.isDataLoaded === false && i < 30000) return;
       clearInterval(interval);
       loadData();
     }, 1);
   },
   created() {
-    this.isDesktop = false; //todo change window.innerWidth > 896; //false; //todo change
+    this.isDesktop = window.innerWidth > 896;
   },
   methods: {
+    getQcImagesById(qId) {
+      // console.log(
+      //   "getQcImagesById",
+      //   qId,
+      //   this.attached_files.filter(qc => qc.quality_control_id === qId)
+      // );
+      return this.attached_files.filter(qc => qc.quality_control_id === qId);
+    },
     updateField(field, value) {
       field.ControlSource = value;
       if (field.FuncOnUpdate !== undefined) eval(field.FuncOnUpdate(value));
@@ -537,7 +605,9 @@ export default {
           if (result.procReturnValue === 0) {
             this.qualityControls = result.Table;
             this.qualityControlsReports = result.Table1;
+            this.attached_files = result.Table2;
             this.displayFilters = false;
+            // console.log(result);
             this.sortBy();
             //grouping
             this.groupBy.RowSource.forEach(group => {
@@ -629,6 +699,9 @@ export default {
       qc.contractor_name = this.getContractors(qc.project_id).find(
         c => c.ID === qualityControl.contractor_id
       ).contractor_name;
+      qc.status_color = this.getAllStatuses().find(
+        s => s.status_id === qualityControl.status_id
+      )?.status_color;
 
       if (qualityControl.qcReport) {
         this.qualityControlsReports.push(qualityControl.qcReport);
@@ -656,7 +729,7 @@ export default {
     uploadImage(e) {
       let reader = new FileReader();
       reader.onload = event => {
-        console.log(event.target.result);
+        // console.log(event.target.result);
         this.imageEditor.dataUrl = event.target.result;
         this.imageEditor.displayImageEditor = true;
       };
@@ -690,10 +763,10 @@ export default {
             });
           }
 
-          // result = JSON.parse(result);
-          console.log("uploadB64-result", result); //1/1 uploaded successfully
+          // console.log("uploadB64-result", result); //1/1 uploaded successfully
         })
         .catch(error => {
+          console.log("uploadB64-error", error);
           this.$toast.add({
             severity: "error",
             summary: "שגיאה בצירוף קבצים",
@@ -701,7 +774,6 @@ export default {
             life: 10000,
             closable: true
           });
-          console.log("uploadB64-error", error);
         })
         .then(() => {
           this.imageEditor.displayImageEditor = false;
@@ -709,47 +781,19 @@ export default {
           this.imageEditor.fileName = "";
         });
     },
-    addAttFiles(qc) {
-      this.$store.commit("main/setSpinner", {
-        id: spinnerInstances.e_QualityControls_loadAttFiles,
-        flag: true
-      });
-      let procParams = [
-        apiParam("user_exec", this.userID, apiPType.Int),
-        apiParam("quality_control_id", qc.quality_control_id, apiPType.Int)
-      ];
-      callProc("pr_qc_get_attached_files", procParams)
-        .then(result => {
-          result = JSON.parse(result);
-          if (result.Table.length > 0) {
-            this.attached_files = result.Table;
-            this.displayAttFiles = true;
-          } else {
-            this.$toast.add({
-              severity: "warn",
-              summary: "קבצים מצורפים",
-              detail: "אין נתונים להצגה",
-              life: 10000,
-              closable: true
-            });
-          }
-        })
-        .catch(error => {
-          this.$toast.add({
-            severity: "error",
-            summary: "שגיאה - פנה לתמיכה",
-            detail: error,
-            life: 10000,
-            closable: true
-          });
-          console.log("pr_qc_get_attached_files-error", error);
-        })
-        .then(() => {
-          this.$store.commit("main/setSpinner", {
-            id: spinnerInstances.e_QualityControls_loadAttFiles,
-            flag: false
-          });
+
+    addAttFiles(qcId) {
+      this.qc_attached_files = this.getQcImagesById(qcId);
+      if (this.qc_attached_files?.length > 0) this.displayAttFiles = true;
+      else {
+        this.$toast.add({
+          severity: "warn",
+          summary: "קבצים מצורפים",
+          detail: "אין נתונים להצגה",
+          life: 10000,
+          closable: true
         });
+      }
     },
     closeQC() {
       this.displayQualityControl = false;
@@ -760,11 +804,7 @@ export default {
         r => r.quality_control_id === quality_control_id
       );
     },
-    updateStatus(qc_id, status) {
-      this.qualityControls.find(
-        qc => qc.quality_control_id === qc_id
-      ).status_id = status;
-    },
+
     openNewQC() {
       this.$router.push({
         name: "QualityControl"
@@ -772,6 +812,7 @@ export default {
     },
     backToParent() {
       this.displayQualityControl = false;
+      this.$store.commit("main/setAppHeader", "ריכוז בקרות");
     }
   },
   computed: {
@@ -809,7 +850,7 @@ export default {
       return qcStatuses;
     },
     images() {
-      return this.attached_files.map(img => ({
+      return this.qc_attached_files.map(img => ({
         ID: img.ID,
         itemImageSrc: img.fileName,
         thumbnailImageSrc: img.fileName,
@@ -834,110 +875,188 @@ export default {
     }
   },
   unmounted() {
-    this.$store.commit("main/setSpinner", {
-      id: spinnerInstances.e_QualityControls_loadAttFiles,
-      flag: false
-    });
+    // this.$store.commit("main/setSpinner", {
+    //   id: spinnerInstances.e_QualityControls_loadAttFiles,
+    //   flag: false,
+    // });
   }
 };
 </script>
 
 <style scoped lang="scss">
-@media (min-width: 880px) {
-  // DESKTOP STYLING
-  .qc-table-container-desktop {
-    display: flex;
-    width: 100%;
+//זמני בהערה עד להצגת נתונים בצורה שונה לdesktop
+// @media (min-width: 880px) {
+//   // DESKTOP STYLING
+//   .qc-table-container-desktop {
+//     display: flex;
+//     width: 100%;
+//   }
+
+//   .controls {
+//     border-radius: 15px;
+//     .qc-table-headers {
+//       width: 80%;
+//       margin: 0 auto;
+//       margin-bottom: 10px;
+//       display: grid;
+//       grid-template-columns: repeat(6, 1fr);
+//       gap: 6px;
+//       cursor: pointer;
+//       .table-header {
+//         background: white;
+//         margin: 0;
+//         text-align: center;
+//         font-weight: 600;
+//         font-size: 18px;
+//         padding: 10px 0;
+//       }
+//     }
+//     .qc-list {
+//       max-height: 350px;
+//       overflow-y: scroll;
+//       width: 80%;
+//       margin: 0 auto;
+//       .qc:nth-of-type(even) {
+//         background: white;
+//       }
+//       .qc {
+//         cursor: pointer;
+//         width: 100%;
+//         &:hover {
+//           background: lightgray;
+//           transition: 0.4s;
+//         }
+
+//         .qc-desktop {
+//           padding: 8px 0;
+//           text-align: center;
+//           margin: 0 auto;
+//           display: grid;
+//           grid-template-columns: repeat(6, 1fr);
+//         }
+//       }
+//     }
+//   }
+// }
+
+//זמני בהערה עד לשינוי תצוגת נתנוים ב desktop
+// @media (max-width: 800px) {
+.qc {
+  padding: 1px 3px;
+  font-size: 14px;
+  .qc-not-desktop {
+    box-shadow: 0px 1px 10px 0px rgb(179 179 179 / 75%);
+    border-radius: 5px;
+    display: grid;
+    // grid-template-rows: minmax(10%, 18%) minmax(25%, 55%) minmax(27%, 60%);
+    padding: 4px;
+    width: 99%;
+    max-width: 500px;
+    margin: 6px;
+    cursor: pointer;
+    background-color: white;
+    border-right-style: solid;
+    border-right-width: 3px;
+  }
+  .qc-details {
+    display: grid;
+    grid-template-columns: 25% 25% 50%;
+    // grid-template-rows: 1.5fr 1fr 1fr 1fr 1.5fr;
+    // grid-auto-rows: 20px 10px 10px 10px 20px;
+    // height: 50px;
+  }
+  .qc-details > div:nth-child(1) {
+    //כותרת הבקרה -> תיאור
+    grid-column-start: 1;
+    grid-column-end: 4;
+    max-height: 45px;
+    overflow: hidden;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  .qc-details > div:nth-child(2) {
+    //סטטוס
+    grid-column-start: 1;
+    grid-column-end: 2;
+    max-height: 48px;
+    overflow: hidden;
+  }
+  .qc-details > div:nth-child(3) {
+    //פרק
+    grid-column-start: 2;
+    grid-column-end: 4;
+    max-height: 48px;
+    overflow: hidden;
+    text-align: left;
+  }
+  .qc-details > div:nth-child(4) {
+    //אחראי
+    grid-column-start: 1;
+    grid-column-end: 3;
+    max-height: 48px;
+    overflow: hidden;
+  }
+  .qc-details > div:nth-child(5) {
+    //קבלן
+    grid-column-start: 3;
+    grid-column-end: 4;
+    max-height: 48px;
+    overflow: hidden;
+    text-align: left;
+  }
+  .qc-details > div:nth-child(6) {
+    //מספר בקר וחללים
+    grid-column-start: 1;
+    grid-column-end: 4;
+    max-height: 48px;
+    overflow: hidden;
+  }
+  .qc-details > div:nth-child(7) {
+    //תאריך פתיחת הבקרה
+    grid-column-start: 1;
+    grid-column-end: 3;
+    padding-top: 8px;
+    max-height: 48px;
+    overflow: hidden;
+  }
+  .qc-details > div:nth-child(8) {
+    //לחצנים
+    grid-column-start: 3;
+    grid-column-end: 4;
+    overflow: hidden;
+    text-align: left;
+    button {
+      height: 28.38px;
+    }
   }
 
-  .controls {
-    border-radius: 15px;
-    .qc-table-headers {
-      width: 80%;
-      margin: 0 auto;
-      margin-bottom: 10px;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 6px;
-      cursor: pointer;
-      .table-header {
-        background: white;
-        margin: 0;
-        text-align: center;
-        font-weight: 600;
-        font-size: 18px;
-        padding: 10px 0;
-      }
-    }
-    .qc-list {
-      max-height: 350px;
-      overflow-y: scroll;
-      width: 80%;
-      margin: 0 auto;
-      .qc:nth-of-type(even) {
-        background: white;
-      }
-      .qc {
-        cursor: pointer;
-        width: 100%;
-        &:hover {
-          background: lightgray;
-          transition: 0.4s;
-        }
-
-        .qc-desktop {
-          padding: 8px 0;
-          text-align: center;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: repeat(6, 1fr);
-        }
-      }
-    }
+  .content {
+    display: grid;
+    grid-template-columns: 87% 13%;
+    margin: 2px 0px;
+  }
+  .title {
+    text-align: center;
+    font-weight: bold;
+  }
+  .description {
+    text-align: center;
+    padding-top: 5px;
+    overflow: hidden;
+    margin-top: 3px;
+    color: #0e1758;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0px 1px 10px 0px rgb(179 179 179 / 75%);
+    max-height: 71px;
   }
 }
-@media (max-width: 800px) {
-  .qc {
-    padding: 1px 3px;
-    font-size: 14px;
-    .qc-not-desktop {
-      box-shadow: 0px 1px 10px 0px rgb(179 179 179 / 75%);
-      border-radius: 5px;
-      display: grid;
-      // grid-template-rows: minmax(10%, 18%) minmax(25%, 55%) minmax(27%, 60%);
-      padding: 4px;
-      width: 99%;
-      max-width: 455px;
-      margin: 6px;
-      cursor: pointer;
-    }
-    .content {
-      display: grid;
-      grid-template-columns: 87% 13%;
-      margin: 2px 0px;
-    }
-    .title {
-      text-align: center;
-      font-weight: bold;
-    }
-    .description {
-      text-align: center;
-      padding-top: 5px;
-      overflow: hidden;
-      margin-top: 3px;
-      color: #0e1758;
-      font-size: 16px;
-      font-weight: bold;
-      box-shadow: 0px 1px 10px 0px rgb(179 179 179 / 75%);
-      max-height: 71px;
-    }
-  }
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
+// }
 .buttonsDiv {
   display: flex;
   align-items: center;
@@ -954,42 +1073,118 @@ export default {
   background: $color--folder;
   color: white;
 }
-.slide-fade-enter-active {
-  transition: all 0.6s ease;
-}
+// .slide-fade-enter-active {
+//   transition: all 0.6s ease;
+// }
 
-.slide-fade-leave-active {
-  transition: all 1s cubic-bezier(0.5, 1, 1, 0.5);
-}
+// .slide-fade-leave-active {
+//   transition: all 1s cubic-bezier(0.5, 1, 1, 0.5);
+// }
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateY(-100vh);
-  opacity: 0;
-}
-.slide-fade-group-enter-active {
-  transition: all 0.3s ease;
-}
+// .slide-fade-enter-from,
+// .slide-fade-leave-to {
+//   transform: translateY(-100vh);
+//   opacity: 0;
+// }
+// .slide-fade-group-enter-active {
+//   transition: all 0.3s ease;
+// }
 
-.slide-fade-group-leave-active {
-  transition: all 0.3s cubic-bezier(0.5, 1, 1, 0.5);
-}
+// .slide-fade-group-leave-active {
+//   transition: all 0.3s cubic-bezier(0.5, 1, 1, 0.5);
+// }
 
-.slide-fade-group-enter-from,
-.slide-fade-group-leave-to {
-  transform: translateY(-100%);
-  opacity: 0;
-}
+// .slide-fade-group-enter-from,
+// .slide-fade-group-leave-to {
+//   transform: translateY(-100%);
+//   opacity: 0;
+// }
 .ProjectFilter {
   margin: auto;
   max-width: 950px;
   width: 97%;
   display: flex;
-
   flex-wrap: wrap;
+  margin-bottom: 2px;
+  // position: fixed;
+  z-index: 10;
+  background-color: #f4f4f4;
+  width: 100vw;
 }
 .ProjectFilter #ddlProjects {
   width: 100%;
   text-align: center;
+  background-color: transparent;
+  font-size: 16px;
+  color: #6d8dbe;
+}
+
+.content-qcs {
+  // position: absolute;
+  // top: 111px;
+  // margin-top: 10px;
+  overflow: scroll;
+}
+.header-btn {
+  display: flex;
+  // width: 97%;
+  // margin-right: auto;
+  // margin-left: auto;
+  justify-content: center;
+}
+.header-btn button {
+  height: 40px;
+}
+.header-select {
+  display: flex;
+  // background-color: white;
+  justify-content: space-between;
+  label {
+    margin: auto 10px;
+  }
+  .header-select-ddl {
+    width: 200px;
+  }
+  .toggleButton {
+    border: none;
+    height: 100%;
+  }
+  .cancelBtn {
+    background-color: transparent;
+    border: none;
+  }
+}
+.selected-option {
+  background-color: #6d8dbe !important;
+  color: white !important;
+}
+.top-grid {
+  // display: grid;
+  // grid-template-rows: 1fr 1fr 1fr;
+  // grid-auto-rows: 50px 50px 50px;
+  .ProjectFilter {
+    grid-row-start: 1;
+    grid-row-end: 1;
+  }
+  .chipFilters {
+    margin-top: 45px;
+    z-index: 2;
+    &.m-10 {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+  }
+  .header-content {
+    grid-row-start: 3;
+    grid-row-end: 3;
+  }
+}
+</style>
+<style>
+.ProjectFilter .p-multiselect .p-multiselect-trigger {
+  position: absolute !important;
+  top: 12px;
+  left: 2px;
+  background-color: #f4f4f4;
 }
 </style>
