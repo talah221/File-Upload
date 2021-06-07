@@ -48,103 +48,160 @@
     :dataUrl="imageEditor.dataUrl"
     @cancel="cancelImage"
   ></ImageEditor>
-  <div class="container" v-if="!isDesktop || qcMode === qcModes_enum.e_new">
-    <div v-if="!imageEditor.displayImageEditor">
+  <div class="container" v-show="!isDesktop || qcMode === qcModes_enum.e_new">
+    <div v-show="!imageEditor.displayImageEditor">
       <Button
         v-if="qcMode === qcModes_enum.e_new"
         @click="backToParent"
         icon="pi pi-angle-right"
       ></Button>
-
-      <div class="single_form">
+      <h3 v-if="isDesktop">פתיחת בקרה חדשה</h3>
+      <div class="newQcGridDesctop1">
         <div
-          class="field p-d-flex p-ai-center p-m-2"
-          :class="field.Name"
-          v-for="(field, i) of detailsFields"
-          :key="i"
+          :class="isDesktop ? 'newQcGridDesctop' : 'single_form'"
+          v-if="qcMode === qcModes_enum.e_new"
+          ref="gridLayout"
         >
-          <label :for="field.Name">{{ field.Caption }}</label>
-          <div class="p-d-flex p-flex-column" ref="" :id="field.Name">
-            <a-point-textbox
-              :field="field"
-              :model-value="field.ControlSource"
-              @update:model-value="field.ControlSource = $event"
-              v-if="field.apointType == 'text'"
-            ></a-point-textbox>
-            <a-point-checkbox
-              v-else-if="field.apointType == 'checkbox'"
-              :field="field"
-              :model-value="field.ControlSource"
-              @update:model-value="field.ControlSource = $event"
-            ></a-point-checkbox>
-            <a-point-dropdown
-              v-else-if="field.apointType == 'dropdown'"
-              :field="field"
-              :model-value="field.ControlSource"
-              @update:model-value="updateField(field, $event)"
-            ></a-point-dropdown>
+          <div class="divider"></div>
+          <div
+            class="field p-d-flex p-ai-center p-m-2"
+            :class="field.Name"
+            v-for="(field, i) of detailsFields"
+            :key="i"
+          >
+            <label :for="field.Name">{{ field.Caption }}</label>
+            <div class="p-d-flex p-flex-column" ref="" :id="field.Name">
+              <a-point-textbox
+                :field="field"
+                :model-value="field.ControlSource"
+                @update:model-value="field.ControlSource = $event"
+                v-if="field.apointType == 'text'"
+              ></a-point-textbox>
+              <a-point-checkbox
+                v-else-if="field.apointType == 'checkbox'"
+                :field="field"
+                :model-value="field.ControlSource"
+                @update:model-value="field.ControlSource = $event"
+              ></a-point-checkbox>
+              <a-point-dropdown
+                v-else-if="field.apointType == 'dropdown'"
+                :field="field"
+                :model-value="field.ControlSource"
+                @update:model-value="updateField(field, $event)"
+              ></a-point-dropdown>
 
-            <Textarea
-              v-else-if="field.apointType == 'textarea'"
-              :field="field"
-              :model-value="field.ControlSource"
-              @update:model-value="updateField(field, $event)"
-              autoResize
-              :disabled="!field.Enabled || field.Locked"
-              :rows="1"
-              :class="field.required && field.check ? 'p-invalid' : ''"
-            ></Textarea>
-            <!-- style="resize: none" -->
-            <span class="error p-mt-1 p-mr-2" v-if="field.check">
-              * שדה חובה
-            </span>
+              <Textarea
+                v-else-if="field.apointType == 'textarea'"
+                :field="field"
+                :model-value="field.ControlSource"
+                @update:model-value="updateField(field, $event)"
+                autoResize
+                :disabled="!field.Enabled || field.Locked"
+                :rows="1"
+                :class="field.required && field.check ? 'p-invalid' : ''"
+              ></Textarea>
+              <!-- style="resize: none" -->
+              <span class="error p-mr-2" v-if="field.check"> * שדה חובה </span>
+            </div>
           </div>
         </div>
-      </div>
+        <div
+          v-if="qcMode && qcMode !== qcModes_enum.e_new"
+          class="p-ml-2 p-mr-2"
+        >
+          <div class="qc-btns p-mb-2">
+            <span v-if="qcMode === qcModes_enum.e_open">
+              <QualityControlOpen
+                @plans="selectPlan"
+                @reporting="reporting"
+                :apartmentId="apartmentId"
+                :allow_edit="qualityControl.allow_edit_open_qc"
+              />
+            </span>
+            <span v-else-if="qcMode === qcModes_enum.e_close">
+              <Button
+                :disabled="apartmentId === 0"
+                label="צפה בתכניות"
+                @click="selectPlan"
+                icon="pi pi-file-pdf"
+                class="p-button-info p-button-outlined p-button-sm p-ml-2"
+              ></Button>
+              <Button
+                label="צפה בקבצים"
+                icon="pi pi-folder-open"
+                @click="attFiles"
+                class="p-button-sm"
+              ></Button>
+            </span>
+          </div>
+          <div class="qc-not-desktop">
+            <div>פרויקט:</div>
+            <div class="">{{ qualityControl.project_desc }}</div>
+            <div>סטטוס:</div>
+            <div>{{ qualityControl.status_name }}</div>
+            <div>תיאור:</div>
+            <div>
+              {{ qualityControl.quality_control_desc }}
+            </div>
+            <div>מיקום:</div>
+            <div>
+              {{ qualityControl.project_zone1_name }} -
+              {{ qualityControl.project_zone2_name }} -
+              {{ qualityControl.project_zone3_name }}
+            </div>
+            <div>פרק:</div>
+            <div>{{ qualityControl.chapter_name }}</div>
+            <div>אחראי לביצוע:</div>
+            <div>{{ qualityControl.responsible_name }}</div>
+            <div>קבלן:</div>
+            <div>{{ qualityControl.contractor_name }}</div>
+            <div>סוג ליקוי:</div>
+            <div>{{ qualityControl.impairment_desc }}</div>
+            <div>רמת חומרה:</div>
+            <div>{{ qualityControl.level_desc }}</div>
+            <div>יעד לביצוע:</div>
+            <div>{{ qualityControl.formattedPlaned_date }}</div>
+            <div>פותח הבקרה:</div>
+            <div>{{ qualityControl.creater_name }}</div>
+            <template v-if="qcMode === qcModes_enum.e_close">
+              <div>סוגר הבקרה:</div>
+              <div>{{ qualityControl.closed_name }}</div>
+              <div>תאריך סגירה:</div>
+              <div>{{ qualityControl.formated_closed_date }}</div>
+            </template>
+          </div>
+        </div>
 
-      <div v-if="qcMode === qcModes_enum.e_new">
-        <QualityControlAdd
-          @saveClose="saveClose"
-          :apartmentId="apartmentId"
-          @plans="selectPlan"
-          @addNewQC="addNewQC"
-          @addPoto="addPoto"
-        />
-      </div>
-      <div v-else-if="qcMode === qcModes_enum.e_open">
-        <q-creports class="p-mb-2" :QCreports="qcReports"></q-creports>
+        <div v-if="qcMode === qcModes_enum.e_new">
+          <QualityControlAdd
+            ref="buttonsControl"
+            @saveClose="saveClose"
+            :apartmentId="apartmentId"
+            @plans="selectPlan"
+            @addNewQC="addNewQC"
+            @addPoto="addPoto"
+          />
+        </div>
+        <div v-if="qcMode === qcModes_enum.e_open">
+          <q-creports class="p-mb-2" :QCreports="qcReports"></q-creports>
 
-        <galleria-full :images="images"></galleria-full>
+          <galleria-full :images="images"></galleria-full>
+        </div>
+        <div v-else-if="qcMode === qcModes_enum.e_close">
+          <q-creports :QCreports="qcReports"></q-creports>
 
-        <QualityControlOpen
-          @plans="selectPlan"
-          @reporting="reporting"
-          :apartmentId="apartmentId"
-          :allow_edit="qualityControl.allow_edit_open_qc"
-        />
-      </div>
-      <div v-else-if="qcMode === qcModes_enum.e_close">
-        <q-creports :QCreports="qcReports"></q-creports>
-
-        <div class="single_form_buttons">
-          <Button
-            :disabled="apartmentId === 0"
-            label="צפה בתכניות"
-            @click="selectPlan"
-            icon="pi pi-file-pdf"
-            class="p-button-info p-button-outlined qc-button"
-          ></Button>
-          <Button
-            icon="pi pi-folder-open"
-            @click="attFiles"
-            class="folder-btn qc-button "
-          ></Button>
-          <Button
-            label="פתח בקרה מחדש"
-            @click="openCloseQC"
-            class="qc-button"
-            :disabled="!qualityControl.allow_to_open_closed_qc"
-          ></Button>
+          <div class="qc-btns p-mr-2 p-ml-2">
+            <Button
+              label="פתח בקרה מחדש"
+              @click="openCloseQC"
+              class="p-button-sm"
+              :disabled="!qualityControl.allow_to_open_closed_qc"
+            ></Button>
+          </div>
+        </div>
+        <div v-else-if="qcMode === qcModes_enum.e_canceled">
+          <q-creports :QCreports="qcReports"></q-creports>
+          <galleria-full :images="images"></galleria-full>
         </div>
       </div>
     </div>
@@ -217,6 +274,7 @@
           </div>
           <div class="btns">
             <QualityControlOpen
+              :ref="isDesktop ? 'QualityControlOpen_' : ''"
               v-if="qcMode === qcModes_enum.e_open"
               @plans="selectPlan"
               @reporting="reporting"
@@ -264,6 +322,8 @@ import QCReporting from "@/components/QCReporting.vue";
 import { qcStatuses, fileTypes, spinnerInstances } from "@/scripts/enums.js";
 import QCreports from "../components/QCreports.vue";
 import GalleriaFull from "@/components/GalleriaFull.vue";
+import { pr_qc_reporting_ins } from "@/scripts/db.js";
+
 export default {
   name: "QualityControl",
   components: {
@@ -289,14 +349,13 @@ export default {
     qcReports: {
       type: Object,
       require: false
+    },
+    qcImages: {
+      type: Array,
+      require: false
     }
   },
-  emits: [
-    "close",
-    "closeReportingAndAddPoto",
-    "updateStatus",
-    "updateQCReporting"
-  ],
+  emits: ["close", "closeReportingAndAddPoto", "updateQCReporting"],
   data() {
     return {
       fields: [
@@ -322,18 +381,7 @@ export default {
             this.$store.commit("qc/setSelectedProjectId", value);
           }
         },
-        {
-          num: 2,
-          apointType: "text",
-          check: false,
-          required: false,
-          Caption: "פותח הבקרה:",
-          Format: "",
-          ControlSource: null,
-          Enabled: true,
-          Locked: false,
-          Name: "creater_name"
-        },
+
         {
           num: 3,
           apointType: "dropdown",
@@ -350,6 +398,63 @@ export default {
           Name: "status",
           DefaultValue: qcStatuses.e_draft,
           AllRowSource: null
+        },
+        {
+          num: 12,
+          apointType: "textarea",
+          check: false,
+          required: true,
+          Caption: "תיאור:",
+          Format: "",
+          ControlSource: null,
+          Enabled: true,
+          Locked: false,
+          Name: "description"
+        },
+        {
+          num: 7,
+          apointType: "dropdown",
+          check: false,
+          required: true,
+          Caption: "פרק:",
+          optionLabel: "chapter_name",
+          optionValue: "chapter_id",
+          showClear: true,
+          Format: "",
+          ControlSource: null,
+          RowSource: [],
+          Enabled: true,
+          Name: "chapter"
+        },
+        {
+          num: 10,
+          apointType: "dropdown",
+          check: false,
+          required: true,
+          Caption: "סוג ליקוי:",
+          optionLabel: "impairment_desc",
+          optionValue: "ID",
+          showClear: true,
+          Format: "",
+          ControlSource: null,
+          RowSource: [],
+          Enabled: true,
+          Name: "impairment"
+        },
+        {
+          num: 11,
+          apointType: "dropdown",
+          check: false,
+          required: true,
+          Caption: "רמת חומרה:",
+          optionLabel: "level_desc",
+          optionValue: "ID",
+          showClear: true,
+          Format: "",
+          ControlSource: null,
+          RowSource: [],
+          Enabled: true,
+          Name: "severityLevel"
         },
         {
           num: 4,
@@ -407,21 +512,7 @@ export default {
           Name: "zone3",
           AllRowSource: null
         },
-        {
-          num: 7,
-          apointType: "dropdown",
-          check: false,
-          required: true,
-          Caption: "פרק:",
-          optionLabel: "chapter_name",
-          optionValue: "chapter_id",
-          showClear: true,
-          Format: "",
-          ControlSource: null,
-          RowSource: [],
-          Enabled: true,
-          Name: "chapter"
-        },
+
         {
           num: 8,
           apointType: "dropdown",
@@ -453,48 +544,7 @@ export default {
           Name: "planedDate",
           showIcon: true
         },
-        {
-          num: 10,
-          apointType: "dropdown",
-          check: false,
-          required: true,
-          Caption: "סוג ליקוי:",
-          optionLabel: "impairment_desc",
-          optionValue: "ID",
-          showClear: true,
-          Format: "",
-          ControlSource: null,
-          RowSource: [],
-          Enabled: true,
-          Name: "impairment"
-        },
-        {
-          num: 11,
-          apointType: "dropdown",
-          check: false,
-          required: true,
-          Caption: "רמת חומרה:",
-          optionLabel: "level_desc",
-          optionValue: "ID",
-          showClear: true,
-          Format: "",
-          ControlSource: null,
-          RowSource: [],
-          Enabled: true,
-          Name: "severityLevel"
-        },
-        {
-          num: 12,
-          apointType: "textarea",
-          check: false,
-          required: true,
-          Caption: "תיאור:",
-          Format: "",
-          ControlSource: null,
-          Enabled: true,
-          Locked: false,
-          Name: "description"
-        },
+
         {
           num: 13,
           apointType: "dropdown",
@@ -509,6 +559,18 @@ export default {
           RowSource: [],
           Enabled: true,
           Name: "contractor_id"
+        },
+        {
+          num: 2,
+          apointType: "text",
+          check: false,
+          required: false,
+          Caption: "פותח הבקרה:",
+          Format: "",
+          ControlSource: null,
+          Enabled: true,
+          Locked: false,
+          Name: "creater_name"
         },
         {
           num: 14,
@@ -532,7 +594,7 @@ export default {
           ControlSource: null,
           Enabled: true,
           Locked: false,
-          Name: "formattedCreate_date"
+          Name: "formated_closed_date"
         },
 
         {
@@ -570,7 +632,8 @@ export default {
       qcModes_enum: {
         e_new: 1,
         e_open: 2,
-        e_close: 3
+        e_close: 3,
+        e_canceled: 4
       },
       displaySelectPlan: false,
       selectedPlan: null,
@@ -586,10 +649,9 @@ export default {
     };
   },
   created() {
-    this.isDesktop = false; //todo change window.innerWidth > 896; //
+    this.isDesktop = window.innerWidth > 890; // false; //todo change window.innerWidth > 896; //
   },
   mounted() {
-    this.getDdlData();
     this.getQcData();
   },
   methods: {
@@ -598,6 +660,7 @@ export default {
 
       if (this.qualityControl === undefined) {
         //בקרה חדשה
+        this.getDdlData();
         this.qcMode = this.qcModes_enum.e_new;
         header = "בקרה חדשה";
         this.getField(this.fields_enum.e_qc_id).ControlSource = null;
@@ -618,11 +681,17 @@ export default {
         //   ).RowSource[0].ProjectId;
         // }
       } else {
-        //בקרה פתוחה/סגורה
-        header = "בקרה מס' " + this.qualityControl.quality_control_id;
+        //בקרה קיימת
+        header =
+          "ב-" +
+          this.qualityControl.quality_control_id +
+          " - " +
+          this.qualityControl.formattedCreate_date;
 
         if (this.qualityControl.status_id === qcStatuses.e_close) {
           this.qcMode = this.qcModes_enum.e_close;
+        } else if (this.qualityControl.status_id === qcStatuses.e_canceled) {
+          this.qcMode = this.qcModes_enum.e_canceled;
         } else {
           this.qcMode = this.qcModes_enum.e_open;
         }
@@ -694,7 +763,8 @@ export default {
               break;
           }
         });
-        this.getAttachedFiles();
+        // this.getAttachedFiles();
+        this.attached_files = this.qcImages;
       }
       this.$store.commit("main/setAppHeader", header);
       this.setPermission();
@@ -705,7 +775,7 @@ export default {
     uploadImage(e) {
       let reader = new FileReader();
       reader.onload = event => {
-        console.log(event.target.result);
+        // console.log(event.target.result);
         this.imageEditor.dataUrl = event.target.result;
         this.imageEditor.displayImageEditor = true;
       };
@@ -886,7 +956,7 @@ export default {
       callProc("pr_qc_ins_upd", procParams)
         .then(result => {
           result = JSON.parse(result);
-          console.log("pr_qc_ins_upd-result", result);
+          // console.log("pr_qc_ins_upd-result", result);
           if (result.procReturnValue === 0) {
             this.getField(this.fields_enum.e_qc_id).ControlSource =
               result.Table[0].quality_control_id;
@@ -960,7 +1030,6 @@ export default {
       }
     },
     displayPlan(plan) {
-      console.log("selected plan ", plan);
       this.selectedPlan = plan;
       this.displaySelectPlan = false;
       if (this.selectedPlan != null) {
@@ -974,7 +1043,8 @@ export default {
             .then(result => {
               result = JSON.parse(result);
               if (result.Table.length > 0) {
-                this.imageEditor.dataUrl = result.Table[0].fileName;
+                this.imageEditor.dataUrl =
+                  result.Table[0].fileName + this.$store.state.api.sessionToken;
                 // "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAYAAABxyNlsAAAD+UlEQVR4Xu3Y3U5cVRiH8WftPXv2nmEopUEwBVOZALFii0ar/bCNMWn86JEnnnjSy/AOvAAvoDfgmTGa2mgNmqhQW4uWNqaAmRiDUtphYPb3Xs0MTTCGNkD6HvHO8eY/4cfDypox6fIfNl1pUDo0jAl6cYMecH2MWwLjgDHoa28Cpn131q5PX6Jy/B3IcwhXybMMb+AIfv0EbrVfgfdmi8nCNfvg8084eOFj8tUGG3NfYdIQt3cQt/8wwcRZnGrfHuf3948ZmyW2eflT/ImzhAuz2LhF37mLYAuShRnwAoKxUxi/RwveZSvG5plt3/ySaPE63uAoJgkpDdbxRl7C5inpwk84PYcoDU/i1AYwjrPLt9i/jxtrC5v8Nc/a9CUOnPoIp3eA9M/r4Dh4I8cwjkvSuIkxThfYPXhYgXfYi7GdV9QinPsam8dUpi5gs4S08StFtE5l/DTWQNqYw2Yp5SOv4PQ+o0fEDoA3cW2B3bhP+PsViiSmdvJDinije+baeIPqy+9TRC3ihRmMF+DX38AEtR3M7+9HuribBJZi7V/Wb3yBU/KoHnsXazOi299jjCF44RxFa4XozjRu55o2dhInOKAFP6Gf/+BuAufNf0gWZ8ijFsH4GYxXJlm6Qb6xCqXOhwsPu34PU+mjcvQtnB69Bz/O93+4jwpuPyBevEbeWqE6eZ4iDWnf+hZTKlMePkp8+7vuTaI8NEYweR5Truzv///H/Pbb4EL3DA6bxHd+IG0ud69o6b0GQf0EydI13Eov3shxors/4o2+jv/smOJuI7At7tYZvEJ79jPi+39Te+0DiuYyNosJJt7EVPtJFn/GFgXB+GnF3R3u1hkc/XaFrPPlztAowcQZ3P5hbNKmPXeZ0lAd/7kpxd097qMzeH2VaP4qtsgIXnwbx68R3fqmC1yZeg/j67Vsu7qecCxsPd45gzvXsPb8VQibkMYYv9L9wOH2DQH6teSecTevwZYibBIt/YIpcvznX8Wp9Svszu+5enQ+TYEdHQtP8w3305biCv61FVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XMUVFBCc1nIVV1BAcFrLVVxBAcFpLVdxBQUEp7VcxRUUEJzWchVXUEBwWstVXEEBwWktV3EFBQSntVzFFRQQnNZyFVdQQHBay1VcQQHBaS1XcQUFBKe1XEHch0SKbRqgl+f2AAAAAElFTkSuQmCC";
                 this.imageEditor.fileName = this.selectedPlan.FileName;
                 this.imageEditor.displayImageEditor = true;
@@ -1066,10 +1136,10 @@ export default {
             });
           }
 
-          // result = JSON.parse(result);
-          console.log("uploadB64-result", result); //1/1 uploaded successfully
+          // console.log("uploadB64-result", result); //1/1 uploaded successfully
         })
         .catch(error => {
+          console.log("uploadB64-error", error);
           this.$toast.add({
             severity: "error",
             summary: "שגיאה בצירוף קבצים",
@@ -1077,7 +1147,6 @@ export default {
             life: 10000,
             closable: true
           });
-          console.log("uploadB64-error", error);
         })
         .then(() => {
           closeImageEditor();
@@ -1089,35 +1158,37 @@ export default {
       });
     },
     setPermission() {
-      let enabledFields;
-      if (this.qcMode === this.qcModes_enum.e_new) enabledFields = true;
-      else enabledFields = false;
-      this.fields.forEach(field => {
-        field.Enabled = enabledFields;
-      });
+      //אין צורך היות ומשתמשים בקומבויים רק בבקרה חדשה ותמיד כל השדות מאופשרים
+      // let enabledFields;
+      // if (this.qcMode === this.qcModes_enum.e_new) enabledFields = true;
+      // else enabledFields = false;
+      // this.fields.forEach(field => {
+      //   field.Enabled = enabledFields;
+      // });
     },
     reporting() {
       this.displayReporting = true;
     },
-    closeReporting(qualityControl) {
-      //? נתונים לא מתרעננים במסך descktop
-      this.getField(this.fields_enum.e_status).ControlSource =
-        qualityControl.status_id;
-      this.getField(this.fields_enum.e_responsibles).ControlSource =
-        qualityControl.responsible_id;
-      this.getField(this.fields_enum.e_contractor_id).ControlSource =
-        qualityControl.contractor_id;
+    closeReporting(updatedQC) {
+      // //? נתונים לא מתרעננים במסך descktop
+      // this.getField(this.fields_enum.e_status).ControlSource =
+      //   qualityControl.status_id;
+      // this.getField(this.fields_enum.e_responsibles).ControlSource =
+      //   qualityControl.responsible_id;
+      // this.getField(this.fields_enum.e_contractor_id).ControlSource =
+      //   qualityControl.contractor_id;
 
-      let qcMode;
-      if (qualityControl.status_id === qcStatuses.e_close)
-        qcMode = this.qcModes_enum.e_close;
-      else qcMode = this.qcModes_enum.e_open;
-      if (qcMode !== this.qcMode) {
-        this.qcMode = qcMode;
-        this.setPermission();
-      }
+      // let qcMode;
+      // if (qualityControl.status_id === qcStatuses.e_close)
+      //   qcMode = this.qcModes_enum.e_close;
+      // //הבאת נתונים נוספים מהDB
+      // else qcMode = this.qcModes_enum.e_open;
+      // if (qcMode !== this.qcMode) {
+      //   this.qcMode = qcMode;
+      //   this.setPermission();
+      // }
       this.displayReporting = false;
-      this.$emit("updateQCReporting", qualityControl);
+      this.$emit("updateQCReporting", updatedQC);
     },
     backToParent() {
       this.$router.push({
@@ -1151,17 +1222,56 @@ export default {
         });
     },
     openCloseQC() {
-      this.getField(this.fields_enum.e_status).ControlSource =
-        qcStatuses.e_open;
-      this.saveData(() => {
-        this.qcMode = this.qcModes_enum.e_open;
-        this.setPermission();
-        this.$emit(
-          "updateStatus",
-          this.getField(this.fields_enum.e_qc_id).ControlSource,
-          qcStatuses.e_open
-        );
-      });
+      pr_qc_reporting_ins(
+        this.qualityControl.quality_control_id,
+        qcStatuses.e_open,
+        this.qualityControl.responsible_id,
+        "בקרה נפתחה מחדש",
+        this.qualityControl.contractor_id
+      )
+        .then(result => {
+          result = JSON.parse(result);
+          if (result.procReturnValue === 0) {
+            this.$toast.add({
+              severity: "success",
+              summary: "הבקרה נפתחה בהצלחה",
+              detail: "",
+              life: 3000,
+              closable: true
+            });
+            let updatedQC = {
+              qualityControl: result.Table2[0],
+              // quality_control_id: result.Table1[0].quality_control_id,
+              // status_id: result.Table1[0].new_status_id,
+              // responsible_id: result.Table1[0].new_responsible_id,
+              // contractor_id: result.Table1[0].new_contractor_id,
+              qcReport: result.Table1[0]
+            };
+            this.closeReporting(updatedQC);
+          } else {
+            this.$toast.add({
+              severity: "error",
+              summary: "שגיאה בפתיחת בקרה מחדש- פנה לתמיכה",
+              detail: "",
+              life: 10000,
+              closable: true
+            });
+            console.log(
+              "pr_qc_reporting_ins-error-procReturnValue",
+              result.procReturnValue
+            );
+          }
+        })
+        .catch(error => {
+          this.$toast.add({
+            severity: "error",
+            summary: "שגיאה - פנה לתמיכה",
+            detail: error,
+            life: 10000,
+            closable: true
+          });
+          console.log("pr_qc_reporting_ins-error", error);
+        });
     },
     getAttachedFiles() {
       let procParams = [
@@ -1189,9 +1299,9 @@ export default {
         });
     },
     cancelImage() {
-      if (this.qcMode === this.qcModes_enum.e_new)
-        this.imageEditor.displayImageEditor = false;
-      else this.displayReporting = false;
+      // if (this.qcMode === this.qcModes_enum.e_new)
+      this.imageEditor.displayImageEditor = false;
+      // else this.displayReporting = false;
     }
   },
   computed: {
@@ -1215,17 +1325,21 @@ export default {
     },
 
     apartmentId() {
-      let allZone2 = this.getField(this.fields_enum.e_zone2).AllRowSource;
+      if (this.qcMode === this.qcModes_enum.e_new) {
+        let allZone2 = this.getField(this.fields_enum.e_zone2).AllRowSource;
 
-      if (allZone2 === undefined || allZone2 === null) return 0;
+        if (allZone2 === undefined || allZone2 === null) return 0;
 
-      let currentZone = allZone2.find(
-        zone =>
-          zone.project_zones_id ===
-          this.getField(this.fields_enum.e_zone2).ControlSource
-      );
-      if (currentZone === undefined) return 0;
-      return Nz(currentZone.apartment_id);
+        let currentZone = allZone2.find(
+          zone =>
+            zone.project_zones_id ===
+            this.getField(this.fields_enum.e_zone2).ControlSource
+        );
+        if (currentZone === undefined) return 0;
+        return Nz(currentZone.apartment_id);
+      } else {
+        return Nz(this.qualityControl.apartment_id);
+      }
     },
     //היה בשימוש בשביל להעביר נתונים לדיווח בקרה והוחלף לפרופס כי לא היה צורך בחישוב זה
     // qcObject() {
@@ -1250,7 +1364,7 @@ export default {
     //   };
     // },
     images() {
-      return this.attached_files.map(img => ({
+      return this.qcImages.map(img => ({
         ID: img.ID,
         itemImageSrc: img.fileName,
         thumbnailImageSrc: img.fileName,
@@ -1280,6 +1394,13 @@ export default {
   watch: {
     qualityControl() {
       this.getQcData();
+    },
+    qcMode() {
+      if (this.qcMode === this.qcModes_enum.e_new) {
+        this.$nextTick(function() {
+          // this.$refs.gridLayout.appendChild(this.$refs.buttonsControl.$el);
+        });
+      }
     }
   },
   unmounted() {
@@ -1292,6 +1413,17 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.container {
+  h3 {
+    text-align: center;
+    text-decoration: underline;
+  }
+}
+
+.field label {
+  min-width: 105px;
+  max-width: 105px;
+}
 .error {
   color: red;
   font-size: 11px;
@@ -1304,22 +1436,68 @@ export default {
   display: flex;
   justify-content: space-around;
 }
-.folder-btn {
-  padding: 3px;
-  background: $color--folder;
-  color: white;
-}
 /* זה הגדרות של דסקטופ שאת רשמת אבל אני מוסיף הגדרות נוספות מתחת */
 @media screen and (min-width: 896px) {
-  .description {
+  #description {
     width: 97% !important;
-    max-width: 950px !important;
+    // max-width: 950px !important;
   }
   .description label {
-    width: 8% !important;
+    // width: 8% !important;
   }
   .description div {
-    width: 91.5% !important;
+    // width: 91.5% !important;
+  }
+
+  .single_form {
+    width: 90%;
+    margin: 0 auto;
+    // display: grid;
+    // grid-template-columns: 5% 10% 30% 30% 10% 5%;
+    // grid-template-rows: repeat(20, 1fr);
+    .projectId {
+      width: 50%;
+      grid-column: 2/6;
+      label {
+        width: 30%;
+      }
+      div {
+        width: 70%;
+      }
+    }
+    .status {
+      width: 50%;
+      label {
+        width: 30%;
+      }
+      div {
+        width: 60%;
+      }
+    }
+    .description {
+      display: block !important;
+      div {
+        width: 100% !important;
+      }
+    }
+    .chapter {
+    }
+    .impairment {
+    }
+    .severityLevel {
+    }
+    .zone1 {
+    }
+    .zone2 {
+    }
+    .zone3 {
+    }
+    .responsibles {
+    }
+    .planedDate {
+    }
+    .contractor_id {
+    }
   }
 }
 .quality-control-dekstop {
@@ -1367,5 +1545,121 @@ export default {
       }
     }
   }
+}
+.qc-not-desktop {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-column-gap: 5px;
+}
+.qc-not-desktop > div:nth-child(2n-1) {
+  font-weight: 700;
+}
+.qc-btns {
+  text-align: left;
+}
+.newQcGridDesctop {
+  display: grid;
+  grid-template-rows: repeat(10, 50px);
+  grid-template-columns: 39% 4% 40% 2% 10%;
+  justify-content: center;
+  gap: 13px 3px;
+
+  // grid-template-columns: 40vw 1px 40vh 30px;
+  // grid-template-areas: 40fr 1px 40fr 30px;
+  .projectId {
+    grid-row: 1;
+    grid-column-start: 1;
+    grid-column-end: 2;
+
+    #projectId {
+      width: 100%;
+    }
+  }
+  .status {
+    grid-row: 2;
+    grid-column-start: 1;
+    grid-column-end: 2;
+    #status {
+      width: 100%;
+    }
+  }
+  .description {
+    grid-row: 3;
+    grid-column-start: 1;
+    grid-column-end: -1;
+  }
+  .chapter {
+    grid-row: 4;
+    grid-column: 1;
+    #chapter {
+      width: 100%;
+    }
+  }
+  .impairment {
+    grid-row: 5;
+    grid-column: 1;
+    #impairment {
+      width: 100%;
+    }
+  }
+  .severityLevel {
+    grid-row: 6;
+    grid-column: 1;
+    #severityLevel {
+      width: 100%;
+    }
+  }
+  .responsibles {
+    grid-row: 7;
+    grid-column: 1;
+    #responsibles {
+      width: 100%;
+    }
+  }
+  .contractor_id {
+    grid-row: 8;
+    grid-column: 1;
+    #contractor_id {
+      width: 100%;
+    }
+  }
+  .planedDate {
+    grid-row: 9;
+    grid-column: 1;
+  }
+  .zone1 {
+    grid-row: 4;
+    grid-column: 3;
+    #zone1 {
+      width: 100%;
+    }
+  }
+  .zone2 {
+    grid-row: 5;
+    grid-column: 3;
+    #zone2 {
+      width: 100%;
+    }
+  }
+  .zone3 {
+    grid-row: 6;
+    grid-column: 3;
+
+    #zone3 {
+      width: 100%;
+    }
+  }
+  .divider {
+    background-color: black;
+    display: block;
+    grid-column: 2;
+    grid-row-start: 4;
+    grid-row-end: 9;
+    width: 2px;
+    justify-self: center;
+  }
+}
+.divider {
+  display: none;
 }
 </style>

@@ -7,44 +7,45 @@ import Options from "../views/Options.vue";
 import AttendanceReporting from "../views/AttendanceReporting.vue";
 import QualityControl from "../views/QualityControl.vue";
 import QualityControls from "../views/QualityControls.vue";
-// import Dashboard from "../views/Dashboard.vue";
+import Dashboard from "../views/Dashboard.vue";
 
 const routes = [
   {
     path: "/detail/:id",
     name: "Detail",
-    component: Detail
+    component: Detail,
+  },
+  {
+    path: "/dashboard/:id?",
+    name: "Dashboard",
+    component: Dashboard,
   },
   {
     path: "/",
     name: "Home",
-    component: QualityControls
+    component: QualityControls,
   },
-  // {
-  //   path: "/",
-  //   name: "Home",
-  //   component: Home
-  // },
+
   {
     path: "/options/:id",
     name: "Options",
-    component: Options
+    component: Options,
   },
   {
     path: "/AttendanceReporting",
     name: "AttendanceReporting",
-    component: AttendanceReporting
+    component: AttendanceReporting,
   },
   {
     path: "/QualityControl",
     name: "QualityControl",
-    component: QualityControl
+    component: QualityControl,
   },
   {
     path: "/QualityControls/:filter",
     name: "QualityControls",
-    component: QualityControls
-  }
+    component: QualityControls,
+  },
 ];
 // ,
 // {
@@ -59,9 +60,9 @@ const router = createRouter({
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: "smooth"
+      behavior: "smooth",
     });
-  }
+  },
 });
 
 export default router;

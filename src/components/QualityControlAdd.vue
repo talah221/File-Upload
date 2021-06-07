@@ -1,27 +1,38 @@
 <template>
   <div class="buttons-control">
-    <div class="first-buttons-section">
-      <Button
-        :disabled="apartmentId === 0"
-        label="הוסף תכניות"
-        @click="plans"
-        icon="pi pi-file-pdf"
-        class="p-button-info p-button-outlined"
-      ></Button>
-      <Button
-        label="הוסף תמונה"
-        @click="addPoto"
-        icon="pi pi-camera"
-        class="p-button-info p-button-outlined"
-      ></Button>
+    <div :class="['first-buttons-section', isDesktop ? 'desktop' : '']">
+      <teleport to=".newQcGridDesctop" :disabled="!isDesktop">
+        <Button
+          :disabled="apartmentId === 0"
+          label="הוסף תכניות"
+          @click="plans"
+          icon="pi pi-file-pdf"
+          class="p-button-info p-button-outlined buttonIcon add-plans"
+        ></Button>
+        <Button
+          label="הוסף תמונה"
+          @click="addPoto"
+          icon="pi pi-camera"
+          class="p-button-info p-button-outlined buttonIcon add-pic"
+        ></Button>
+      </teleport>
     </div>
+
     <div class="second-buttons-section">
-      <Button label="שמור וסגור" @click="saveClose" icon="pi pi-check"></Button>
-      <Button
-        label="בקרה חדשה"
-        @click="addNewQC"
-        icon="pi pi-plus-circle"
-      ></Button>
+      <teleport to=".newQcGridDesctop" :disabled="!isDesktop">
+        <Button
+          label="שמור וסגור"
+          @click="saveClose"
+          icon="pi pi-check"
+          class="buttonIcon save-exit"
+        ></Button>
+        <Button
+          label="בקרה חדשה"
+          @click="addNewQC"
+          icon="pi pi-plus-circle"
+          class="buttonIcon new-qc"
+        ></Button>
+      </teleport>
     </div>
   </div>
 </template>
@@ -32,14 +43,16 @@ export default {
   name: "QualityControlAdd",
   props: {
     apartmentId: {
-      type: Number
-    }
+      type: Number,
+    },
   },
   emits: ["saveClose", "plans", "addNewQC", "addPoto"],
   components: {
-    Button
+    Button,
   },
-
+  created() {
+    this.isDesktop = window.innerWidth > 860;
+  },
   methods: {
     saveClose() {
       this.$emit("saveClose");
@@ -53,12 +66,41 @@ export default {
     },
     addPoto() {
       this.$emit("addPoto");
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped lang="scss">
+.add-plans {
+  margin-top: 20px;
+  padding: 20px;
+  grid-column: 5/-1;
+  grid-row-start: 4;
+  grid-row-end: 5;
+  justify-content: center;
+}
+.add-pic {
+  padding: 20px;
+  grid-column: 5/-1;
+  grid-row-start: 6;
+  grid-row-end: 7;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.save-exit {
+  grid-row: -1;
+  grid-column: 5;
+  justify-content: center;
+}
+.new-qc {
+  justify-content: center;
+  grid-row: -1;
+  grid-column: 3;
+  width: 30%;
+  justify-self: flex-end;
+}
 .buttons-control {
   width: 100%;
   max-width: 950px;
@@ -73,10 +115,15 @@ export default {
     justify-content: space-evenly;
     width: 100%;
     padding: 0 35px;
+    &.desktop {
+      grid-column: 4;
+      grid-row-start: 4;
+      grid-row-end: 7;
+    }
     button {
       width: 35%;
       padding: 10px;
-      margin-bottom: 10px;
+      margin: 15px 0;
     }
   }
 

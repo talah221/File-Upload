@@ -5,7 +5,7 @@
     <ProgressSpinner v-if="displaySpinner" class="vueSpinner" />
   </div>
   <div
-    class="layout-rtl "
+    class="layout-rtl"
     :class="{ mainApp: isLoggedIn === true && isDesktop }"
   >
     <Main v-if="isLoggedIn" />
@@ -22,6 +22,8 @@
 </template>
 
 <script>
+/*eslint-disable*/
+
 import { mapState, mapGetters } from "vuex";
 import Login from "./components/Login";
 import Main from "./views/Main";
@@ -32,19 +34,19 @@ export default {
   components: {
     Login,
     Main,
-    ProgressSpinner
+    ProgressSpinner,
   },
   data() {
     return {
       // logoImgSrc: "./assets/img/Logo.png",
       logoImgSrc: "/assets/logo-apoint.png",
       // logoImgSrc: "/assets/img/logo-small.png",
-      compName: "ram aderet"
+      compName: "ram aderet",
     };
   },
   mounted() {
     // console.log("locale", this.$primevue);
-    window.onbeforeunload = function() {
+    window.onbeforeunload = function () {
       return "Your work will be lost.";
     };
     this.$cookie.config({
@@ -53,7 +55,7 @@ export default {
       domain: "",
       secure:
         window.location.host.substring(0, 9) === "localhost" ? false : true, //for debugging
-      sameSite: "Lax"
+      sameSite: "Lax",
     });
 
     // this.$cookie.getCookie("")
@@ -77,15 +79,15 @@ export default {
   computed: {
     ...mapGetters("api", ["isLoggedIn"]),
     ...mapState({
-      compID: state => state.api.compID,
-      compGUID: state => state.api.compGUID,
-      displaySpinner: state => state.main.displaySpinner
+      compID: (state) => state.api.compID,
+      compGUID: (state) => state.api.compGUID,
+      displaySpinner: (state) => state.main.displaySpinner,
     }),
-    isDesktop: () => screen.isDesktop()
-  }
+    isDesktop: () => screen.isDesktop(),
+  },
 };
 </script>
-<style>
+<style lang="scss">
 .vueSpinner {
   display: block !important;
   margin-left: auto !important;
@@ -100,11 +102,9 @@ export default {
   position: fixed;
 }
 .mainApp {
-  margin-right: 20rem;
+  margin-right: 12rem;
 }
-.qc-button {
-  height: 52px;
-}
+
 @media screen and (min-width: 896px) {
   .single_form .field {
     width: 30%;
@@ -126,12 +126,14 @@ export default {
   max-width: 950px;
   margin: auto;
   width: 99%;
+  .field {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+.single_form {
 }
 
-.single_form .field {
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
 .single_form .field label {
   width: 25%;
 }
@@ -216,5 +218,44 @@ export default {
 }
 .buttonIcon .pi {
   font-size: 1.5rem;
+}
+.p-dropdown-panel ul {
+  z-index: 999999999 !important;
+  position: relative;
+}
+.qcDesktopBtn {
+  border: 2px solid black !important;
+  border-radius: 40px !important;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  background-color: #f5f5f5;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 10px;
+  background-color: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #555;
+}
+::-moz-selection {
+  background: rgb(0, 105, 139);
+}
+::selection {
+  background: rgb(0, 105, 139);
+}
+
+@media (max-width: 550px) {
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
 }
 </style>

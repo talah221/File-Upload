@@ -4,8 +4,8 @@
       class="ProjectFilter"
       v-show="
         !displayFilters &&
-          !imageEditor.displayImageEditor &&
-          !displayQualityControl
+        !imageEditor.displayImageEditor &&
+        !displayQualityControl
       "
     >
       <MultiSelect
@@ -16,8 +16,8 @@
         :optionValue="projects.optionValue"
         :filter="
           projects.RowSource !== null &&
-            projects.RowSource !== undefined &&
-            projects.RowSource.length > 10
+          projects.RowSource !== undefined &&
+          projects.RowSource.length > 10
         "
         :placeholder="projects.placeholder"
         @change="projects.FuncOnUpdate()"
@@ -27,9 +27,9 @@
     <div
       v-show="
         !isDesktop &&
-          displayQualityControl &&
-          !displayFilters &&
-          !imageEditor.displayImageEditor
+        displayQualityControl &&
+        !displayFilters &&
+        !imageEditor.displayImageEditor
       "
     >
       <Button @click="backToParent" icon="pi pi-angle-right"></Button>
@@ -78,12 +78,7 @@
         :displayFullScreen="true"
         @closeGalleria="displayAttFiles = false"
       ></galleria-full>
-      <div
-        v-if="
-          (!displayQualityControl || isDesktop) &&
-            !imageEditor.displayImageEditor
-        "
-      >
+      <div v-if="!displayQualityControl && !imageEditor.displayImageEditor">
         <div class="content-qcs">
           <div v-show="!displayFilters">
             <div class="header-content">
@@ -157,29 +152,6 @@
               </div>
             </div>
             <div class="controls">
-              <div v-if="isDesktop" class="qc-table-headers">
-                <h5 @click="sortBy('id', true)" class="table-header">
-                  מס' בקרה
-                </h5>
-                <h5 @click="sortBy('date', true)" class="table-header">
-                  תאריך פתיחה
-                </h5>
-                <h5 @click="sortBy('status_name', true)" class="table-header">
-                  סטטוס
-                </h5>
-                <h5 @click="sortBy('chapter_name', true)" class="table-header">
-                  פרק
-                </h5>
-                <h5
-                  @click="sortBy('impairment_desc', true)"
-                  class="table-header"
-                >
-                  סוג ליקוי
-                </h5>
-                <h5 @click="sortBy('level_desc')" class="table-header">
-                  רמת חומרה
-                </h5>
-              </div>
               <div class="qc-list">
                 <div v-if="!isDesktop">
                   <div
@@ -188,6 +160,7 @@
                     class="qc"
                   >
                     <span
+                      v-show="group.name !== ''"
                       @click="group.show = !group.show"
                       style="font-size: 1.5rem"
                     >
@@ -213,7 +186,8 @@
                             <div class="" @click="openQC(qc)">
                               {{ qc.quality_control_desc }}
                             </div>
-                            <div @click="openQC(qc)">
+                            <div @click="openQC(qc)">{{ qc.project_desc }}</div>
+                            <div class="p-text-bold" @click="openQC(qc)">
                               {{ qc.status_name }}
                             </div>
                             <div @click="openQC(qc)">{{ qc.chapter_name }}</div>
@@ -224,13 +198,14 @@
                               {{ qc.contractor_name }}
                             </div>
                             <div @click="openQC(qc)">
-                              ב&nbsp;{{ qc.quality_control_id }} -{{
-                                qc.project_zone1_name
-                              }}
+                              {{ qc.project_zone1_name }}
                               - {{ qc.project_zone2_name }} -
                               {{ qc.project_zone3_name }}
                             </div>
                             <div @click="openQC(qc)">
+                              <span class="p-text-bold"
+                                >ב&nbsp;{{ qc.quality_control_id }}</span
+                              >
                               {{ qc.formattedCreate_date }}
                             </div>
                             <div>
@@ -240,7 +215,7 @@
                                 @click="addExternalPoto(qc)"
                                 :disabled="
                                   qc.status_id === qcStatuses.e_close ||
-                                    !qc.allow_edit_open_qc
+                                  !qc.allow_edit_open_qc
                                 "
                               ></Button>
                               <Button
@@ -254,7 +229,7 @@
                                 @click="reporting(qc)"
                                 :disabled="
                                   qc.status_id === qcStatuses.e_close ||
-                                    !qc.allow_edit_open_qc
+                                  !qc.allow_edit_open_qc
                                 "
                                 :style="
                                   qc.status_id === qcStatuses.e_close
@@ -267,24 +242,6 @@
                         </div>
                       </div>
                     </transition>
-                  </div>
-                </div>
-                <div v-if="isDesktop">
-                  <div
-                    v-for="qc of qualityControls"
-                    :key="qc.quality_control_id"
-                    class="qc"
-                  >
-                    <section class="qc-desktop" @click="openQC(qc)">
-                      <div class="qc-id">{{ qc.quality_control_id }}</div>
-                      <div class="qc-create-date">
-                        {{ qc.formattedCreate_date }}
-                      </div>
-                      <div class="qc-status">{{ qc.status_name }}</div>
-                      <div class="qc-chapter">{{ qc.chapter_name }}</div>
-                      <div class="qc-impairment">{{ qc.impairment_desc }}</div>
-                      <div class="qc-level">{{ qc.level_desc }}</div>
-                    </section>
                   </div>
                 </div>
               </div>
@@ -313,8 +270,8 @@
       <div
         v-if="
           displayQualityControl &&
-            !displayFilters &&
-            !imageEditor.displayImageEditor
+          !displayFilters &&
+          !imageEditor.displayImageEditor
         "
       >
         <QualityControl
@@ -339,7 +296,7 @@ import {
   apiParam,
   apiPType,
   Nz,
-  uploadB64
+  uploadB64,
 } from "../services/APointAPI";
 import QualityControlsFilters from "@/components/QualityControlsFilters.vue";
 import Dialog from "primevue/dialog";
@@ -369,7 +326,7 @@ export default {
     APointDropdown,
     ToggleButton,
     MultiSelect,
-    QualityControlsDesktop
+    QualityControlsDesktop,
   },
   data() {
     return {
@@ -382,7 +339,7 @@ export default {
       imageEditor: {
         displayImageEditor: false,
         dataUrl: "",
-        fileName: ""
+        fileName: "",
       },
       displayAttFiles: false,
       attached_files: [],
@@ -403,17 +360,18 @@ export default {
         ControlSource: null,
         RowSource: [
           { field: "id", desc: "תאריך פתיחה" },
+          { field: "project_desc", desc: "פרויקט" },
           { field: "project_zone1_name", desc: "חללים" },
           { field: "chapter_name", desc: "פרק" },
           { field: "responsible_name", desc: "אחראי לביצוע" },
-          { field: "status_name", desc: "סטטוס" }
+          { field: "status_name", desc: "סטטוס" },
         ],
         Enabled: true,
         Name: "sortBy",
         FuncOnUpdate: () => {
           this.sortBy();
         },
-        DefaultValue: "id"
+        DefaultValue: "id",
       },
       sortUp: {
         num: 2,
@@ -431,7 +389,7 @@ export default {
         Name: "sortBy",
         FuncOnUpdate: () => {
           this.sortBy();
-        }
+        },
       },
       groupBy: {
         num: 3,
@@ -444,13 +402,15 @@ export default {
         showClear: false,
         ControlSource: null,
         RowSource: [
+          { column_name: "", desc: "ללא קיבוץ", array: [] },
+          { column_name: "project_desc", desc: "פרויקט" },
           { column_name: "chapter_name", desc: "פרקים", array: [] },
-          { column_name: "status_name", desc: "סטטוס", array: [] }
+          { column_name: "status_name", desc: "סטטוס", array: [] },
         ],
         Enabled: true,
         Name: "groupBy",
         FuncOnUpdate: () => {},
-        DefaultValue: "chapter_name"
+        DefaultValue: "",
       },
       projects: {
         num: 4,
@@ -474,13 +434,13 @@ export default {
             "qc/setSelectedProjectId",
             this.projects.ControlSource
           );
-        }
+        },
       },
       header_option_enum: {
         e_sort: 1,
-        e_group: 2
+        e_group: 2,
       },
-      selected_header_option: null
+      selected_header_option: null,
     };
   },
   mounted() {
@@ -516,14 +476,14 @@ export default {
       //   qId,
       //   this.attached_files.filter(qc => qc.quality_control_id === qId)
       // );
-      return this.attached_files.filter(qc => qc.quality_control_id === qId);
+      return this.attached_files.filter((qc) => qc.quality_control_id === qId);
     },
     updateField(field, value) {
       field.ControlSource = value;
       if (field.FuncOnUpdate !== undefined) eval(field.FuncOnUpdate(value));
     },
     getField(num) {
-      return this.fields.find(f => f.num === num);
+      return this.fields.find((f) => f.num === num);
     },
     sortBy(sortName, changeSortUp) {
       let sort, sortUp;
@@ -569,9 +529,11 @@ export default {
       this.qualityControls = qualityControlsToShow;
     },
     filetrByGroup(filterStr) {
-      return this.qualityControls.filter(
-        e => e[this.groupBy.ControlSource] === filterStr
-      );
+      if (filterStr === "") return this.qualityControls;
+      else
+        return this.qualityControls.filter(
+          (e) => e[this.groupBy.ControlSource] === filterStr
+        );
     },
     showFilters() {
       this.displayFilters = true;
@@ -588,7 +550,7 @@ export default {
           )
         );
       }
-      this.chipFilters.forEach(filter => {
+      this.chipFilters.forEach((filter) => {
         procParams.push(
           apiParam(
             filter.Name,
@@ -600,9 +562,19 @@ export default {
         );
       });
       callProc("pr_qc_select", procParams)
-        .then(result => {
+        .then((result) => {
           result = JSON.parse(result);
           if (result.procReturnValue === 0) {
+            // הצגת הודעה כאשר אין נתונים
+            if (result.Table?.length === 0) {
+              this.$toast.add({
+                severity: "info",
+                summary: "בקרות איכות",
+                detail: "אין נתונים להצגה",
+                life: 10000,
+                closable: true,
+              });
+            }
             this.qualityControls = result.Table;
             this.qualityControlsReports = result.Table1;
             this.attached_files = result.Table2;
@@ -610,31 +582,40 @@ export default {
             // console.log(result);
             this.sortBy();
             //grouping
-            this.groupBy.RowSource.forEach(group => {
-              group.array = this.qualityControls
-                .map(item => item[group.column_name])
-                .filter((value, index, self) => self.indexOf(value) === index)
-                .sort()
-                .map(item => ({ name: item, show: true }));
+
+            this.groupBy.RowSource.forEach((group) => {
+              if (group.column_name !== "") {
+                group.array = this.qualityControls
+                  .map((item) => {
+                    // console.log(item);
+                    return item[group.column_name];
+                  })
+                  .filter((value, index, self) => self.indexOf(value) === index)
+                  .sort()
+                  .map((item) => ({ name: item, show: true }));
+              } else {
+                group.array = [{ name: "", show: true }];
+              }
             });
+            console.log("qc-select end", new Date());
           } else {
             this.$toast.add({
               severity: "error",
               summary: "שגיאה בהצגת בקרות - פנה לתמיכה",
               detail: "",
               life: 10000,
-              closable: true
+              closable: true,
             });
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.log("pr_qc_select-error", error);
           this.$toast.add({
             severity: "error",
             summary: "שגיאה - פנה לתמיכה",
             detail: error,
             life: 10000,
-            closable: true
+            closable: true,
           });
         });
     },
@@ -647,7 +628,7 @@ export default {
       if (fieldNum === undefined) {
         this.chipFilters = [];
       } else {
-        let index = this.chipFilters.findIndex(f => f.num === fieldNum);
+        let index = this.chipFilters.findIndex((f) => f.num === fieldNum);
         if (index >= 0) this.chipFilters.splice(index, 1);
         this.removeFilter = fieldNum;
         this.filterQualityControl();
@@ -660,11 +641,11 @@ export default {
           field.ControlSource.length === 0) ||
         (field.apointType === "checkbox" && !field.ControlSource)
       ) {
-        let index = this.chipFilters.findIndex(f => f.num === field.num);
+        let index = this.chipFilters.findIndex((f) => f.num === field.num);
         if (index >= 0) this.chipFilters.splice(index, 1);
       } else {
-        if (this.chipFilters.find(f => f.num === field.num) !== undefined) {
-          this.chipFilters.find(f => f.num === field.num).ControlSource =
+        if (this.chipFilters.find((f) => f.num === field.num) !== undefined) {
+          this.chipFilters.find((f) => f.num === field.num).ControlSource =
             field.ControlSource;
         } else {
           this.chipFilters.push(field);
@@ -683,28 +664,22 @@ export default {
       if (!fromAddPoto) this.qualityControl = null;
       this.displayReporting = false;
     },
-    updateQCReporting(qualityControl) {
-      let qc = this.qualityControls.find(
-        qc => qc.quality_control_id === qualityControl.quality_control_id
+    updateQCReporting(updatedQC) {
+      let qcIndex = this.qualityControls.findIndex(
+        (qc) =>
+          qc.quality_control_id === updatedQC.qualityControl.quality_control_id
       );
-      qc.status_id = qualityControl.status_id;
-      qc.status_name = this.getAllStatuses().find(
-        s => s.status_id === qualityControl.status_id
-      ).status_name;
-      qc.responsible_id = qualityControl.responsible_id;
-      qc.responsible_name = this.getResponsibles(qc.project_id).find(
-        r => r.rank_id == qualityControl.responsible_id
-      ).user_rank_name;
-      qc.contractor_id = qualityControl.contractor_id;
-      qc.contractor_name = this.getContractors(qc.project_id).find(
-        c => c.ID === qualityControl.contractor_id
-      ).contractor_name;
-      qc.status_color = this.getAllStatuses().find(
-        s => s.status_id === qualityControl.status_id
-      )?.status_color;
+      this.qualityControls[qcIndex] = updatedQC.qualityControl;
+      //במקרה בו הבקרה שנשלחת לתצוגת בקרה בודדת, זהה לזאת שדיווחו עליה- מעדכנים
+      if (
+        this.qualityControl.quality_control_id ===
+        updatedQC.qualityControl.quality_control_id
+      ) {
+        this.qualityControl = updatedQC.qualityControl;
+      }
 
-      if (qualityControl.qcReport) {
-        this.qualityControlsReports.push(qualityControl.qcReport);
+      if (updatedQC.qcReport) {
+        this.qualityControlsReports.push(updatedQC.qcReport);
       }
     },
     openQC(qc) {
@@ -728,7 +703,7 @@ export default {
     },
     uploadImage(e) {
       let reader = new FileReader();
-      reader.onload = event => {
+      reader.onload = (event) => {
         // console.log(event.target.result);
         this.imageEditor.dataUrl = event.target.result;
         this.imageEditor.displayImageEditor = true;
@@ -744,14 +719,14 @@ export default {
       srcFileName = this.imageEditor.fileName;
       base64String = imageUrl;
       uploadB64(parentType, parentID, createdBy, srcFileName, base64String)
-        .then(result => {
+        .then((result) => {
           if (result === true) {
             this.$toast.add({
               severity: "success",
               summary: "הקובץ צורף בהצלחה",
               detail: "",
               life: 10000,
-              closable: true
+              closable: true,
             });
           } else {
             this.$toast.add({
@@ -759,20 +734,20 @@ export default {
               summary: "שגיאה בצירוף קובץ",
               detail: "",
               life: 10000,
-              closable: true
+              closable: true,
             });
           }
 
           // console.log("uploadB64-result", result); //1/1 uploaded successfully
         })
-        .catch(error => {
+        .catch((error) => {
           console.log("uploadB64-error", error);
           this.$toast.add({
             severity: "error",
             summary: "שגיאה בצירוף קבצים",
             detail: error,
             life: 10000,
-            closable: true
+            closable: true,
           });
         })
         .then(() => {
@@ -791,7 +766,7 @@ export default {
           summary: "קבצים מצורפים",
           detail: "אין נתונים להצגה",
           life: 10000,
-          closable: true
+          closable: true,
         });
       }
     },
@@ -801,28 +776,28 @@ export default {
     },
     getReports(quality_control_id) {
       return this.qualityControlsReports.filter(
-        r => r.quality_control_id === quality_control_id
+        (r) => r.quality_control_id === quality_control_id
       );
     },
 
     openNewQC() {
       this.$router.push({
-        name: "QualityControl"
+        name: "QualityControl",
       });
     },
     backToParent() {
       this.displayQualityControl = false;
       this.$store.commit("main/setAppHeader", "ריכוז בקרות");
-    }
+    },
   },
   computed: {
     arrActiveGroup() {
       return this.groupBy.RowSource.find(
-        e => e.column_name === this.groupBy.ControlSource
+        (e) => e.column_name === this.groupBy.ControlSource
       )?.array;
     },
     filterToShow() {
-      return this.chipFilters.map(f => {
+      return this.chipFilters.map((f) => {
         return {
           num: f.num,
           Name: f.Name,
@@ -831,10 +806,10 @@ export default {
             f.apointType === "multiSelect"
               ? f.ControlSource?.length > 1
                 ? "(" + f.ControlSource.length.toString() + ")"
-                : f.RowSource.filter(field => {
+                : f.RowSource.filter((field) => {
                     return f.ControlSource.indexOf(field[f.optionValue]) >= 0;
                   })
-                    .map(fieldMap => fieldMap[f.optionLabel])
+                    .map((fieldMap) => fieldMap[f.optionLabel])
                     .toString()
               : f.apointType === "text" &&
                 f.Format === "Long Date" &&
@@ -842,7 +817,7 @@ export default {
               ? Intl.DateTimeFormat("en-GB").format(f.ControlSource)
               : f.apointType === "checkbox"
               ? ""
-              : f.ControlSource
+              : f.ControlSource,
         };
       });
     },
@@ -850,97 +825,35 @@ export default {
       return qcStatuses;
     },
     images() {
-      return this.qc_attached_files.map(img => ({
+      return this.qc_attached_files.map((img) => ({
         ID: img.ID,
         itemImageSrc: img.fileName,
         thumbnailImageSrc: img.fileName,
         alt: img.SrcFile,
-        title: img.SrcFile
+        title: img.SrcFile,
       }));
     },
     ...mapState({
-      userID: state => +state.api.userID,
-      isDataLoaded: state => state.qc.isDataLoaded
+      userID: (state) => +state.api.userID,
+      isDataLoaded: (state) => state.qc.isDataLoaded,
     }),
     ...mapGetters({
       getAllStatuses: "qc/getStatuses",
       getResponsibles: "qc/getResponsibles",
       getProjectsUser: "qc/getProjectsUser",
-      getContractors: "qc/getContractors"
-    })
+      getContractors: "qc/getContractors",
+    }),
   },
   watch: {
-    qualityControls: function() {
+    qualityControls: function () {
       // console.log("QC", this.qualityControls[0]);
-    }
+    },
   },
-  unmounted() {
-    // this.$store.commit("main/setSpinner", {
-    //   id: spinnerInstances.e_QualityControls_loadAttFiles,
-    //   flag: false,
-    // });
-  }
+  unmounted() {},
 };
 </script>
 
 <style scoped lang="scss">
-//זמני בהערה עד להצגת נתונים בצורה שונה לdesktop
-// @media (min-width: 880px) {
-//   // DESKTOP STYLING
-//   .qc-table-container-desktop {
-//     display: flex;
-//     width: 100%;
-//   }
-
-//   .controls {
-//     border-radius: 15px;
-//     .qc-table-headers {
-//       width: 80%;
-//       margin: 0 auto;
-//       margin-bottom: 10px;
-//       display: grid;
-//       grid-template-columns: repeat(6, 1fr);
-//       gap: 6px;
-//       cursor: pointer;
-//       .table-header {
-//         background: white;
-//         margin: 0;
-//         text-align: center;
-//         font-weight: 600;
-//         font-size: 18px;
-//         padding: 10px 0;
-//       }
-//     }
-//     .qc-list {
-//       max-height: 350px;
-//       overflow-y: scroll;
-//       width: 80%;
-//       margin: 0 auto;
-//       .qc:nth-of-type(even) {
-//         background: white;
-//       }
-//       .qc {
-//         cursor: pointer;
-//         width: 100%;
-//         &:hover {
-//           background: lightgray;
-//           transition: 0.4s;
-//         }
-
-//         .qc-desktop {
-//           padding: 8px 0;
-//           text-align: center;
-//           margin: 0 auto;
-//           display: grid;
-//           grid-template-columns: repeat(6, 1fr);
-//         }
-//       }
-//     }
-//   }
-// }
-
-//זמני בהערה עד לשינוי תצוגת נתנוים ב desktop
-// @media (max-width: 800px) {
 .qc {
   padding: 1px 3px;
   font-size: 14px;
@@ -956,11 +869,11 @@ export default {
     cursor: pointer;
     background-color: white;
     border-right-style: solid;
-    border-right-width: 3px;
+    border-right-width: 7px;
   }
   .qc-details {
     display: grid;
-    grid-template-columns: 25% 25% 50%;
+    grid-template-columns: 27% 25% 48%;
     // grid-template-rows: 1.5fr 1fr 1fr 1fr 1.5fr;
     // grid-auto-rows: 20px 10px 10px 10px 20px;
     // height: 50px;
@@ -975,13 +888,20 @@ export default {
     font-size: 16px;
   }
   .qc-details > div:nth-child(2) {
+    //פרויקט
+    grid-column-start: 1;
+    grid-column-end: 4;
+    max-height: 48px;
+    overflow: hidden;
+  }
+  .qc-details > div:nth-child(5) {
     //סטטוס
     grid-column-start: 1;
     grid-column-end: 2;
     max-height: 48px;
     overflow: hidden;
   }
-  .qc-details > div:nth-child(3) {
+  .qc-details > div:nth-child(4) {
     //פרק
     grid-column-start: 2;
     grid-column-end: 4;
@@ -989,14 +909,14 @@ export default {
     overflow: hidden;
     text-align: left;
   }
-  .qc-details > div:nth-child(4) {
+  .qc-details > div:nth-child(5) {
     //אחראי
     grid-column-start: 1;
     grid-column-end: 3;
     max-height: 48px;
     overflow: hidden;
   }
-  .qc-details > div:nth-child(5) {
+  .qc-details > div:nth-child(6) {
     //קבלן
     grid-column-start: 3;
     grid-column-end: 4;
@@ -1004,28 +924,31 @@ export default {
     overflow: hidden;
     text-align: left;
   }
-  .qc-details > div:nth-child(6) {
-    //מספר בקר וחללים
+  .qc-details > div:nth-child(7) {
+    //חללים
     grid-column-start: 1;
     grid-column-end: 4;
     max-height: 48px;
     overflow: hidden;
   }
-  .qc-details > div:nth-child(7) {
-    //תאריך פתיחת הבקרה
+  .qc-details > div:nth-child(8) {
+    //מס בקרה ותאריך פתיחת הבקרה
     grid-column-start: 1;
     grid-column-end: 3;
     padding-top: 8px;
     max-height: 48px;
     overflow: hidden;
   }
-  .qc-details > div:nth-child(8) {
+  .qc-details > div:nth-child(9) {
     //לחצנים
     grid-column-start: 3;
     grid-column-end: 4;
     overflow: hidden;
     text-align: left;
     button {
+      &.buttonIcon {
+        width: 33px;
+      }
       height: 28.38px;
     }
   }

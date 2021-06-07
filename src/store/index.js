@@ -32,7 +32,7 @@ const mainStore = {
       [spinnerInstances.e_QCReporting_loadDdl]: false,
       [spinnerInstances.e_QualityControlsFilters_loadDdl]: false,
       [spinnerInstances.e_QualityControl_loadDdl]: false,
-      [spinnerInstances.e_QualityControls_loadAttFiles]: false
+      
     }
   },
   mutations: {

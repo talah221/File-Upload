@@ -1,7 +1,7 @@
 <template>
   <c-header class="c-header"></c-header>
   <c-mobile-menu />
-  <div class="router-view" style="overflow: scroll;">
+  <div class="router-view" style="overflow: scroll">
     <router-view />
   </div>
   <Toast position="bottom-right" :baseZIndex="2000" />
@@ -17,7 +17,7 @@ export default {
   name: "Main",
   components: {
     CMobileMenu,
-    CHeader
+    CHeader,
 
     // About
   },
@@ -27,7 +27,7 @@ export default {
   },
   computed: {
     // ...mapState({ displaySpinner: state => state.main.displaySpinner })
-  }
+  },
 };
 </script>
 
@@ -40,7 +40,11 @@ export default {
   box-shadow: 0px 1px 20px 0px rgb(103 103 103 / 75%);
 }
 .router-view {
-  padding-top: 80px;
   height: 100vh;
+}
+@media (max-width: 896px) {
+  .router-view {
+    padding-top: 69px;
+  }
 }
 </style>

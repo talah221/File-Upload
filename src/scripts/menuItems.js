@@ -1,18 +1,14 @@
 import store from "../store/index";
 // import { apiStore } from "../store/apiStore";
-
+/*eslint-disable*/
 // import { VueCookieNext } from "vue-cookie-next";
 import router from "../router/index.js";
 export default [
-  // {
-  //   label: "צילום תמונות ומסמכים",
-  //   command: () => {
-  //     router.push({
-  //       name: "Options",
-  //       params: { id: 1 }
-  //     });
-  //   }
-  // },
+  {
+    label: "עמוד הבית",
+    command: () => router.push("/"),
+  },
+
   // {
   //   label: "דיווח נוכחות",
 
@@ -30,35 +26,36 @@ export default [
     items: [
       { label: "פתיחת בקרה חדשה", to: "/QualityControl" },
       {
-        label: "בקרות לטיפול שלי",
-        command: () => {
-          router.push({
-            name: "QualityControls",
-            params: { filter: "myResponsibility" }
-          });
-        }
-      },
-      {
         label: "צפייה בבקרות",
+        icon: `${getCurrentRoute() === "all" ? "active-route" : ""}`,
         // to: "/QualityControls",
         // params: { filter: 4 }
         command: () => {
           router.push({
             name: "QualityControls",
-            params: { filter: "all" }
+            params: { filter: "all" },
           });
-        }
+        },
+      },
+      {
+        label: "בקרות לטיפול שלי",
+        command: () => {
+          router.push({
+            name: "QualityControls",
+            params: { filter: "myResponsibility" },
+          });
+        },
       },
       {
         label: "בקרות שפתחתי",
         command: () => {
           router.push({
             name: "QualityControls",
-            params: { filter: "ICreated" }
+            params: { filter: "ICreated" },
           });
-        }
-      }
-    ]
+        },
+      },
+    ],
     // }
     // ,{ label: "סדר מלאכות בדירה" }
     // ]
@@ -109,12 +106,12 @@ export default [
   //   }
   // }
   {
-    label: "חזור לתפריט ראשי",
+    label: "התנתק",
     icon: "pi pi-fw pi-power-off",
     command: () => {
       let baseHost = store.state.main.baseHost();
       baseHost = store.state.main.baseHost() + "options.aspx";
       location.replace(baseHost);
-    }
-  }
+    },
+  },
 ];

@@ -1,5 +1,5 @@
 <template>
-  <header id="header" class="header">
+  <header id="header" class="header" v-if="!isDesktop">
     <div class="header-top">
       <div class="p-d-flex p-ai-center space-evenly">
         <div>
@@ -11,7 +11,7 @@
             <c-icon name="menu" />
           </a>
         </div>
-        <h1>{{ appHeader }}</h1>
+        <h3>{{ appHeader }}</h3>
         <div>
           <div class="header-logo" v-if="showLogo">
             <router-link to="/">
@@ -34,28 +34,33 @@ export default {
   props: {
     icon: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
+  },
+  created() {
+    this.isDesktop = window.innerWidth > 896;
   },
   components: {
-    CIcon
+    CIcon,
   },
   data() {
-    return {};
+    return {
+      isDesktop: true,
+    };
   },
   methods: {
     toggleMenu() {
       this.$store.dispatch("main/toggleMenuShow", true);
-    }
+    },
   },
   computed: {
     showLogo() {
       return screen.isDesktop();
     },
     ...mapState({
-      appHeader: state => state.main.appHeader
-    })
-  }
+      appHeader: (state) => state.main.appHeader,
+    }),
+  },
 };
 </script>
 
@@ -99,8 +104,8 @@ export default {
       // padding: 40px 35px 10px;
     }
 
-    h1 {
-      font-size: 35px;
+    h3 {
+      // font-size: 35px;
       color: $color--primary;
     }
 

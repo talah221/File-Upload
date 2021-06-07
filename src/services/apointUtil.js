@@ -49,3 +49,34 @@ export function dateStr(
   }
   return today;
 }
+export function dateFormat(
+  date,
+  withTime = false,
+  withSeconds = false,
+  yrTwoDigits = false
+) {
+  let dateOption = {
+    month: "2-digit",
+    day: "2-digit"
+  };
+
+  if (yrTwoDigits) dateOption.year = "2-digit";
+  else dateOption.year = "numeric";
+
+  if (withTime) {
+    dateOption.hour = "2-digit";
+    dateOption.hour12 = false;
+    dateOption.minute = "2-digit";
+    if (withSeconds) dateOption.second = "2-digit";
+  }
+
+  if (date === undefined) {
+    date = new Date();
+  } else {
+    if (typeof date === "string") date = new Date(date);
+  }
+
+  let formated = new Intl.DateTimeFormat("en-US", dateOption).format(date);
+
+  return formated.replace(",", "");
+}

@@ -18,6 +18,7 @@ import { primeVueLocale } from "./locale.js";
 import PrimeVue from "primevue/config";
 import ToastService from "primevue/toastservice";
 import Toast from "primevue/toast";
+import Divider from "primevue/divider";
 import Ripple from "primevue/ripple";
 import Tooltip from "primevue/tooltip";
 import ConfirmationService from "primevue/confirmationservice";
@@ -46,7 +47,7 @@ router.afterEach(() => {
 });
 app.use(ToastService).use(PrimeVue, {
   locale: primeVueLocale,
-  ripple: true
+  ripple: true,
 });
 app.use(ConfirmationService);
 app.config.globalProperties.$appState = reactive({ inputStyle: "outlined" });
@@ -55,8 +56,9 @@ app.config.globalProperties.$appState = reactive({ inputStyle: "outlined" });
 app.directive("tooltip", Tooltip);
 app.directive("ripple", Ripple);
 // app.directive("code", CodeHighlight);
-
 app.component("Toast", Toast);
+app.component("Divider", Divider);
+
 //PrimeVue settings end
 
 app.mount("#app");

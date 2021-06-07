@@ -5,7 +5,8 @@ export const qcStatuses = {
   e_in_progress: 1105,
   e_existing_situation: 1107,
   e_reminder: 1108,
-  e_close: 1109
+  e_close: 1109,
+  e_canceled: 1103
 };
 export const fileTypes = {
   e_qualityControl: 254
@@ -14,6 +15,5 @@ export const spinnerInstances = {
   e_testLogin: 1,
   e_QCReporting_loadDdl: 2,
   e_QualityControlsFilters_loadDdl: 3,
-  e_QualityControl_loadDdl: 4,
-  e_QualityControls_loadAttFiles: 5
+  e_QualityControl_loadDdl: 4
 };

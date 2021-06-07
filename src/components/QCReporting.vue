@@ -23,6 +23,7 @@
             :field="field"
             :model-value="field.ControlSource"
             @update:model-value="field.ControlSource = $event"
+            style="width:100%"
           ></a-point-dropdown>
           <Textarea
             v-else-if="field.apointType == 'textarea'"
@@ -53,19 +54,19 @@
     </div>
     <div class="actions-btns">
       <Button
-        class="myBtn"
+        class="myBtn buttonIcon"
         label="שמור וסגור"
         @click="saveClose"
         icon="pi pi-check"
       />
-      <Button
-        class="myBtn"
+      <!-- <Button
+        class="myBtn buttonIcon"
         label="צרף תמונות"
         @click="addPoto($event)"
         icon="pi pi-camera"
-      />
+      /> -->
       <Button
-        class="myBtn"
+        class="myBtn buttonIcon"
         label="סגור בקרה"
         @click="closeQC"
         icon="pi pi-check-circle"
@@ -83,11 +84,10 @@ import APointTextbox from "./APoint-textbox.vue";
 import APointCheckbox from "./APoint-checkbox.vue";
 import Button from "primevue/button";
 import Textarea from "primevue/textarea";
-import { callProc, apiParam, apiPType } from "../services/APointAPI";
 import { mapState, mapGetters } from "vuex";
 import ConfirmPopup from "primevue/confirmpopup";
 import { spinnerInstances, qcStatuses } from "../scripts/enums.js";
-
+import { pr_qc_reporting_ins } from "../scripts/db.js";
 export default {
   name: "QCReporting",
   components: {
@@ -226,11 +226,22 @@ export default {
     getField(num) {
       return this.fields.find(f => f.num === num);
     },
-    checkData() {
+    checkData(blnCloseQc) {
       let flag = false;
-
+      let curr_status = this.getField(this.fields_enum.e_status).ControlSource;
       this.fields.forEach(f => {
-        if (f.required && (f.ControlSource == null || f.ControlSource == "")) {
+        if (
+          f.required &&
+          (f.ControlSource == null || f.ControlSource == "") &&
+          !(
+            // בסגירת בקרה שדה 'מה בוצע' אינו שדה חובה כאשר הסטטוס הוא טופל
+            (
+              f.num === this.fields_enum.e_action_performed &&
+              blnCloseQc === true &&
+              curr_status === qcStatuses.e_completed
+            )
+          )
+        ) {
           f.check = true;
           flag = true;
         } else f.check = false;
@@ -238,42 +249,21 @@ export default {
       return flag;
     },
     saveData(blnCloseQc, blnAddPoto) {
-      if (this.checkData() === true) return;
-      let procParams = [
-        apiParam("user_exec", this.userID, apiPType.Int),
-        apiParam(
-          "quality_control_id",
-          this.qualityControl.quality_control_id,
-          apiPType.Int
-        ),
-        apiParam(
-          "status_id",
-          blnCloseQc === true
-            ? qcStatuses.e_close
-            : this.getField(this.fields_enum.e_status).ControlSource,
-          apiPType.Int
-        ),
-        apiParam(
-          "responsible_id",
-          this.getField(this.fields_enum.e_responsible).ControlSource,
-          apiPType.Int
-        ),
-        apiParam(
-          "action_performed",
-          this.getField(this.fields_enum.e_action_performed).ControlSource,
-          apiPType.NVarChar
-        ),
-        apiParam(
-          "contractor_id",
-          this.getField(this.fields_enum.e_contractor).ControlSource,
-          apiPType.Int
-        )
-      ];
-      callProc("pr_qc_reporting_ins", procParams)
+      if (this.checkData(blnCloseQc) === true) return;
+
+      pr_qc_reporting_ins(
+        this.qualityControl.quality_control_id,
+        blnCloseQc === true
+          ? qcStatuses.e_close
+          : this.getField(this.fields_enum.e_status).ControlSource,
+        this.getField(this.fields_enum.e_responsible).ControlSource,
+        this.getField(this.fields_enum.e_action_performed).ControlSource,
+        this.getField(this.fields_enum.e_contractor).ControlSource
+      )
         .then(result => {
           result = JSON.parse(result);
           if (result.procReturnValue === 0) {
-            console.log("new-reporting", result.Table1);
+            console.log("new-reporting", result);
             this.$toast.add({
               severity: "success",
               summary: "הדיווח נשמר בהצלחה",
@@ -282,17 +272,11 @@ export default {
               closable: true
             });
             let updatedQC = {
-              // quality_control_id: this.qualityControl.quality_control_id,
-              // status_id:
-              //   blnCloseQc === true
-              //     ? qcStatuses.e_close
-              //     : this.getField(this.fields_enum.e_status).ControlSource,
-              // responsible_id: this.getField(this.fields_enum.e_responsible)
-              // .ControlSource,
-              quality_control_id: result.Table1[0].quality_control_id,
-              status_id: result.Table1[0].new_status_id,
-              responsible_id: result.Table1[0].new_responsible_id,
-              contractor_id: result.Table1[0].new_contractor_id,
+              qualityControl: result.Table2[0],
+              // quality_control_id: result.Table1[0].quality_control_id,
+              // status_id: result.Table1[0].new_status_id,
+              // responsible_id: result.Table1[0].new_responsible_id,
+              // contractor_id: result.Table1[0].new_contractor_id,
               qcReport: result.Table1[0]
             };
             if (blnAddPoto) {
@@ -349,7 +333,6 @@ export default {
   },
   computed: {
     ...mapState({
-      userID: state => +state.api.userID,
       isDataLoaded: state => state.qc.isDataLoaded
     }),
     ...mapGetters({
@@ -380,6 +363,7 @@ export default {
 #status {
   display: grid;
   grid-template-columns: repeat(2, 50%);
+  font-size: 16px;
 }
 .myBtn {
   margin-left: 10px;
@@ -391,6 +375,7 @@ export default {
   button {
     margin-top: 5px;
     padding: 10px;
+    width: 50%;
   }
 }
 </style>

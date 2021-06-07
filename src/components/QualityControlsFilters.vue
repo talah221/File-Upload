@@ -1,34 +1,42 @@
 <template>
+  <div v-if="isDesktop" class="header-desktop">
+    <h3>סינון בקרות</h3>
+    <i class="pi pi-times" @click="closeFilters"></i>
+  </div>
   <div class="top-button">
-    <div class="p-d-flex p-ai-center p-jc-end btn-filters" style="width: 97%">
+    <div
+      class="p-d-flex p-ai-center p-jc-end btn-filters"
+      style="width: 97%"
+      v-if="!isDesktop"
+    >
       <Button
-        class="p-m-2 btn-filter p-button-info"
+        class="p-m-2 btn-filter p-button-info mypadding"
         label="הצג בקרות"
         @click="showQc"
       />
       <Button
-        class="p-m-2"
+        class="p-m-2 buttonIcon mypadding"
         icon="pi pi-filter-slash"
         label="נקה"
         @click="clearFilters()"
       />
     </div>
   </div>
-  <div class="content-filters">
-    <div class="p-d-flex p-ai-center p-jc-center p-mb-4 p-mt-2">
+  <div :class="['content-filters', isDesktop ? 'desktop' : '']">
+    <div class="p-d-flex p-ai-center p-jc-center p-mb-2 p-mt-2">
       <SelectButton
         v-model="showControls.ControlSource"
         :options="showControls.RowSource"
         :optionLabel="showControls.optionLabel"
         :optionValue="showControls.optionValue"
-        class="ltrDir"
+        class="ltrDir selectBtn"
         @click="changeDates()"
       />
     </div>
     <div class="single_form">
       <div
         class="field p-d-flex p-ai-center"
-        v-for="(field, i) of fields"
+        v-for="(field, i) of fieldsToDisplay"
         :key="i"
       >
         <label :for="field.Name" v-if="field.show != false">
@@ -89,14 +97,32 @@
         </div>
       </div>
     </div>
-    <div class=" p-d-flex p-flex-column p-ai-center">
+    <div class="p-d-flex p-flex-column p-ai-center">
       <Button
-        class="p-mt-4 p-button-link"
+        v-if="!this.isDesktop"
+        class="p-mt-4 p-button-link buttonIcon"
         :icon="showAllBtnIcon"
         :label="showAllBtnLbl"
         @click="showAllFilters"
       />
     </div>
+  </div>
+  <div
+    class="p-d-flex p-ai-center p-jc-end"
+    style="width: 97%"
+    v-if="isDesktop"
+  >
+    <Button
+      class="p-m-2 btn-filter mypadding qcDesktopBtn"
+      label="הצג בקרות"
+      @click="showQc"
+    />
+    <Button
+      class="p-m-2 buttonIcon mypadding qcDesktopBtn"
+      icon="pi pi-filter-slash"
+      label="נקה"
+      @click="clearFilters()"
+    />
   </div>
 </template>
 
@@ -110,6 +136,7 @@ import { apiPType } from "../services/APointAPI";
 import MultiSelect from "primevue/multiselect";
 import AutoComplete from "primevue/autocomplete";
 import { mapState, mapGetters } from "vuex";
+import { qcStatuses } from "../scripts/enums";
 // import { spinnerInstances } from "../scripts/enums.js";
 
 export default {
@@ -124,10 +151,16 @@ export default {
     AutoComplete
   },
   props: {
-    removeFilter: { type: Number },
-    projects: { type: Array }
+    removeFilter: { type: Number, required: false },
+    projects: { type: Array, required: false }
   },
-  emits: ["showData", "updateFilters", "clearFilters", "filterRemoved"],
+  emits: [
+    "showData",
+    "updateFilters",
+    "clearFilters",
+    "filterRemoved",
+    "closeFilters"
+  ],
   data() {
     return {
       showControls: {
@@ -140,26 +173,26 @@ export default {
         ]
       },
       fields: [
-        // {
-        //   num: 1,
-        //   apointType: "multiSelect",
-        //   check: false,
-        //   required: false,
-        //   Caption: "שם פרוייקט",
-        //   optionLabel: "ProjectName",
-        //   optionValue: "ProjectId",
-        //   showClear: true,
-        //   ControlSource: null,
-        //   RowSource: [],
-        //   Enabled: true,
-        //   Locked: false,
-        //   Name: "project_id",
-        //   FuncOnUpdate: field => {
-        //     this.filterZonesAndZoneTypes();
-        //     this.setFilters(field);
-        //   },
-        //   type: apiPType.NVarChar
-        // },
+        {
+          num: 1,
+          apointType: "multiSelect",
+          check: false,
+          required: false,
+          Caption: "שם פרוייקט",
+          optionLabel: "ProjectName",
+          optionValue: "ProjectId",
+          showClear: true,
+          ControlSource: null,
+          RowSource: [],
+          Enabled: true,
+          Locked: false,
+          Name: "project_id",
+          FuncOnUpdate: field => {
+            this.filterZonesAndZoneTypes();
+            this.setFilters(field);
+          },
+          type: apiPType.NVarChar
+        },
         {
           num: 2,
           apointType: "multiSelect",
@@ -289,7 +322,7 @@ export default {
           apointType: "dropdown",
           check: false,
           required: false,
-          Caption: "חלל 1",
+          Caption: "חלל 1 (בנין)",
           showClear: true,
           ControlSource: null,
           RowSource: [],
@@ -327,7 +360,7 @@ export default {
           apointType: "dropdown",
           check: false,
           required: false,
-          Caption: "חלל 2",
+          Caption: "חלל 2 (דירה)",
           showClear: true,
           Format: "",
           ControlSource: null,
@@ -497,7 +530,7 @@ export default {
       showAllBtnIcon: "pi pi-chevron-down",
       // displaySpinner: false,
       fields_enum: {
-        // e_projectId: 1,
+        e_projectId: 1, //לא לשנות את המספר - משתמשים בו גם בקומפוננטה QualityControlsDesktop.container
         e_status: 2,
         e_showControls: 3,
         e_fromDate: 4,
@@ -516,14 +549,26 @@ export default {
         e_zoneType1: 17,
         e_zoneType2: 18,
         e_myResponsibility: 19
-      }
+      },
+      isDesktop: false
     };
+  },
+  created() {
+    this.isDesktop = window.innerWidth > 896;
+    if (this.isDesktop) {
+      this.showAllBtn = false;
+      this.showAllFilters();
+    }
   },
   mounted() {
     this.getDdlData();
     this.setBasicFilter();
   },
   methods: {
+    closeFilters() {
+      this.$emit("closeFilters");
+    },
+
     updateField(field, event) {
       field.ControlSource = event;
       if (field.FuncOnUpdate !== undefined)
@@ -539,14 +584,14 @@ export default {
     showAllFilters() {
       if (!this.showAllBtn) {
         this.showAllBtn = true;
-        this.fields.forEach(f => {
+        this.fieldsToDisplay.forEach(f => {
           if (!f.show) f.show = true;
         });
         this.showAllBtnLbl = "הסתר מסננים נוספים";
         this.showAllBtnIcon = "pi pi-chevron-up";
       } else {
         this.showAllBtn = false;
-        this.fields.forEach(f => {
+        this.fieldsToDisplay.forEach(f => {
           if (f.isHide) f.show = false;
         });
         this.showAllBtnLbl = "הצג מסננים נוספים";
@@ -554,7 +599,7 @@ export default {
       }
     },
     clearFilters() {
-      this.fields.forEach(f => {
+      this.fieldsToDisplay.forEach(f => {
         f.ControlSource = null;
       });
       this.$emit("clearFilters");
@@ -576,61 +621,109 @@ export default {
 
       this.showControls.ControlSource = null;
     },
+    loadData() {
+      this.getField(
+        this.fields_enum.e_projectId
+      ).RowSource = this.getProjectsUser();
+      this.getField(
+        this.fields_enum.e_status
+      ).RowSource = this.getStatuses().filter(
+        s => s.status_id !== qcStatuses.e_draft
+      );
+      this.getField(this.fields_enum.e_zone1).allRowSource = this.getZone1();
+      this.getField(
+        this.fields_enum.e_zoneType1
+      ).allRowSource = this.getZone1().map(f => ({
+        zone_type_name: f.zone_type_name,
+        project_id: f.project_id
+      }));
+      this.getField(this.fields_enum.e_zone2).allRowSource = this.getZone2();
+      this.getField(
+        this.fields_enum.e_zoneType2
+      ).allRowSource = this.getZone2().map(f => ({
+        zone_type_name: f.zone_type_name,
+        project_id: f.project_id
+      }));
+      this.getField(this.fields_enum.e_chapter).RowSource = this.getChapters();
+      this.getField(this.fields_enum.e_zone3).allRowSource = this.getZone3();
 
+      this.getField(
+        this.fields_enum.e_responsible
+      ).RowSource = this.getResponsibles();
+      this.getField(
+        this.fields_enum.e_impairment
+      ).RowSource = this.getImpairment();
+      this.getField(
+        this.fields_enum.e_hardware_level
+      ).RowSource = this.getHardwareLevel();
+      this.getField(this.fields_enum.e_createBy).RowSource = this.getAllUsers();
+      this.getField(
+        this.fields_enum.e_userClosed
+      ).RowSource = this.getAllUsers();
+      this.getField(this.fields_enum.e_notDone).RowSource = this.getNotDone();
+      this.filterZonesAndZoneTypes();
+    },
     getDdlData() {
       // this.$store.commit("main/setSpinner", {
       //   id: spinnerInstances.e_QualityControlsFilters_loadDdl,
       //   flag: true
       // });
-      let loadData = () => {
-        // this.getField(
-        //   this.fields_enum.e_projectId
-        // ).RowSource = this.getProjectsUser();
-        this.getField(this.fields_enum.e_status).RowSource = this.getStatuses();
-        this.getField(this.fields_enum.e_zone1).allRowSource = this.getZone1();
-        this.getField(
-          this.fields_enum.e_zoneType1
-        ).allRowSource = this.getZone1().map(f => ({
-          zone_type_name: f.zone_type_name,
-          project_id: f.project_id
-        }));
-        this.getField(this.fields_enum.e_zone2).allRowSource = this.getZone2();
-        this.getField(
-          this.fields_enum.e_zoneType2
-        ).allRowSource = this.getZone2().map(f => ({
-          zone_type_name: f.zone_type_name,
-          project_id: f.project_id
-        }));
-        this.getField(
-          this.fields_enum.e_chapter
-        ).RowSource = this.getChapters();
-        this.getField(this.fields_enum.e_zone3).allRowSource = this.getZone3();
 
-        this.getField(
-          this.fields_enum.e_responsible
-        ).RowSource = this.getResponsibles();
-        this.getField(
-          this.fields_enum.e_impairment
-        ).RowSource = this.getImpairment();
-        this.getField(
-          this.fields_enum.e_hardware_level
-        ).RowSource = this.getHardwareLevel();
-        this.getField(
-          this.fields_enum.e_createBy
-        ).RowSource = this.getAllUsers();
-        this.getField(
-          this.fields_enum.e_userClosed
-        ).RowSource = this.getAllUsers();
-        this.getField(this.fields_enum.e_notDone).RowSource = this.getNotDone();
-        this.filterZonesAndZoneTypes();
-      };
+      // let loadData = function() {
+      //   this.getField(
+      //     this.fields_enum.e_projectId
+      //   ).RowSource = this.getProjectsUser();
+      //   this.getField(
+      //     this.fields_enum.e_status
+      //   ).RowSource = this.getStatuses().filter(
+      //     s => s.status_id !== qcStatuses.e_draft
+      //   );
+      //     this.getField(
+      //       this.fields_enum.e_zone1
+      //     ).allRowSource = this.getZone1();
+      //   this.getField(
+      //     this.fields_enum.e_zoneType1
+      //   ).allRowSource = this.getZone1().map(f => ({
+      //     zone_type_name: f.zone_type_name,
+      //     project_id: f.project_id
+      //   }));
+      //   this.getField(this.fields_enum.e_zone2).allRowSource = this.getZone2();
+      //   this.getField(
+      //     this.fields_enum.e_zoneType2
+      //   ).allRowSource = this.getZone2().map(f => ({
+      //     zone_type_name: f.zone_type_name,
+      //     project_id: f.project_id
+      //   }));
+      //   this.getField(
+      //     this.fields_enum.e_chapter
+      //   ).RowSource = this.getChapters();
+      //   this.getField(this.fields_enum.e_zone3).allRowSource = this.getZone3();
+
+      //   this.getField(
+      //     this.fields_enum.e_responsible
+      //   ).RowSource = this.getResponsibles();
+      //   this.getField(
+      //     this.fields_enum.e_impairment
+      //   ).RowSource = this.getImpairment();
+      //   this.getField(
+      //     this.fields_enum.e_hardware_level
+      //   ).RowSource = this.getHardwareLevel();
+      //   this.getField(
+      //     this.fields_enum.e_createBy
+      //   ).RowSource = this.getAllUsers();
+      //   this.getField(
+      //     this.fields_enum.e_userClosed
+      //   ).RowSource = this.getAllUsers();
+      //   this.getField(this.fields_enum.e_notDone).RowSource = this.getNotDone();
+      //   this.filterZonesAndZoneTypes();
+      // };
       let i = 0;
       let interval = setInterval(() => {
         i++;
         // console.log("interval", i);
         if (this.isDataLoaded === false && i < 30000) return;
         clearInterval(interval);
-        loadData();
+        this.loadData();
         // this.$store.commit("main/setSpinner", {
         //   id: spinnerInstances.e_QualityControlsFilters_loadDdl,
         //   flag: false
@@ -642,7 +735,7 @@ export default {
     },
     filterZonesAndZoneTypes() {
       let projectIds;
-      projectIds = this.projects;
+      projectIds = this.selectedProjects;
       //הבאת כל הנתונים
       this.getField(this.fields_enum.e_zone1).RowSource = this.getField(
         this.fields_enum.e_zone1
@@ -720,6 +813,11 @@ export default {
           return self.indexOf(value) === index && value !== "";
         })
         .sort();
+
+      //סינון אחראי לביצוע
+      this.getField(
+        this.fields_enum.e_responsible
+      ).RowSource = this.getResponsibles(projectIds);
     },
     // searchSuggestions(field, event) {
     //   if (!event.query.trim().length) {
@@ -736,8 +834,6 @@ export default {
       this.clearFilters();
       switch (param) {
         case "myResponsibility":
-          //? todo לשנות לסינון לפי בקרות של המשתמש
-          //? האם להוסיף סינון נוסף של צ'קבוקס של "בקרות לטיפול שלי" ?
           this.getField(
             this.fields_enum.e_myResponsibility
           ).ControlSource = true;
@@ -748,20 +844,39 @@ export default {
             "[" + this.userID + "]"
           );
           this.setFilters(this.getField(this.fields_enum.e_createBy));
-
           break;
+        case "all":
+        case undefined:
+          break;
+
         default:
+          this.getField(
+            this.fields_enum.e_projectId
+          ).ControlSource = JSON.parse("[" + param + "]");
+          this.setFilters(this.getField(this.fields_enum.e_projectId));
+          break;
         // code block
       }
       this.$emit("showData");
     }
   },
   computed: {
+    selectedProjects() {
+      if (this.isDesktop)
+        return this.getField(this.fields_enum.e_projectId).ControlSource;
+      else return this.projects;
+    },
+    fieldsToDisplay() {
+      if (this.isDesktop) return this.fields;
+      else
+        return this.fields.filter(f => f.num !== this.fields_enum.e_projectId);
+    },
     ...mapState({
       userID: state => +state.api.userID,
       isDataLoaded: state => state.qc.isDataLoaded
     }),
     ...mapGetters({
+      getProjectsUser: "qc/getProjectsUser",
       getStatuses: "qc/getStatuses",
       getZone1: "qc/getZone1",
       getZone2: "qc/getZone2",
@@ -776,7 +891,9 @@ export default {
   },
   watch: {
     "$route.params.filter"() {
-      this.setBasicFilter();
+      if (this.$route.name === "QualityControls") {
+        this.setBasicFilter();
+      }
     },
     removeFilter(newValue) {
       if (newValue) {
@@ -797,7 +914,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .error {
   color: red;
   font-size: 11px;
@@ -808,8 +925,9 @@ export default {
 .ltrDir {
   direction: ltr;
 }
-.btn-filter {
+.mypadding {
   /* height: 30px; */
+  padding: 6px 20px !important;
 }
 .btn-filters {
   /* position: fixed;
@@ -818,12 +936,32 @@ export default {
 .top-button {
   position: fixed;
   z-index: 10;
-  background-color: wheat;
-  width: 100vw;
+  background-color: #f7f7f7;
+  width: 100%;
+  top: 60px;
 }
 .content-filters {
-  position: absolute;
-  top: 150px;
+  /* position: absolute;
+  top: 150px; */
   overflow: scroll;
+  &.desktop {
+    height: 86%;
+  }
+}
+.selectBtn div {
+  height: 30px;
+}
+@media screen and (min-width: 896px) {
+  .single_form .field {
+    width: 49% !important;
+  }
+}
+
+.header-desktop {
+  display: flex;
+  justify-content: space-between;
+  h3 {
+    font-weight: 600;
+  }
 }
 </style>

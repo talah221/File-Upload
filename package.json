@@ -10,7 +10,7 @@
     "rtlcss-theme": "rtlcss ./public/assets/theme/theme-blue.css ./public/assets/theme/theme-blue-rtl.css"
   },
   "dependencies": {
-    "chart.js": "^3.2.1",
+    "chart.js": "^2.9.4",
     "core-js": "^3.6.5",
     "mitt": "^2.1.0",
     "primeflex": "^2.0.0",

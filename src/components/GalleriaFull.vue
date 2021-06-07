@@ -1,39 +1,41 @@
 <template>
-  <Galleria
-    :value="images"
-    v-model:activeIndex="activeIndex"
-    :responsiveOptions="responsiveOptions2"
-    :numVisible="7"
-    containerStyle="max-width: 850px"
-    :circular="true"
-    :fullScreen="true"
-    :showItemNavigators="true"
-    :showThumbnails="false"
-    v-model:visible="displayBasic"
-  >
-    <template #item="slotProps">
+  <div style="direction: ltr" class="container">
+    <Galleria
+      :value="images"
+      :responsiveOptions="responsiveOptions"
+      :numVisible="5"
+      :showThumbnails="true"
+      :circular="true"
+      :fullScreen="true"
+      :showItemNavigators="true"
+      v-model:visible="displayCustom"
+      v-model:activeIndex="activeIndex"
+      :showItemNavigatorsOnHover="true"
+    >
+      <template #item="slotProps">
+        <img
+          :src="getFullImageSrc(slotProps.item.itemImageSrc)"
+          :alt="slotProps.item.alt"
+        />
+      </template>
+      <template #thumbnail="slotProps">
+        <img
+          :src="getFullImageSrc(slotProps.item.thumbnailImageSrc)"
+          :alt="slotProps.item.alt"
+          style="display: block; height: 30px"
+        />
+      </template>
+    </Galleria>
+    <div v-if="images && !displayFullScreen" class="images-container">
       <img
-        :src="slotProps.item.itemImageSrc"
-        :alt="slotProps.item.alt"
-        style="width: 75%; display: block;"
-      />
-    </template>
-    <template #thumbnail="slotProps">
-      <img
-        :src="slotProps.item.thumbnailImageSrc"
-        :alt="slotProps.item.alt"
-        style="display: block; width: 25%;"
-      />
-    </template>
-  </Galleria>
-
-  <div v-if="images" class="p-grid" style="max-width: 400px;">
-    <div v-for="(image, index) of images" class="p-col-6" :key="index">
-      <img
-        :src="image.thumbnailImageSrc"
+        v-for="(image, index) of images"
+        class="image-wrapper"
+        :key="index"
+        :src="getFullImageSrc(image.thumbnailImageSrc)"
         :alt="image.alt"
-        style="cursor: pointer"
+        style="cursor: pointer; border-radius: 5px"
         @click="imageClick(index)"
+        loading="lazy"
       />
     </div>
   </div>
@@ -41,58 +43,48 @@
 
 <script>
 import Galleria from "primevue/galleria";
+import { mapState } from "vuex";
+import { API_HOST } from "../services/APointAPI.js";
 export default {
   components: {
-    Galleria
+    Galleria,
   },
   props: {
     images: {
       type: Object,
-      require: true
+      require: true,
     },
     displayFullScreen: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   emits: ["closeGalleria"],
   data() {
     return {
-      activeIndex: 0,
+      activeIndex: 1,
+
       responsiveOptions: [
         {
-          breakpoint: "1024px",
-          numVisible: 5
-        },
-        {
-          breakpoint: "768px",
-          numVisible: 3
-        },
-        {
-          breakpoint: "560px",
-          numVisible: 1
-        }
-      ],
-      responsiveOptions2: [
-        {
           breakpoint: "1500px",
-          numVisible: 5
+          numVisible: 5,
         },
         {
           breakpoint: "1024px",
-          numVisible: 3
+          numVisible: 4,
         },
+
         {
-          breakpoint: "768px",
-          numVisible: 2
+          breakpoint: "460px",
+          numVisible: 2,
         },
         {
           breakpoint: "560px",
-          numVisible: 1
-        }
+          numVisible: 3,
+        },
       ],
 
-      displayBasic: false
+      displayCustom: false,
     };
   },
   mounted() {
@@ -102,18 +94,52 @@ export default {
   methods: {
     imageClick(index) {
       this.activeIndex = index;
-      this.displayBasic = true;
-    }
+      this.displayCustom = true;
+    },
+    getFullImageSrc(src) {
+      return (
+        API_HOST +
+        "/files/getImg?src=" +
+        src +
+        "&sessionToken=" +
+        this.sessionToken
+      );
+    },
+  },
+  computed: {
+    ...mapState({
+      sessionToken: (state) => state.api.sessionToken,
+    }),
   },
   watch: {
-    displayBasic(newValue) {
+    displayCustom(newValue) {
       if (this.displayFullScreen && !newValue) this.$emit("closeGalleria");
-    }
-  }
+    },
+  },
 };
 </script>
 
-<style scoped>
-body {
+<style lang="scss">
+.container {
+  .images-container {
+    margin: 10px 0;
+    display: flex;
+    width: 100%;
+    height: 250px;
+    gap: 10px;
+
+    overflow: auto;
+    img {
+      width: 100%;
+      object-fit: cover;
+    }
+  }
+}
+.p-galleria-item-container {
+  img {
+    height: 90vh;
+    width: 95%;
+    object-fit: contain;
+  }
 }
 </style>

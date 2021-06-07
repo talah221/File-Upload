@@ -2,9 +2,9 @@ import store from "../store/index";
 
 // Version 1.01
 
-export const API_HOST = "https://api.apoint.co.il";
+// export const API_HOST = "https://api.apoint.co.il";
 // export const API_HOST = "https://localhost:44396"; //DEV - Localhost
-// export const API_HOST = "https://apidev.apoint.co.il"; //DEV - Live
+export const API_HOST = "https://apidev.apoint.co.il"; //DEV - Live
 const FETCH_DEFAULT_TIMEOUT = 10 * 1000; //10 seconds
 const PROC_DEFAULT_TIMEOUT = 10 * 1000; //10 seconds
 const FETCH_DEFAULT_HEADERS = {
@@ -408,9 +408,9 @@ export function uploadB64(
   createdBy,
   srcFileName,
   base64String,
-  orgID = 1,
-  timeout = PROC_DEFAULT_TIMEOUT
+  orgID = 1
 ) {
+  // timeout = PROC_DEFAULT_TIMEOUT
   // console.log("callProc: ", procName, procParams, store.state.api.sessionToken);
   const raw = [
     apiParam("sessionToken", store.state.api.sessionToken, 16),
@@ -431,17 +431,17 @@ export function uploadB64(
     body: JSON.stringify(raw),
     redirect: "follow"
   };
-  let timeoutID = setTimeout(() => {
-    controller.abort;
-    //TODO: לטפל במקרים של ניתוק תקשורת
-    throw { error: "connection timeout" };
-  }, timeout);
+  // let timeoutID = setTimeout(() => {
+  //   controller.abort;
+  //   //TODO: לטפל במקרים של ניתוק תקשורת
+  //   throw { error: "connection timeout" };
+  // }, timeout);
 
   // console.log(options);
   return fetch(API_HOST + "/files/upload/B64", options)
     .then(response => response.text()) //get text is async
     .then(result => {
-      clearTimeout(timeoutID);
+      // clearTimeout(timeoutID);
       //parse and clean extra api data
       let res = JSON.parse(result);
       // console.log(res);

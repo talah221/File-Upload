@@ -1,17 +1,16 @@
 <template>
-  <div class="single_form_buttons">
+  <div>
     <Button
       :disabled="apartmentId === 0 && !allow_edit"
       label="הוסף תכניות"
       @click="plans"
       icon="pi pi-file-pdf"
-      class="p-button-info p-button-outlined"
+      class="p-button-info p-button-outlined p-button-sm p-ml-2"
     ></Button>
     <Button
-      label="דיווח"
+      label="הוסף דיווח"
       @click="reporting"
-      icon="pi pi-arrow-circle-up"
-      class="report-btn"
+      class="p-button-sm report-btn"
       :disabled="!allow_edit"
     />
   </div>
@@ -44,12 +43,7 @@ export default {
 };
 </script>
 
-<style scoped>
-.single_form_buttons {
-  display: flex;
-  justify-content: space-around;
-}
-</style>
+<style scoped></style>
 <style scoped lang="scss">
 .report-btn {
   background: $color--primary;

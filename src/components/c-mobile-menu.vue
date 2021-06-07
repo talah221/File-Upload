@@ -31,7 +31,7 @@
     :visible="showMenu"
     :showCloseIcon="false"
     :modal="false"
-    class="sidebar p-sidebar-right "
+    class="sidebar p-sidebar-right"
   >
     <a
       v-if="showCancle"
@@ -43,8 +43,8 @@
     </a>
 
     <div class="sidebar-body">
-      <h3>תפריט בקרות</h3>
-      <div class="header-logo" v-if="showLogo">
+      <!-- <h3>תפריט בקרות</h3> -->
+      <div class="header-logo">
         <router-link to="/">
           <img src="@/assets/img/logo-small.png" alt="Logo" />
         </router-link>
@@ -57,7 +57,9 @@
 </template>
 
 <script>
-import menuItems from "@/scripts/menuItems.js";
+/*eslint-disable*/
+
+// import menuItems from "@/scripts/menuItems.js";
 import PanelMenu from "primevue/panelmenu";
 import CSidebar from "primevue/sidebar";
 import CIcon from "./c-icon";
@@ -67,11 +69,42 @@ export default {
   components: {
     PanelMenu,
     CSidebar,
-    CIcon
+    CIcon,
   },
   data() {
     return {
-      items: menuItems
+      items: [
+        { label: "עמוד הבית", to: "/" },
+        {
+          label: "בקרות איכות",
+          items: [
+            { label: "פתיחת בקרה חדשה", to: "/QualityControl" },
+            {
+              label: "צפיה בבקרות",
+              to: "/QualityControls/all",
+            },
+            {
+              label: "בקרות לטיפול שלי",
+              to: "/QualityControls/myResponsibility",
+            },
+            {
+              label: "בקרות שפתחתי",
+              to: "/QualityControls/ICreated",
+              icon: "active-icon",
+            },
+          ],
+        },
+        {
+          label: "התנתק",
+          icon: "pi pi-fw pi-power-off",
+
+          command: () => {
+            let baseHost = this.$store.state.main.baseHost();
+            baseHost = this.$store.state.main.baseHost() + "options.aspx";
+            location.replace(baseHost);
+          },
+        },
+      ],
     };
   },
   computed: {
@@ -87,7 +120,14 @@ export default {
     },
     showLogo() {
       return !screen.isDesktop();
-    }
+    },
+  },
+  methods: {
+    getCurrentRoute() {
+      const route = this.$route;
+      console.log("getCurrRoute", route);
+      return route;
+    },
   },
   watch: {
     showMenu(sidebar, value) {
@@ -99,24 +139,32 @@ export default {
         document.body.classList.add("p-overflow-hidden");
         if (mask) mask.classList.remove("p-sidebar-mask-leave");
       }
-    }
-  }
+    },
+  },
 };
 </script>
-
+<style>
+</style>
 <style scoped lang="scss">
 .header-logo {
-  top: 0;
-  left: 0;
-  position: absolute;
-  width: 60px;
-  height: 60px;
+  margin: 0 auto;
+  padding-bottom: 20px;
+  width: 70px;
+  height: 100px;
 }
 .sidebar {
   &-close {
     top: 20px;
     position: absolute;
     right: calc(100% + 25px);
+    background: white;
+    padding: 7px;
+    border-radius: 25px;
+    box-shadow: 0px 0px 20px 0px #888888;
+    transition: 0.3s;
+    &:hover {
+      background: lightblue;
+    }
 
     svg {
       width: 18px;

@@ -119,7 +119,11 @@ export const qualityControl = {
     getResponsibles: state => projectId => {
       //? האם למיין את התפקידים ולפי מה
       let responsibles = state.responsibles;
-      if (projectId > 0) {
+      if (projectId?.length === 1) {
+        responsibles = responsibles.filter(
+          rank => rank.project_id === projectId[0]
+        );
+      } else if (projectId > 0) {
         responsibles = responsibles.filter(
           rank => rank.project_id === projectId
         );
@@ -140,17 +144,26 @@ export const qualityControl = {
         // });
       } else {
         responsibles = responsibles
-          .map(rank => rank.rank_id)
           .filter((value, index, self) => {
-            return self.indexOf(value) === index && value !== "";
+            return self.findIndex(i => i.rank_id === value.rank_id) === index;
           })
-          .map(rankId => ({
-            rank_id: rankId,
-            user_rank_name: state.responsibles.find(r => {
-              // console.log(plan, p);
-              return r.rank_id === rankId;
-            }).rank_name
+          .map(res => ({
+            rank_id: res.rank_id,
+            user_rank_name: res.rank_name
           }));
+
+        // .map(rank => rank.rank_id)
+        // .filter((value, index, self) => {
+        //   return self.indexOf(value) === index && value !== "";
+        // })
+        // .map(rankId => ({
+        //   rank_id: rankId,
+        //   user_rank_name: state.responsibles.find(r => {
+        //     // console.log(plan, p);
+        //     return r.rank_id === rankId;
+        //   }).rank_name
+        // }));
+
         // .sort(function(a, b) {
         //   if (
         //     a.rank_name.toLocaleLowerCase() < b.rank_name.toLocaleLowerCase()
@@ -164,8 +177,8 @@ export const qualityControl = {
         //   }
         //   return 0;
         // });
-        //? מה להציג למשתמש בעת סינון בקרות כאשר לא נבחר פרויקט - תפקידים בלבד?
       }
+      // console.log("responsibles", responsibles);
       return responsibles;
 
       // let distinctUsers = state.responsibles;

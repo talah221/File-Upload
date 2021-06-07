@@ -206,8 +206,8 @@
           class="tool arrow"
           @click="setMode('arrow')"
           :class="mode == 'arrow' ? 'active-tool' : ''"
-          v-if="false"
         >
+          <!-- v-if="false" -->
           <!-- לחצן זה מוסתר כרגע היות ויש איתו שגיאות -->
           <svg
             class="svg-inline--fa fa-long-arrow-alt-down fa-w-8 fa-lg"
@@ -319,11 +319,7 @@
             ref="uploadImage"
           />
         </div>
-        <div
-          class="tool save-image"
-          @click="saveImage"
-          style=" color: #2280b7;"
-        >
+        <div class="tool save-image" @click="saveImage" style="color: #2280b7">
           <svg
             class="svg-inline--fa fa-save fa-w-14 fa-lg"
             aria-hidden="true"
@@ -353,7 +349,7 @@
             width="416.979px"
             height="416.979px"
             viewBox="0 0 416.979 416.979"
-            style="enable-background:new 0 0 416.979 416.979;"
+            style="enable-background: new 0 0 416.979 416.979"
             xml:space="preserve"
           >
             <g>
@@ -384,7 +380,7 @@
       :min="1"
       :max="30"
       @change="changeStrokeWidth"
-      style="width: 50%;"
+      style="width: 50%"
     />
   </div>
 </template>
@@ -397,14 +393,14 @@ export default {
   name: "ImageEditor",
   components: {
     Editor,
-    Slider
+    Slider,
     // ,Dropdown
   },
   props: {
     dataUrl: {
       type: String,
-      require: true
-    }
+      require: true,
+    },
   },
   emits: ["saveImage", "cancel"],
   data() {
@@ -422,11 +418,11 @@ export default {
         "#34b7eb",
         "#eb34df",
         "#1a10ad",
-        "#000"
+        "#000",
       ],
       activeColor: "#001",
       strokeWidth: 2,
-      isDesktop: true
+      isDesktop: true,
     };
   },
   created() {
@@ -435,9 +431,10 @@ export default {
   mounted() {
     this.changeStrokeWidth();
     this.$refs.editor.drawImageInEditor(this.dataUrl);
+    // this.imgSrc = this.dataUrl;
   },
   watch: {
-    mode: function() {}
+    mode: function () {},
   },
   methods: {
     changeColor(color) {
@@ -469,12 +466,12 @@ export default {
     },
     saveImage() {
       var image = this.$refs.editor.saveImage();
-      console.log(image);
+      // console.log(image);
       // this.imgSrc = image;
       this.$emit("saveImage", image);
       // this.saveImageAsFile(image);
     },
-    saveImageAsFile: function(t) {
+    saveImageAsFile: function (t) {
       var e = document.createElement("a");
       e.setAttribute("href", t),
         e.setAttribute("download", "image-markup"),
@@ -498,8 +495,8 @@ export default {
     },
     cancel() {
       this.$emit("cancel");
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -597,24 +594,25 @@ svg:not(:root).svg-inline--fa {
   // margin-bottom: 10px;
 }
 /* width */
-::-webkit-scrollbar {
-  width: 0px;
-  height: 0px;
-}
+// ::-webkit-scrollbar {
+//   width: 5px;
+//   height: 5px;
+// }
 
-/* Track */
-::-webkit-scrollbar-track {
-  background: #a4b416;
-}
+// /* Track */
+// ::-webkit-scrollbar-track {
+//   background: #a4b416;
+// }
 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  width: 0px;
-  background: rgb(188, 194, 188);
-}
+// /* Handle */
+// ::-webkit-scrollbar-thumb {
+//   width: 5px;
+//   background: rgb(188, 194, 188);
+// }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: rgb(49, 51, 51);
-}
+// /* Handle on hover */
+// ::-webkit-scrollbar-thumb:hover {
+//   background: rgb(49, 51, 51);
+//   height: 50px;
+// }
 </style>

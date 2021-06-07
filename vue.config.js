@@ -22,6 +22,6 @@ module.exports = {
     devtool: "source-map"
   },
 
-  publicPath: "/qcApp",
+  publicPath: "/qcApp/",
   assetsDir: "assets"
 };

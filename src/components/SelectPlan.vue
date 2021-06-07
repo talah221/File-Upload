@@ -1,5 +1,5 @@
 <template>
-  <div class="single_form">
+  <div class="single_form p-mt-2">
     <div class="myField">
       <label for="profetionId">מקצוע</label>
       <Dropdown
@@ -20,7 +20,12 @@
         showClear
       />
     </div>
-    <Button icon="pi pi-file-pdf" label="הצג תוכנית" @click="displayPlan" />
+    <Button
+      icon="pi pi-file-pdf"
+      label="הצג תוכנית"
+      @click="displayPlan"
+      class="buttonIcon"
+    />
   </div>
 </template>
 

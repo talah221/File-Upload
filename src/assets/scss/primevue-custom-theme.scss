@@ -1,5 +1,5 @@
-@import '../fonts/font';
-@import 'mixins';
+@import "../fonts/font";
+@import "mixins";
 
 * {
   outline: none;
@@ -43,7 +43,7 @@ a {
 .p-float-label textarea.p-filled ~ label,
 .p-float-label .p-inputwrapper-focus ~ label,
 .p-float-label .p-inputwrapper-filled ~ label {
-  top: -.3rem;
+  top: -0.3rem;
 }
 
 .p-float-label {
@@ -52,7 +52,7 @@ a {
   display: inline-block;
 
   &::before {
-    content: '';
+    content: "";
 
     right: 0;
     bottom: 100%;
@@ -74,34 +74,33 @@ a {
   textarea {
     width: 100%;
   }
-
 }
 
 .p-button {
   padding: 14px 20px;
-  
+
   border: 1px solid #bfbfbf;
   background-color: $color--default;
 
   font-size: 16px;
   font-weight: bold;
-  
+
   @include smartColor($color--default);
 
-  transition: color .3s, background-color .3s, border-color .3s;
+  transition: color 0.3s, background-color 0.3s, border-color 0.3s;
 
   &:hover {
     border-color: darken($color--default, 5%);
     background-color: darken($color--default, 5%);
 
-    @include smartColor(darken($color--default, 5%))
+    @include smartColor(darken($color--default, 5%));
   }
 
   &:active {
     border-color: darken($color--default, 5%);
     background-color: darken($color--default, 5%);
 
-    @include smartColor(darken($color--default, 5%))
+    @include smartColor(darken($color--default, 5%));
   }
 
   &:focus {
@@ -119,16 +118,16 @@ a {
       &:hover {
         border-color: darken($color, 5%);
         background-color: darken($color, 5%);
-  
-        @include smartColor(darken($color, 5%))
+
+        @include smartColor(darken($color, 5%));
       }
 
       &:active {
         &:hover {
           border-color: darken($color, 10%);
           background-color: darken($color, 10%);
-    
-          @include smartColor(darken($color, 10%))
+
+          @include smartColor(darken($color, 10%));
         }
       }
 
@@ -136,11 +135,10 @@ a {
         border-color: $color;
         background-color: $color;
 
-        @include smartColor(darken($color, 10%))
+        @include smartColor(darken($color, 10%));
       }
     }
   }
-
 }
 
 .p-carousel {
@@ -156,10 +154,9 @@ a {
     position: absolute;
     transform: translateX(-50%);
 
-    @include screen ('md') {
+    @include screen("md") {
       bottom: 42px;
     }
-
   }
 
   .p-carousel-indicator {
@@ -172,20 +169,20 @@ a {
 
     border-radius: 36px;
     border: 2px solid $color--secondary;
-    
-    @include screen ('sm') {
+
+    @include screen("sm") {
       width: 36px;
       height: 36px;
-      
+
       border: 5px solid white;
     }
-    
-    @include screen ('md') {
+
+    @include screen("md") {
       margin: 0 10px;
     }
 
     &::before {
-      content: '';
+      content: "";
 
       top: -5px;
       left: -5px;
@@ -196,16 +193,15 @@ a {
 
       width: 36px;
       height: 36px;
-      
+
       border-radius: 36px;
       border: 1px solid $color--secondary;
 
-      transition: all .3s ease;
+      transition: all 0.3s ease;
 
-      @include screen ('sm') {
+      @include screen("sm") {
         display: block;
       }
-
     }
 
     & > button {
@@ -216,20 +212,19 @@ a {
       height: 100%;
 
       border-radius: 36px;
-      
-      transition: all .3s ease;
 
-      @include screen ('sm') {
+      transition: all 0.3s ease;
+
+      @include screen("sm") {
         border: 1px solid $color--secondary;
       }
-
     }
 
     &.p-highlight {
       border-width: 1px;
       background-color: white;
 
-      @include screen ('sm') {
+      @include screen("sm") {
         border-width: 5px;
       }
 
@@ -237,32 +232,27 @@ a {
         border-color: white;
         background-color: white;
       }
-
     }
-
   }
-
 }
 
 .p-sidebar {
   height: 100%;
-  max-width: 290px;
+  max-width: 165px;
 
   .p-sidebar-content {
     height: 100%;
 
     background-color: white;
   }
-
 }
 
 .p-sidebar-mask {
-  background-color: rgba($color--dark, .3) !important;
+  background-color: rgba($color--dark, 0.3) !important;
 
   &.p-sidebar-mask-leave {
     z-index: -1 !important;
-    
+
     opacity: 0 !important;
   }
-  
 }
