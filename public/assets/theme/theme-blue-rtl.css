@@ -40,7 +40,7 @@
 .p-skeleton:after {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 40%),
+    rgba(228, 228, 228, 0.4),
     rgba(255, 255, 255, 40%),
     rgba(255, 255, 255, 40%)
   );
@@ -4799,7 +4799,7 @@
 }
 .p-galleria .p-galleria-item-nav {
   background: transparent;
-  color: #f8f9fa;
+  color: #0080ff;
   width: 4rem;
   height: 4rem;
   transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
@@ -4812,7 +4812,7 @@
 }
 .p-galleria .p-galleria-item-nav:not(.p-disabled):hover {
   background: rgba(255, 255, 255, 0.1);
-  color: #f8f9fa;
+  /* color: #f8f9fa; */
 }
 .p-galleria .p-galleria-caption {
   background: rgba(0, 0, 0, 0.5);
@@ -4869,6 +4869,7 @@
 .p-galleria .p-galleria-thumbnail-container {
   background: rgba(0, 0, 0, 0.9);
   padding: 1rem 0.25rem;
+  justify-content: center;
 }
 .p-galleria .p-galleria-thumbnail-container .p-galleria-thumbnail-prev,
 .p-galleria .p-galleria-thumbnail-container .p-galleria-thumbnail-next {

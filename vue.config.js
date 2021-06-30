@@ -1,9 +1,9 @@
 module.exports = {
   productionSourceMap: false,
 
-  chainWebpack: config => {
-    config.plugin("html").tap(args => {
-      args[0].title = "Ram Control";
+  chainWebpack: (config) => {
+    config.plugin("html").tap((args) => {
+      args[0].title = "BuildApp";
       return args;
     });
   },
@@ -13,15 +13,15 @@ module.exports = {
       scss: {
         prependData: `
           @import "@/assets/scss/variables.scss";
-        `
-      }
-    }
+        `,
+      },
+    },
   },
 
   configureWebpack: {
-    devtool: "source-map"
+    devtool: "source-map",
   },
 
-  publicPath: "/qcApp/",
-  assetsDir: "assets"
+  publicPath: "/",
+  assetsDir: "assets",
 };

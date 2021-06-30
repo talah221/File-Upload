@@ -16,69 +16,9 @@ body {
 }
 
 body {
-
-  background-size: auto 100vh;
-  background-repeat: no-repeat;
-  background-position: bottom left;
-  // background-image: url(../img/effects/bg-bottom.png);
-
-  // @include screen ('sm') {
-  //   background-size: auto 350px;
-  // }
-
-  // @include screen ('lg') {
-  //   background-size: auto 476px;
-  // }
-
 }
 
 img {
   max-width: 100%;
   max-height: 100%;
-}
-
-.section {
-  min-height: 100vh;
-
-  background-size: auto 126px;
-  background-repeat: no-repeat;
-  background-position: top right;
-
-  &--login {
-    background-image: url(../img/effects/bg-top-login.png);
-
-    @include screen ('md') {
-      background-size: auto auto;
-    }
-  }
-
-  &--auth {
-    background-image: url(../img/effects/bg-top.png);
-
-    @include screen ('md') {
-      background-size: auto auto;
-    }
-  }
-
-}
-
-.effect--shadow {
-  background-size: 100% auto;
-  background-repeat: no-repeat;
-  background-position: bottom center;
-  background-image: url(../img/effects/shadow.png);
-
-  padding-bottom: 10px;
-  
-  @include screen ('sm') {
-    padding-bottom: 20px;
-  }
-
-  @include screen ('md') {
-    padding-bottom: 30px;
-  }
-
-  @include screen ('lg') {
-    padding-bottom: 40px;
-  }
 }
